@@ -1,0 +1,385 @@
+fileFormatVersion: 2
+guid: bd03f6768630afa41b38cd016a4e2356
+ModelImporter:
+  serializedVersion: 19301
+  internalIDToNameTable:
+  - first:
+      74: -1847819259585783921
+    second: Screen_01.018|bolt_01 v2Action
+  - first:
+      74: -3521455702781121600
+    second: Screen_01.018|bolt_2 v1Action
+  - first:
+      74: -6348850462490863656
+    second: Screen_01.018|socket_01 v1.001Action
+  - first:
+      74: -1980198429498806813
+    second: Screen_01.018|socket_01 v1.001Action.001
+  - first:
+      74: -363139524768103375
+    second: Screen_01.018|socket_01 v1.001Action.002
+  - first:
+      74: 6438106546525773828
+    second: Screen_01.018|socket_01 v1.001Action.003
+  - first:
+      74: 4226012341947048171
+    second: Screen_02.018|bolt_01 v2Action
+  - first:
+      74: 7101643510069610290
+    second: Screen_02.018|bolt_2 v1Action
+  - first:
+      74: -8644215886265212210
+    second: Screen_02.018|socket_01 v1.001Action
+  - first:
+      74: 1959239054292608543
+    second: Screen_02.018|socket_01 v1.001Action.001
+  - first:
+      74: -3561867319834036198
+    second: Screen_02.018|socket_01 v1.001Action.002
+  - first:
+      74: 8967234678702105677
+    second: Screen_02.018|socket_01 v1.001Action.003
+  - first:
+      74: -5011347407169884215
+    second: Screen_03.018|bolt_01 v2Action
+  - first:
+      74: -1900808956873324750
+    second: Screen_03.018|bolt_2 v1Action
+  - first:
+      74: -8624924457729324511
+    second: Screen_03.018|socket_01 v1.001Action
+  - first:
+      74: 4763664956270508854
+    second: Screen_03.018|socket_01 v1.001Action.001
+  - first:
+      74: -1619133609617279936
+    second: Screen_03.018|socket_01 v1.001Action.002
+  - first:
+      74: -2664185739645921598
+    second: Screen_03.018|socket_01 v1.001Action.003
+  - first:
+      74: -2385812770422193233
+    second: Screen_04.010|bolt_01 v2Action
+  - first:
+      74: 7666181540303403816
+    second: Screen_04.010|bolt_2 v1Action
+  - first:
+      74: -1276600770832621907
+    second: Screen_04.010|socket_01 v1.001Action
+  - first:
+      74: -8580319399789122523
+    second: Screen_04.010|socket_01 v1.001Action.001
+  - first:
+      74: 5200614814675369078
+    second: Screen_04.010|socket_01 v1.001Action.002
+  - first:
+      74: -4842386383418795215
+    second: Screen_04.010|socket_01 v1.001Action.003
+  - first:
+      74: -8896915505900845027
+    second: Screen_02.019|bolt_01 v2Action
+  - first:
+      74: -6953043274697220959
+    second: Screen_02.019|bolt_2 v1Action
+  - first:
+      74: -7317489887993589394
+    second: Screen_02.019|socket_01 v1.001Action
+  - first:
+      74: -3785139987402968068
+    second: Screen_02.019|socket_01 v1.001Action.001
+  - first:
+      74: 5103887750711064130
+    second: Screen_02.019|socket_01 v1.001Action.002
+  - first:
+      74: -7086853722045775485
+    second: Screen_02.019|socket_01 v1.001Action.003
+  - first:
+      74: -7761119994178344516
+    second: Screen_01.019|bolt_01 v2Action
+  - first:
+      74: -6990936276251409234
+    second: Screen_01.019|bolt_2 v1Action
+  - first:
+      74: -1101055031624525316
+    second: Screen_01.019|socket_01 v1.001Action
+  - first:
+      74: -1105145720253700499
+    second: Screen_01.019|socket_01 v1.001Action.001
+  - first:
+      74: 2753961451145332832
+    second: Screen_01.019|socket_01 v1.001Action.002
+  - first:
+      74: -3268932643778767490
+    second: Screen_01.019|socket_01 v1.001Action.003
+  - first:
+      74: 1831957158833401771
+    second: Screen_09.004|bolt_01 v2Action
+  - first:
+      74: 6471380289583750261
+    second: Screen_09.004|bolt_2 v1Action
+  - first:
+      74: 8307055111100272165
+    second: Screen_09.004|socket_01 v1.001Action
+  - first:
+      74: -482089160820091901
+    second: Screen_09.004|socket_01 v1.001Action.001
+  - first:
+      74: -2780685699125186436
+    second: Screen_09.004|socket_01 v1.001Action.002
+  - first:
+      74: -8430271084302318689
+    second: Screen_09.004|socket_01 v1.001Action.003
+  - first:
+      74: -4766348719266612769
+    second: Screen_08.005|bolt_01 v2Action
+  - first:
+      74: 7124360948177824645
+    second: Screen_08.005|bolt_2 v1Action
+  - first:
+      74: 7918927925789842760
+    second: Screen_08.005|socket_01 v1.001Action
+  - first:
+      74: -8535023177207603537
+    second: Screen_08.005|socket_01 v1.001Action.001
+  - first:
+      74: -814954362376059009
+    second: Screen_08.005|socket_01 v1.001Action.002
+  - first:
+      74: -2266665173200533664
+    second: Screen_08.005|socket_01 v1.001Action.003
+  - first:
+      74: 7448196333056950863
+    second: Screen_07.005|bolt_01 v2Action
+  - first:
+      74: -8901592577791326357
+    second: Screen_07.005|bolt_2 v1Action
+  - first:
+      74: 1883669895231239602
+    second: Screen_07.005|socket_01 v1.001Action
+  - first:
+      74: 216961561582704552
+    second: Screen_07.005|socket_01 v1.001Action.001
+  - first:
+      74: 5445506351845180004
+    second: Screen_07.005|socket_01 v1.001Action.002
+  - first:
+      74: 5803031026010984260
+    second: Screen_07.005|socket_01 v1.001Action.003
+  - first:
+      74: -4789094969547721248
+    second: Screen_06.005|bolt_01 v2Action
+  - first:
+      74: -2839192381718700711
+    second: Screen_06.005|bolt_2 v1Action
+  - first:
+      74: 1592472915042968474
+    second: Screen_06.005|socket_01 v1.001Action
+  - first:
+      74: 7193227539477544575
+    second: Screen_06.005|socket_01 v1.001Action.001
+  - first:
+      74: 8442803710314507247
+    second: Screen_06.005|socket_01 v1.001Action.002
+  - first:
+      74: 8748860079414279867
+    second: Screen_06.005|socket_01 v1.001Action.003
+  - first:
+      74: 8411808904702868777
+    second: Screen_05.009|bolt_01 v2Action
+  - first:
+      74: -4968958880815752172
+    second: Screen_05.009|bolt_2 v1Action
+  - first:
+      74: 8182210642472493515
+    second: Screen_05.009|socket_01 v1.001Action
+  - first:
+      74: -2353019259703805466
+    second: Screen_05.009|socket_01 v1.001Action.001
+  - first:
+      74: 2012501592795258159
+    second: Screen_05.009|socket_01 v1.001Action.002
+  - first:
+      74: 8753013666238267570
+    second: Screen_05.009|socket_01 v1.001Action.003
+  - first:
+      74: 6369318628591273105
+    second: Screen_04.018|bolt_01 v2Action
+  - first:
+      74: 6844844011095837318
+    second: Screen_04.018|bolt_2 v1Action
+  - first:
+      74: -4415070045941752632
+    second: Screen_04.018|socket_01 v1.001Action
+  - first:
+      74: 8351411550356677213
+    second: Screen_04.018|socket_01 v1.001Action.001
+  - first:
+      74: 7475510715765779444
+    second: Screen_04.018|socket_01 v1.001Action.002
+  - first:
+      74: 295662034441634780
+    second: Screen_04.018|socket_01 v1.001Action.003
+  - first:
+      74: -8690391636239277742
+    second: Screen_03.019|bolt_01 v2Action
+  - first:
+      74: 4652668012574338536
+    second: Screen_03.019|bolt_2 v1Action
+  - first:
+      74: 5389640219095474535
+    second: Screen_03.019|socket_01 v1.001Action
+  - first:
+      74: 6656944197985300957
+    second: Screen_03.019|socket_01 v1.001Action.001
+  - first:
+      74: -1747952519637601844
+    second: Screen_03.019|socket_01 v1.001Action.002
+  - first:
+      74: 3647790373263987347
+    second: Screen_03.019|socket_01 v1.001Action.003
+  - first:
+      74: -5208723389345207448
+    second: Screen_10.004|bolt_01 v2Action
+  - first:
+      74: -4751809064395319267
+    second: Screen_10.004|bolt_2 v1Action
+  - first:
+      74: 8396715801031873686
+    second: Screen_10.004|socket_01 v1.001Action
+  - first:
+      74: 5608554840098834514
+    second: Screen_10.004|socket_01 v1.001Action.001
+  - first:
+      74: -6082410634560970023
+    second: Screen_10.004|socket_01 v1.001Action.002
+  - first:
+      74: 7858219257109655035
+    second: Screen_10.004|socket_01 v1.001Action.003
+  - first:
+      74: -8040413538379210118
+    second: LOD_0.042|bolt_01 v2Action
+  - first:
+      74: 8924090950313478690
+    second: LOD_0.042|bolt_2 v1Action
+  - first:
+      74: 1375657597841614833
+    second: LOD_0.042|socket_01 v1.001Action
+  - first:
+      74: -6602123632628805472
+    second: LOD_0.042|socket_01 v1.001Action.001
+  - first:
+      74: 227284917983663678
+    second: LOD_0.042|socket_01 v1.001Action.002
+  - first:
+      74: -4601015083573227731
+    second: LOD_0.042|socket_01 v1.001Action.003
+  - first:
+      74: -2754604187657127913
+    second: LOD_0.044|bolt_01 v2Action
+  - first:
+      74: -7253569336131081397
+    second: LOD_0.044|bolt_2 v1Action
+  - first:
+      74: -7684682223113151072
+    second: LOD_0.044|socket_01 v1.001Action
+  - first:
+      74: -8061221157724451932
+    second: LOD_0.044|socket_01 v1.001Action.001
+  - first:
+      74: 4650107650898504208
+    second: LOD_0.044|socket_01 v1.001Action.002
+  - first:
+      74: -1335273668431577279
+    second: LOD_0.044|socket_01 v1.001Action.003
+  externalObjects: {}
+  materials:
+    materialImportMode: 1
+    materialName: 0
+    materialSearch: 1
+    materialLocation: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    rigImportErrors: 
+    rigImportWarnings: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    extraUserProperties: []
+    clipAnimations: []
+    isReadable: 0
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importVisibility: 1
+    importBlendShapes: 1
+    importCameras: 1
+    importLights: 1
+    fileIdsGeneration: 2
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    keepQuads: 0
+    weldVertices: 1
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
+    indexFormat: 0
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+    normalCalculationMode: 4
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
+  importAnimation: 1
+  humanDescription:
+    serializedVersion: 3
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    globalScale: 1
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 1
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
+  animationType: 2
+  humanoidOversampling: 1
+  avatarSetup: 0
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

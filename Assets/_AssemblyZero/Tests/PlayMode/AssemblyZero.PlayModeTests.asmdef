@@ -1,0 +1,8 @@
+{
+  "name": "AssemblyZero.PlayModeTests",
+  "rootNamespace": "AssemblyZero.Tests",
+  "references": ["AssemblyZero.Domain", "AssemblyZero.Unity"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "autoReferenced": false,
+  "noEngineReferences": false
+}

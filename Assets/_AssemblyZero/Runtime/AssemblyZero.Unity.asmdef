@@ -1,0 +1,7 @@
+{
+  "name": "AssemblyZero.Unity",
+  "rootNamespace": "AssemblyZero.Unity",
+  "references": ["AssemblyZero.Domain", "Unity.InputSystem", "UnityEngine.UI", "Unity.TextMeshPro"],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

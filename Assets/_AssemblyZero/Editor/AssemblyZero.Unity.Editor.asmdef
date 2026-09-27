@@ -1,0 +1,8 @@
+{
+  "name": "AssemblyZero.Unity.Editor",
+  "rootNamespace": "AssemblyZero.Unity.Editor",
+  "references": ["AssemblyZero.Unity", "AssemblyZero.Domain", "Unity.TextMeshPro", "Unity.TextMeshPro.Editor", "UnityEngine.UI", "UnityEditor.UI", "Unity.InputSystem"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true,
+  "noEngineReferences": false
+}

@@ -1,0 +1,7 @@
+{
+  "name": "AssemblyZero.Domain",
+  "rootNamespace": "AssemblyZero.Domain",
+  "references": [],
+  "autoReferenced": true,
+  "noEngineReferences": true
+}

@@ -1,0 +1,9 @@
+{
+  "name": "AssemblyZero.Tests",
+  "rootNamespace": "AssemblyZero.Tests",
+  "references": ["AssemblyZero.Domain", "AssemblyZero.Unity"],
+  "optionalUnityReferences": ["TestAssemblies"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": false,
+  "noEngineReferences": false
+}
