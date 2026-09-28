@@ -46,9 +46,9 @@ namespace AssemblyZero.Unity
             for (var i = 0; i < ordered.Count; i++) result.WorldCenters[i] = ordered[i].transform.position;
             var length = Math.Max(BeltConstants.UnitsPerGrid, ordered.Count * BeltConstants.UnitsPerGrid);
             var line = new TransportLineDefinition(new LineId(0), length, 0, ordered.Count);
-            var lanes = new[] { new LaneDefinition(new LaneId(0), line.Id, length, ItemType.ServoCore), new LaneDefinition(new LaneId(1), line.Id, length, ItemType.SensorPack) };
+            var lanes = new[] { new LaneDefinition(new LaneId(0), line.Id, length, ItemType.ServoCore) };
             var samples = new PathSample[ordered.Count + 1]; for (var i = 0; i < samples.Length; i++) samples[i] = new PathSample(i * BeltConstants.UnitsPerGrid, Math.Min(i, Math.Max(0, ordered.Count - 1)), i == ordered.Count ? BeltConstants.UnitsPerGrid : 0);
-            result.DomainTopology = new BeltTopology(lanes, new[] { line }, new[] { new LineConnection(lanes[0].Id, default, EndpointKind.Sink), new LineConnection(lanes[1].Id, default, EndpointKind.Sink) }, samples);
+            result.DomainTopology = new BeltTopology(lanes, new[] { line }, new[] { new LineConnection(lanes[0].Id, default, EndpointKind.Sink) }, samples);
             return result;
         }
 
@@ -81,8 +81,7 @@ namespace AssemblyZero.Unity
                 center = centers[piece] + entry * Mathf.Lerp(-entryHalf, exitHalf, t);
                 tangent = entry;
             }
-            var lateral = Vector3.Cross(Vector3.up, tangent).normalized * (laneId == 0 ? -0.23f : 0.23f);
-            return center + lateral + Vector3.up * 0.24f;
+            return center + Vector3.up * 0.24f;
         }
 
         private static Vector3 PieceEntry(Vector3[] centers, int piece)

@@ -98,6 +98,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EmissionStrength: 1.8
     - _EnvironmentReflections: 1
     - _FlowSpeed: 1.4
     - _GlossMapScale: 0
@@ -121,12 +122,12 @@ Material:
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.025, g: 0.04, b: 0.055, a: 1}
+    - _BaseColor: {r: 0.055, g: 0.075, b: 0.095, a: 1}
     - _Color: {r: 0.054999977, g: 0.06999998, b: 0.08499997, a: 1}
     - _Direction: {r: -1, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
-    - _StripeColor: {r: 0.03, g: 0.32, b: 0.36, a: 1}
+    - _StripeColor: {r: 1, g: 0.19, b: 0.015, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
 --- !u!114 &5153872758052098257

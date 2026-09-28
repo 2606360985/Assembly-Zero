@@ -23,7 +23,8 @@ namespace AssemblyZero.Domain
         public int MinimumSpacing = 16;
         public int SpawnIntervalTicks = 3;
         public int MaxItems = 200;
-        public int InitialItemsPerLane;
+        public int InitialItems;
+        public bool AlternateItemTypes;
         public int InitialFrontDistance = -1;
         public int OrderTarget = 100;
         public int GateCloseTick = -1;

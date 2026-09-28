@@ -30,7 +30,8 @@ namespace AssemblyZero.Tests
             pieces.Add(Piece(1, new Vector2Int(1, 0), GridDirection.North, BeltPieceShape.Corner90, false, false));
             pieces.Add(Piece(2, new Vector2Int(1, 1), GridDirection.North, BeltPieceShape.Straight, false, true));
             var baked = BeltTopologyBuilder.Bake(pieces); var length = baked.DomainTopology.Lanes[0].Length;
-            for (var lane = 0; lane < 2; lane++)
+            Assert.AreEqual(1, baked.DomainTopology.Lanes.Length);
+            for (var lane = 0; lane < baked.DomainTopology.Lanes.Length; lane++)
             {
                 var previous = BeltTopologyBuilder.SampleWorldPose(baked, 0, lane, out var previousTangent);
                 for (var d = 8; d <= length; d += 8)
@@ -43,6 +44,8 @@ namespace AssemblyZero.Tests
                 BeltTopologyBuilder.SampleWorldPose(baked, length, lane, out var endTangent);
                 Assert.Less(Vector3.Angle(Vector3.forward, endTangent), 0.01f);
             }
+            var center = BeltTopologyBuilder.SampleWorld(baked, 0, 0);
+            Assert.That(center.z, Is.EqualTo(0f).Within(0.0001f), "The single cargo lane must be centered on the belt.");
         }
 
         [Test]

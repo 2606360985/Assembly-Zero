@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 550bfe00678da924899c03f4468d8920, type: 3}
   m_Name: EP01Scenario
   m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.ScenarioConfig
-  ConfigurationVersion: 2
+  ConfigurationVersion: 4
   SpeedUnitsPerTick: 8
   SpawnIntervalTicks: 2
   OrderTarget: 100
   MaxCatchUpTicks: 8
-  PhysicalMinimumSpacing: 512
+  PhysicalMinimumSpacing: 400
   SmallLoadItems: 96
   GateDemoItems: 112
   PhysicalVisibleItems: 128
   StressLogicalItems: 20000
-  StressMinimumSpacing: 3
+  StressMinimumSpacing: 2
   StressVisibleItems: 128
   GateCloseTick: 180
   GateOpenTick: 480

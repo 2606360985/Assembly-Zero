@@ -28,6 +28,7 @@ Material:
     m_Floats:
     - _BeltHalfWidth: 0.39
     - _Corner: 1
+    - _EmissionStrength: 1.8
     - _FlowSpeed: 1.4
     - _Metallic: 0.15
     - _Smoothness: 0.35
@@ -35,8 +36,8 @@ Material:
     - _Tiling: 9
     - _TurnSign: -1
     m_Colors:
-    - _BaseColor: {r: 0.025, g: 0.04, b: 0.055, a: 1}
+    - _BaseColor: {r: 0.055, g: 0.075, b: 0.095, a: 1}
     - _Direction: {r: 1, g: 0, b: 0, a: 0}
-    - _StripeColor: {r: 0.03, g: 0.32, b: 0.36, a: 1}
+    - _StripeColor: {r: 1, g: 0.19, b: 0.015, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

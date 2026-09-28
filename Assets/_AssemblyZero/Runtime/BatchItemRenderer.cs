@@ -51,7 +51,7 @@ namespace AssemblyZero.Unity
             for (var i = 0; i < VisibleCount; i++)
             {
                 var sourceIndex = VisibleCount == items.Count || VisibleCount <= 1 ? i : (int)((long)i * (items.Count - 1) / (VisibleCount - 1));
-                var x = items[sourceIndex]; var p = BeltTopologyBuilder.SampleWorldPose(topology, x.Distance, x.LaneId.Value, out var tangent) + Vector3.down * 0.1f; var matrix = Matrix4x4.TRS(p, Quaternion.LookRotation(tangent, Vector3.up), new Vector3(0.5f, 0.7f, 0.5f)); if (x.ItemType == ItemType.ServoCore) servo.Add(matrix); else sensor.Add(matrix);
+                var x = items[sourceIndex]; var p = BeltTopologyBuilder.SampleWorldPose(topology, x.Distance, x.LaneId.Value, out var tangent) + Vector3.down * 0.1f; var matrix = Matrix4x4.TRS(p, Quaternion.LookRotation(tangent, Vector3.up), new Vector3(0.36f, 0.64f, 0.36f)); if (x.ItemType == ItemType.ServoCore) servo.Add(matrix); else sensor.Add(matrix);
                 if (stage == 5 && i < 256) { var marker = Matrix4x4.TRS(p + Vector3.up * 0.28f, Quaternion.identity, new Vector3(Mathf.Clamp(x.GapAhead / 48f, 0.05f, 0.38f), 0.045f, 0.045f)); if (x.GapAhead == 0) boundaries.Add(marker); else gaps.Add(marker); if (i == 0 || i == VisibleCount - 1) endGaps.Add(Matrix4x4.TRS(p + Vector3.up * 0.42f, Quaternion.identity, Vector3.one * 0.11f)); }
             }
         }

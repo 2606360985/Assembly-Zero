@@ -13,6 +13,7 @@ Shader "AssemblyZero/ConveyorSurface"
         _BeltHalfWidth("Belt Half Width (Cells)", Float) = 0.39
         _Metallic("Metallic", Range(0,1)) = 0.15
         _Smoothness("Smoothness", Range(0,1)) = 0.35
+        _EmissionStrength("Emission Strength", Range(0,4)) = 1.5
     }
     SubShader
     {
@@ -42,6 +43,7 @@ Shader "AssemblyZero/ConveyorSurface"
                 float _BeltHalfWidth;
                 half _Metallic;
                 half _Smoothness;
+                half _EmissionStrength;
             CBUFFER_END
 
             Varyings Vert(Attributes input)
@@ -77,7 +79,8 @@ Shader "AssemblyZero/ConveyorSurface"
                 half3 albedo = lerp(_StripeColor.rgb, _BaseColor.rgb, stripe);
                 Light mainLight = GetMainLight();
                 half ndl = saturate(dot(normalize(input.normalWS), mainLight.direction));
-                half3 lit = albedo * (0.3h + ndl * mainLight.color * 0.7h);
+                half3 lit = albedo * (0.55h + ndl * mainLight.color * 0.75h);
+                lit += _StripeColor.rgb * (1.0h - stripe) * _EmissionStrength;
                 lit = MixFog(lit, input.fogFactor);
                 return half4(lit, 1);
             }

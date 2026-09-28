@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using AssemblyZero.Domain;
 using UnityEditor;
@@ -6,6 +7,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -51,11 +53,13 @@ namespace AssemblyZero.Unity.Editor
             var cargoMesh = GetCargoMesh();
             var cargoSourceMaterial = AssetDatabase.LoadAssetAtPath<Material>(CargoMaterialPath);
             if (cargoSourceMaterial == null) throw new FileNotFoundException("CarboardBox04 material is required for the EP01 cargo renderer.", CargoMaterialPath);
-            var cargoOrange = CargoMaterial("CargoServoOrange", cargoSourceMaterial, new Color(1f, 0.48f, 0.18f, 1f));
-            var cargoBlue = CargoMaterial("CargoSensorBlue", cargoSourceMaterial, new Color(0.28f, 0.68f, 1f, 1f));
+            var cargoOrange = CargoMaterial("CargoServoOrange", cargoSourceMaterial, new Color(1f, 0.16f, 0.015f, 1f));
+            var cargoBlue = CargoMaterial("CargoSensorBlue", cargoSourceMaterial, new Color(0.015f, 0.28f, 1f, 1f));
 
             var environment = new GameObject("Miniature Factory");
-            CreatePrimitive("Tabletop", PrimitiveType.Cube, environment.transform, new Vector3(0, -0.35f, 0), new Vector3(16, 0.5f, 11), palette.Dark);
+            var floor = Mat("FactoryFloor", new Color(0.075f, 0.105f, 0.14f), false);
+            CreatePrimitive("Tabletop", PrimitiveType.Cube, environment.transform, new Vector3(0, -0.35f, 0), new Vector3(16, 0.5f, 11), floor);
+            CreateFactoryDressing(environment.transform, palette);
             var warehouse = new GameObject("Smart Warehouse"); warehouse.transform.SetParent(environment.transform);
             CreatePrimitive("Warehouse Body", PrimitiveType.Cube, warehouse.transform, new Vector3(-6.25f, 1.2f, 2.5f), new Vector3(2.5f, 2.8f, 3.6f), palette.Steel);
             CreatePrimitive("Loading Bay", PrimitiveType.Cube, warehouse.transform, new Vector3(-5.0f, 0.65f, 2.0f), new Vector3(0.22f, 1.15f, 1.35f), palette.Dark);
@@ -71,7 +75,7 @@ namespace AssemblyZero.Unity.Editor
             var beltRoot = new GameObject("Transport Belts"); beltRoot.transform.SetParent(environment.transform);
             var topologyOverlay = new GameObject("Stage 1 - Piece Directions"); topologyOverlay.transform.SetParent(environment.transform);
             var lineOverlay = new GameObject("Stage 4 - Transport Line"); lineOverlay.transform.SetParent(environment.transform);
-            var path = new[] { new Vector2Int(-5,2),new Vector2Int(-4,2),new Vector2Int(-3,2),new Vector2Int(-2,2),new Vector2Int(-1,2),new Vector2Int(0,2),new Vector2Int(1,2),new Vector2Int(2,2),new Vector2Int(3,2),new Vector2Int(4,2),new Vector2Int(5,2),new Vector2Int(5,1),new Vector2Int(5,0),new Vector2Int(5,-1),new Vector2Int(4,-1),new Vector2Int(3,-1),new Vector2Int(2,-1),new Vector2Int(1,-1),new Vector2Int(0,-1),new Vector2Int(-1,-1),new Vector2Int(-2,-1),new Vector2Int(-3,-1),new Vector2Int(-3,-2),new Vector2Int(-3,-3),new Vector2Int(-2,-3),new Vector2Int(-1,-3),new Vector2Int(0,-3),new Vector2Int(1,-3),new Vector2Int(2,-3),new Vector2Int(3,-3),new Vector2Int(4,-3),new Vector2Int(5,-3) };
+            var path = BuildSerpentinePath();
             BeltAuthoring first = null, last = null;
             for (var i = 0; i < path.Length; i++)
             {
@@ -86,7 +90,7 @@ namespace AssemblyZero.Unity.Editor
                     var turnSign = entryDelta.x * exitDelta.y - entryDelta.y * exitDelta.x > 0 ? 1f : -1f;
                     var surface = CreateChildPrimitiveWorldScale("Moving Surface", PrimitiveType.Cube, go.transform, new Vector3(0, 0.115f, 0), new Vector3(0.9f, 0.035f, 0.9f), turnSign > 0 ? beltCornerLeft : beltCornerRight);
                     surface.transform.rotation = Quaternion.Euler(0, DirectionYaw(Direction(entryDelta)), 0);
-                    CreateCornerDressing(go.transform, entryDelta, exitDelta, turnSign, palette.Orange, palette.Blue, palette.Dark);
+                    CreateCornerDressing(go.transform, entryDelta, exitDelta, turnSign, palette.Orange, palette.Dark);
                     CreateCornerArrow($"Piece Arrow {i:00}", topologyOverlay.transform, go.transform.position + Vector3.up * 0.48f, entryDelta, exitDelta, guideWhite);
                     var linePivot = CornerPivot(go.transform.position + Vector3.up * 0.36f, entryDelta, exitDelta, out var lineEntry, out var lineExit);
                     CreateArc($"Line Segment {i:00}", lineOverlay.transform, linePivot, lineEntry, lineExit, 0.5f, 0f, 0.025f, 0.12f, palette.Holo, 0.05f, 0.95f);
@@ -94,7 +98,7 @@ namespace AssemblyZero.Unity.Editor
                 else
                 {
                     CreateChildPrimitiveWorldScale("Moving Surface", PrimitiveType.Cube, go.transform, new Vector3(0, 0.115f, 0), new Vector3(0.86f, 0.035f, 0.78f), palette.Belt);
-                    CreateLaneStripe(go.transform, -0.27f, palette.Orange); CreateLaneStripe(go.transform, 0.27f, palette.Blue);
+                    CreateCenterStripe(go.transform, palette.Orange);
                     CreateChildPrimitiveWorldScale("Left Rail", PrimitiveType.Cube, go.transform, new Vector3(0, 0.18f, -0.45f), new Vector3(0.96f, 0.09f, 0.045f), palette.Dark);
                     CreateChildPrimitiveWorldScale("Right Rail", PrimitiveType.Cube, go.transform, new Vector3(0, 0.18f, 0.45f), new Vector3(0.96f, 0.09f, 0.045f), palette.Dark);
                     CreateArrow($"Piece Arrow {i:00}", topologyOverlay.transform, go.transform.position + Vector3.up * 0.48f, authoring.Direction, guideWhite);
@@ -110,24 +114,29 @@ namespace AssemblyZero.Unity.Editor
             var gateIndicator = CreatePrimitive("Gate Status", PrimitiveType.Sphere, gate.transform, gate.transform.position + new Vector3(0, 1.82f, 0), Vector3.one * 0.2f, palette.Warning).GetComponent<Renderer>();
             var sink = new GameObject("Joint Module Sink"); sink.transform.SetParent(environment.transform); sink.transform.position = last.transform.position + Vector3.right; sink.AddComponent<SinkAuthoring>().Target = last;
 
-            var holoRoot = new GameObject("R-01 Hologram"); holoRoot.transform.position = new Vector3(0, 1.1f, 0.5f);
-            var torso = CreatePrimitive("Torso", PrimitiveType.Capsule, holoRoot.transform, Vector3.zero, new Vector3(0.9f, 1.3f, 0.55f), palette.Holo);
-            var head = CreatePrimitive("Head", PrimitiveType.Sphere, holoRoot.transform, new Vector3(0, 1.35f, 0), Vector3.one * 0.5f, palette.Holo);
-            var leftArm = CreatePrimitive("Left Arm", PrimitiveType.Capsule, holoRoot.transform, new Vector3(-0.9f, 0.25f, 0), new Vector3(0.28f, 0.9f, 0.28f), palette.Holo); leftArm.transform.rotation = Quaternion.Euler(0, 0, -22);
-            var rightArm = CreatePrimitive("Right Arm", PrimitiveType.Capsule, holoRoot.transform, new Vector3(0.9f, 0.25f, 0), new Vector3(0.28f, 0.9f, 0.28f), palette.Holo); rightArm.transform.rotation = Quaternion.Euler(0, 0, 22);
-            CreatePrimitive("Hologram Base", PrimitiveType.Cylinder, holoRoot.transform, new Vector3(0, -1.35f, 0), new Vector3(1.3f, 0.12f, 1.3f), palette.Holo);
-            CreatePrimitive("Left Leg", PrimitiveType.Capsule, holoRoot.transform, new Vector3(-0.36f, -1.0f, 0), new Vector3(0.3f, 0.7f, 0.3f), palette.Holo);
-            CreatePrimitive("Right Leg", PrimitiveType.Capsule, holoRoot.transform, new Vector3(0.36f, -1.0f, 0), new Vector3(0.3f, 0.7f, 0.3f), palette.Holo);
+            var holoRoot = new GameObject("R-01 Hologram"); holoRoot.transform.position = new Vector3(6.15f, 1.1f, 0.3f);
+            var holoOrigin = holoRoot.transform.position;
+            var torso = CreatePrimitive("Torso", PrimitiveType.Capsule, holoRoot.transform, holoOrigin, new Vector3(0.9f, 1.3f, 0.55f), palette.Holo);
+            var head = CreatePrimitive("Head", PrimitiveType.Sphere, holoRoot.transform, holoOrigin + new Vector3(0, 1.35f, 0), Vector3.one * 0.5f, palette.Holo);
+            var leftArm = CreatePrimitive("Left Arm", PrimitiveType.Capsule, holoRoot.transform, holoOrigin + new Vector3(-0.9f, 0.25f, 0), new Vector3(0.28f, 0.9f, 0.28f), palette.Holo); leftArm.transform.rotation = Quaternion.Euler(0, 0, -22);
+            var rightArm = CreatePrimitive("Right Arm", PrimitiveType.Capsule, holoRoot.transform, holoOrigin + new Vector3(0.9f, 0.25f, 0), new Vector3(0.28f, 0.9f, 0.28f), palette.Holo); rightArm.transform.rotation = Quaternion.Euler(0, 0, 22);
+            CreatePrimitive("Hologram Base", PrimitiveType.Cylinder, holoRoot.transform, holoOrigin + new Vector3(0, -1.35f, 0), new Vector3(1.3f, 0.12f, 1.3f), palette.Holo);
+            CreatePrimitive("Left Leg", PrimitiveType.Capsule, holoRoot.transform, holoOrigin + new Vector3(-0.36f, -1.0f, 0), new Vector3(0.3f, 0.7f, 0.3f), palette.Holo);
+            CreatePrimitive("Right Leg", PrimitiveType.Capsule, holoRoot.transform, holoOrigin + new Vector3(0.36f, -1.0f, 0), new Vector3(0.3f, 0.7f, 0.3f), palette.Holo);
             RemoveColliders(environment); RemoveColliders(holoRoot);
 
-            var cameraGo = new GameObject("Stage Camera", typeof(Camera), typeof(AudioListener)); cameraGo.tag = "MainCamera"; var camera = cameraGo.GetComponent<Camera>(); camera.transform.position = new Vector3(0, 13, -12); camera.transform.rotation = Quaternion.Euler(43, 0, 0); camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(0.025f, 0.04f, 0.065f); camera.farClipPlane = 100;
-            var lightGo = new GameObject("Key Light", typeof(Light)); var light = lightGo.GetComponent<Light>(); light.type = LightType.Directional; light.intensity = 1.15f; light.shadows = LightShadows.Soft; lightGo.transform.rotation = Quaternion.Euler(50, -35, 0);
-            var fillGo = new GameObject("Fill Light", typeof(Light)); var fill = fillGo.GetComponent<Light>(); fill.type = LightType.Point; fill.intensity = 3.5f; fill.range = 13; fill.color = new Color(0.18f, 0.32f, 0.48f); fillGo.transform.position = new Vector3(-1, 6, -4);
+            var cameraGo = new GameObject("Stage Camera", typeof(Camera), typeof(AudioListener), typeof(UniversalAdditionalCameraData)); cameraGo.tag = "MainCamera"; var camera = cameraGo.GetComponent<Camera>(); camera.transform.position = new Vector3(0, 13f, -12.2f); camera.transform.rotation = Quaternion.Euler(46, 0, 0); camera.fieldOfView = 52f; camera.clearFlags = CameraClearFlags.SolidColor; camera.backgroundColor = new Color(0.018f, 0.035f, 0.06f); camera.farClipPlane = 100; camera.allowHDR = true; cameraGo.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing = true;
+            RenderSettings.ambientMode = AmbientMode.Flat; RenderSettings.ambientLight = new Color(0.20f, 0.27f, 0.36f);
+            var lightGo = new GameObject("Key Light", typeof(Light)); var light = lightGo.GetComponent<Light>(); light.type = LightType.Directional; light.intensity = 2.15f; light.color = new Color(1f, 0.82f, 0.65f); light.shadows = LightShadows.Soft; lightGo.transform.rotation = Quaternion.Euler(50, -35, 0);
+            CreatePointLight("Blue Fill Light", new Vector3(-3.5f, 5.5f, -1f), new Color(0.08f, 0.55f, 1f), 7.5f, 12f);
+            CreatePointLight("Orange Fill Light", new Vector3(4.8f, 4.5f, -2.5f), new Color(1f, 0.26f, 0.035f), 8f, 10f);
+            CreatePointLight("Warehouse Fill Light", new Vector3(-5.5f, 4f, 2.2f), new Color(0.18f, 0.65f, 1f), 5f, 8f);
+            CreatePostProcessing();
 
             CreateWorldLabel("Warehouse Label", "智能仓库\n出库口", environment.transform, new Vector3(-6.2f, 3.35f, 1.2f), font, palette.Blue.color);
             CreateWorldLabel("Gate Label", "质检闸门", environment.transform, gate.transform.position + new Vector3(-0.8f, 2.35f, 0.4f), font, palette.Warning.color);
             CreateWorldLabel("Buffer Label", "关节模组\n缓存区", environment.transform, new Vector3(6.55f, 1.65f, -3.85f), font, palette.Orange.color);
-            CreateWorldLabel("R01 Label", "R-01\n左臂关节订单", environment.transform, new Vector3(0, 3.15f, 0.5f), font, palette.Holo.color);
+            CreateWorldLabel("R01 Label", "R-01\n左臂关节订单", environment.transform, new Vector3(6.15f, 3.15f, 0.3f), font, palette.Holo.color);
             BuildUI(font, out var hud, out var orderLabel);
             var order = holoRoot.AddComponent<R01OrderDisplay>(); order.Configure(leftArm.GetComponent<Renderer>(), orderLabel);
             var runtime = new GameObject("Assembly Zero Runtime"); var renderer = runtime.AddComponent<BatchItemRenderer>(); renderer.Configure(cargoMesh, cargoMesh, cargoOrange, cargoBlue, palette.Blue, palette.Red, palette.Warning); var presentation = runtime.AddComponent<StagePresentationController>(); presentation.Configure(topologyOverlay, lineOverlay, gateIndicator, gateBarrier.transform); var driver = runtime.AddComponent<AssemblyZeroSimulationDriver>(); driver.Configure(config, renderer, hud, order, camera, presentation);
@@ -153,21 +162,77 @@ namespace AssemblyZero.Unity.Editor
             var target = new RenderTexture(1920, 1080, 24, RenderTextureFormat.ARGB32); var texture = new Texture2D(1920, 1080, TextureFormat.RGB24, false); camera.targetTexture = target; camera.Render(); RenderTexture.active = target; texture.ReadPixels(new Rect(0, 0, 1920, 1080), 0, 0); texture.Apply(); var output = Path.GetFullPath("AssemblyZeroPreview.png"); File.WriteAllBytes(output, texture.EncodeToPNG()); camera.targetTexture = null; RenderTexture.active = null; UnityEngine.Object.DestroyImmediate(target); UnityEngine.Object.DestroyImmediate(texture); Debug.Log($"Assembly Zero preview captured: {output} ({scene.name}).");
         }
 
+        private static void CreateFactoryDressing(Transform parent, (Material Dark, Material Steel, Material Belt, Material Orange, Material Blue, Material Holo, Material Warning, Material Red) palette)
+        {
+            var panel = Mat("FloorPanel", new Color(0.11f, 0.15f, 0.19f), false);
+            for (var z = -1; z <= 1; z++) for (var x = -1; x <= 1; x++)
+                CreatePrimitive($"Floor Panel {x + 1}-{z + 1}", PrimitiveType.Cube, parent, new Vector3(x * 4.6f, -0.075f, z * 3.1f), new Vector3(4.42f, 0.035f, 2.92f), panel);
+
+            CreatePrimitive("Neon Edge North", PrimitiveType.Cube, parent, new Vector3(0, -0.015f, 5.05f), new Vector3(15.2f, 0.025f, 0.055f), palette.Holo);
+            CreatePrimitive("Neon Edge South", PrimitiveType.Cube, parent, new Vector3(0, -0.015f, -5.05f), new Vector3(15.2f, 0.025f, 0.055f), palette.Holo);
+            CreatePrimitive("Neon Edge West", PrimitiveType.Cube, parent, new Vector3(-7.55f, -0.015f, 0), new Vector3(0.055f, 0.025f, 10.1f), palette.Holo);
+            CreatePrimitive("Neon Edge East", PrimitiveType.Cube, parent, new Vector3(7.55f, -0.015f, 0), new Vector3(0.055f, 0.025f, 10.1f), palette.Holo);
+            CreatePrimitive("Power Trunk Blue", PrimitiveType.Cube, parent, new Vector3(-5.35f, -0.005f, -0.25f), new Vector3(0.055f, 0.025f, 7.7f), palette.Blue);
+            CreatePrimitive("Power Trunk Orange", PrimitiveType.Cube, parent, new Vector3(5.35f, -0.005f, 0.5f), new Vector3(0.055f, 0.025f, 6.8f), palette.Orange);
+
+            CreateMachinePod("North East Fabricator", parent, new Vector3(6.15f, 0, 3.45f), palette.Steel, palette.Orange, palette.Holo);
+            CreateMachinePod("West Compressor", parent, new Vector3(-6.05f, 0, -0.35f), palette.Steel, palette.Blue, palette.Orange);
+            CreateMachinePod("South West Reactor", parent, new Vector3(-6.15f, 0, -3.65f), palette.Steel, palette.Orange, palette.Blue);
+            CreateMachinePod("Center Analyzer", parent, new Vector3(0, 0, 0), palette.Steel, palette.Holo, palette.Orange, 0.72f);
+
+            for (var i = 0; i < 9; i++)
+            {
+                var x = -4f + i;
+                var support = CreatePrimitive($"Belt Support {i:00}", PrimitiveType.Cylinder, parent, new Vector3(x, -0.02f, -4f), new Vector3(0.11f, 0.18f, 0.11f), palette.Dark);
+                support.transform.rotation = Quaternion.identity;
+            }
+        }
+
+        private static void CreateMachinePod(string name, Transform parent, Vector3 position, Material steel, Material accent, Material glow, float scale = 1f)
+        {
+            var root = new GameObject(name); root.transform.SetParent(parent); root.transform.position = position;
+            CreatePrimitive("Base", PrimitiveType.Cylinder, root.transform, position + Vector3.up * 0.16f, new Vector3(0.85f, 0.16f, 0.85f) * scale, steel);
+            CreatePrimitive("Core", PrimitiveType.Cylinder, root.transform, position + Vector3.up * 0.62f * scale, new Vector3(0.46f, 0.58f, 0.46f) * scale, accent);
+            CreatePrimitive("Light Ring", PrimitiveType.Cylinder, root.transform, position + Vector3.up * 1.17f * scale, new Vector3(0.58f, 0.055f, 0.58f) * scale, glow);
+            CreatePrimitive("Cap", PrimitiveType.Sphere, root.transform, position + Vector3.up * 1.31f * scale, Vector3.one * 0.28f * scale, glow);
+        }
+
+        private static void CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
+        {
+            var go = new GameObject(name, typeof(Light)); go.transform.position = position; var light = go.GetComponent<Light>(); light.type = LightType.Point; light.color = color; light.intensity = intensity; light.range = range; light.shadows = LightShadows.None;
+        }
+
+        private static void CreatePostProcessing()
+        {
+            const string profilePath = Root + "/Materials/FactoryPostProcessing.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            if (profile == null) { profile = ScriptableObject.CreateInstance<VolumeProfile>(); AssetDatabase.CreateAsset(profile, profilePath); }
+            if (!profile.TryGet(out Bloom bloom)) bloom = profile.Add<Bloom>(true);
+            bloom.active = true; bloom.threshold.Override(0.65f); bloom.intensity.Override(0.55f); bloom.scatter.Override(0.72f);
+            if (!profile.TryGet(out ColorAdjustments color)) color = profile.Add<ColorAdjustments>(true);
+            color.active = true; color.postExposure.Override(0.65f); color.contrast.Override(12f); color.saturation.Override(18f); color.colorFilter.Override(new Color(1f, 0.98f, 0.94f));
+            if (!profile.TryGet(out Tonemapping tone)) tone = profile.Add<Tonemapping>(true);
+            tone.active = true; tone.mode.Override(TonemappingMode.ACES);
+            EditorUtility.SetDirty(profile);
+            var volumeGo = new GameObject("Factory Post Processing", typeof(Volume)); var volume = volumeGo.GetComponent<Volume>(); volume.isGlobal = true; volume.priority = 10f; volume.sharedProfile = profile;
+        }
+
         private static (Material Dark, Material Steel, Material Belt, Material Orange, Material Blue, Material Holo, Material Warning, Material Red) CreateMaterials()
         {
-            return (UnlitMat("Dark", new Color(0.012f,0.02f,0.035f)), Mat("Steel", new Color(0.13f,0.17f,0.21f), false), ConveyorMat("Belt", 0f, 1f), Mat("ServoOrange", new Color(1f,0.28f,0.035f), true), Mat("SensorBlue", new Color(0.02f,0.42f,1f), true), Mat("Hologram", new Color(0.04f,0.75f,0.8f), true), Mat("Warning", new Color(1f,0.72f,0.04f), true), Mat("CompressedRed", new Color(1f,0.03f,0.05f), true));
+            return (UnlitMat("Dark", new Color(0.025f,0.045f,0.075f)), Mat("Steel", new Color(0.24f,0.31f,0.39f), false), ConveyorMat("Belt", 0f, 1f), Mat("ServoOrange", new Color(1f,0.22f,0.025f), true), Mat("SensorBlue", new Color(0.015f,0.52f,1f), true), Mat("Hologram", new Color(0.02f,0.9f,1f), true), Mat("Warning", new Color(1f,0.78f,0.05f), true), Mat("CompressedRed", new Color(1f,0.03f,0.05f), true));
         }
         private static Material UnlitMat(string name, Color color) { var path = Root + "/Materials/" + name + ".mat"; var shader = Shader.Find("Universal Render Pipeline/Unlit"); var material = AssetDatabase.LoadAssetAtPath<Material>(path); if (material == null) { material = new Material(shader) { name = name }; AssetDatabase.CreateAsset(material, path); } else material.shader = shader; material.SetColor("_BaseColor", color); material.SetColor("_Color", color); return material; }
         private static Material ConveyorMat(string name, float corner, float turnSign)
         {
             var path = Root + "/Materials/" + name + ".mat"; var shader = Shader.Find("AssemblyZero/ConveyorSurface"); if (shader == null) throw new InvalidOperationException("AssemblyZero/ConveyorSurface shader was not imported."); var material = AssetDatabase.LoadAssetAtPath<Material>(path); if (material == null) { material = new Material(shader) { name = name }; AssetDatabase.CreateAsset(material, path); } else material.shader = shader;
-            material.SetColor("_BaseColor", new Color(0.025f, 0.04f, 0.055f)); material.SetColor("_StripeColor", new Color(0.03f, 0.32f, 0.36f)); material.SetFloat("_FlowSpeed", 1.4f); material.SetFloat("_Tiling", 9f); material.SetVector("_Direction", new Vector4(1, 0, 0, 0));
+            material.SetColor("_BaseColor", new Color(0.055f, 0.075f, 0.095f)); material.SetColor("_StripeColor", new Color(1f, 0.19f, 0.015f)); material.SetFloat("_FlowSpeed", 1.4f); material.SetFloat("_Tiling", 9f); material.SetVector("_Direction", new Vector4(1, 0, 0, 0)); material.SetFloat("_EmissionStrength", 1.8f);
             material.SetFloat("_Corner", corner); material.SetFloat("_TurnSign", turnSign); material.SetFloat("_SurfaceSize", 0.9f); material.SetFloat("_BeltHalfWidth", 0.39f); EditorUtility.SetDirty(material); return material;
         }
         private static Material Mat(string name, Color color, bool emission)
         {
-            var path = Root + "/Materials/" + name + ".mat"; var existing = AssetDatabase.LoadAssetAtPath<Material>(path); if (existing != null) return existing;
-            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"); var m = new Material(shader) { name = name, enableInstancing = true }; m.SetColor("_BaseColor", color); m.SetColor("_Color", color); m.SetFloat("_Smoothness", 0.45f); if (emission) { m.EnableKeyword("_EMISSION"); m.SetColor("_EmissionColor", color * 1.7f); } AssetDatabase.CreateAsset(m, path); return m;
+            var path = Root + "/Materials/" + name + ".mat"; var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+            var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard"); if (m == null) { m = new Material(shader) { name = name, enableInstancing = true }; AssetDatabase.CreateAsset(m, path); } else m.shader = shader;
+            m.enableInstancing = true; m.SetColor("_BaseColor", color); m.SetColor("_Color", color); m.SetFloat("_Smoothness", emission ? 0.65f : 0.42f); if (emission) { m.EnableKeyword("_EMISSION"); m.SetColor("_EmissionColor", color * 2.2f); } else { m.DisableKeyword("_EMISSION"); m.SetColor("_EmissionColor", Color.black); } EditorUtility.SetDirty(m); return m;
         }
         private static Material CargoMaterial(string name, Material source, Color tint)
         {
@@ -176,6 +241,7 @@ namespace AssemblyZero.Unity.Editor
             material.shader = source.shader; material.enableInstancing = true; material.name = name;
             if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", tint);
             if (material.HasProperty("_Color")) material.SetColor("_Color", tint);
+            if (material.HasProperty("_EmissionColor")) { material.EnableKeyword("_EMISSION"); material.SetColor("_EmissionColor", tint * 0.35f); }
             if (material.HasProperty("_ReceiveShadows")) material.SetFloat("_ReceiveShadows", 0f);
             EditorUtility.SetDirty(material); return material;
         }
@@ -221,14 +287,33 @@ namespace AssemblyZero.Unity.Editor
             entry = new Vector3(entryDelta.x, 0, entryDelta.y); exit = new Vector3(exitDelta.x, 0, exitDelta.y);
             return center - entry * 0.5f + exit * 0.5f;
         }
-        private static void CreateLaneStripe(Transform parent, float z, Material material) { var go = CreateChildPrimitiveWorldScale(z < 0 ? "Left Lane" : "Right Lane", PrimitiveType.Cube, parent, new Vector3(0, 0.145f, z), new Vector3(0.82f, 0.018f, 0.08f), material); var c = go.GetComponent<Collider>(); if (c != null) UnityEngine.Object.DestroyImmediate(c); }
-        private static void CreateCornerDressing(Transform parent, Vector2Int entryDelta, Vector2Int exitDelta, float turnSign, Material orange, Material blue, Material dark)
+        private static void CreateCenterStripe(Transform parent, Material material) { var go = CreateChildPrimitiveWorldScale("Center Lane", PrimitiveType.Cube, parent, new Vector3(0, 0.145f, 0), new Vector3(0.82f, 0.018f, 0.09f), material); var c = go.GetComponent<Collider>(); if (c != null) UnityEngine.Object.DestroyImmediate(c); }
+        private static void CreateCornerDressing(Transform parent, Vector2Int entryDelta, Vector2Int exitDelta, float turnSign, Material orange, Material dark)
         {
             var pivot = CornerPivot(parent.position, entryDelta, exitDelta, out var entry, out var exit);
-            CreateArc("Left Lane", parent, pivot, entry, exit, 0.5f + 0.27f * turnSign, 0.145f, 0.018f, 0.08f, orange);
-            CreateArc("Right Lane", parent, pivot, entry, exit, 0.5f - 0.27f * turnSign, 0.145f, 0.018f, 0.08f, blue);
+            CreateArc("Center Lane", parent, pivot, entry, exit, 0.5f, 0.145f, 0.018f, 0.09f, orange);
             CreateArc("Left Rail", parent, pivot, entry, exit, 0.5f + 0.45f * turnSign, 0.18f, 0.09f, 0.045f, dark);
             CreateArc("Right Rail", parent, pivot, entry, exit, 0.5f - 0.45f * turnSign, 0.18f, 0.09f, 0.045f, dark);
+        }
+
+        private static Vector2Int[] BuildSerpentinePath()
+        {
+            var path = new List<Vector2Int>(45);
+            AddRun(path, new Vector2Int(-4, 3), new Vector2Int(4, 3));
+            AddRun(path, new Vector2Int(4, 2), new Vector2Int(4, 1));
+            AddRun(path, new Vector2Int(3, 1), new Vector2Int(-3, 1));
+            AddRun(path, new Vector2Int(-3, 0), new Vector2Int(-3, -1));
+            AddRun(path, new Vector2Int(-2, -1), new Vector2Int(3, -1));
+            AddRun(path, new Vector2Int(3, -2), new Vector2Int(3, -3));
+            AddRun(path, new Vector2Int(2, -3), new Vector2Int(-4, -3));
+            AddRun(path, new Vector2Int(-4, -4), new Vector2Int(5, -4));
+            return path.ToArray();
+        }
+
+        private static void AddRun(List<Vector2Int> path, Vector2Int from, Vector2Int to)
+        {
+            var step = new Vector2Int(Math.Sign(to.x - from.x), Math.Sign(to.y - from.y));
+            for (var point = from;; point += step) { path.Add(point); if (point == to) break; }
         }
         private static void CreateArc(string name, Transform parent, Vector3 pivot, Vector3 entry, Vector3 exit, float radius, float height, float thickness, float width, Material material, float t0 = 0f, float t1 = 1f)
         {

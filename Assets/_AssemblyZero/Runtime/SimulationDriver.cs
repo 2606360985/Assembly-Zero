@@ -81,7 +81,7 @@ namespace AssemblyZero.Unity
             stage = Mathf.Clamp(value, 1, 6); tick = 0; accumulator = 0; gateOverride = null;
             var stress = stage == 3 || stage == 5;
             var count = stage switch { 1 => 0, 2 => scenarioConfig.SmallLoadItems, 3 => scenarioConfig.StressLogicalItems, 4 => scenarioConfig.SmallLoadItems, 5 => scenarioConfig.StressLogicalItems, _ => scenarioConfig.GateDemoItems };
-            var initial = stage switch { 2 => Math.Max(1, count / 4), 4 => count / 2, 6 => count / 2, _ => 0 };
+            var initial = stage switch { 2 => Math.Max(1, count / 2), 4 => count, 6 => count, _ => 0 };
             var scenario = stress ? scenarioConfig.CreateStress() : scenarioConfig.CreatePhysical(count, initial);
             if (stage == 6) { scenario.GateCloseTick = scenarioConfig.GateCloseTick; scenario.GateOpenTick = scenarioConfig.GateOpenTick; }
             if (stage == 6 && topology.DomainTopology.Lanes.Length > 0) scenario.InitialFrontDistance = Mathf.Max(initial, topology.DomainTopology.Lanes[0].Length - 128);
@@ -104,7 +104,7 @@ namespace AssemblyZero.Unity
         private void ApplyCamera(int value)
         {
             if (stageCamera == null) stageCamera = Camera.main; if (stageCamera == null) return;
-            var positions = new[] { new Vector3(0, 13, -12), new Vector3(-3, 9, -9), new Vector3(0, 16, -15), new Vector3(2, 12, -12), new Vector3(-2, 10, -10), new Vector3(0, 13, -12) };
+            var positions = new[] { new Vector3(0, 13f, -12.2f), new Vector3(-2, 11, -10.5f), new Vector3(0, 14.5f, -13.5f), new Vector3(1, 12.5f, -12), new Vector3(-1, 12, -11.5f), new Vector3(0, 13f, -12.2f) };
             stageCamera.transform.position = positions[value - 1]; stageCamera.transform.rotation = Quaternion.Euler(43, value == 2 ? 20 : 0, 0);
         }
     }

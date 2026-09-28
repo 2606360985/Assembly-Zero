@@ -1,7 +1,7 @@
 {
   "name": "AssemblyZero.Unity.Editor",
   "rootNamespace": "AssemblyZero.Unity.Editor",
-  "references": ["AssemblyZero.Unity", "AssemblyZero.Domain", "Unity.TextMeshPro", "Unity.TextMeshPro.Editor", "UnityEngine.UI", "UnityEditor.UI", "Unity.InputSystem"],
+  "references": ["AssemblyZero.Unity", "AssemblyZero.Domain", "Unity.TextMeshPro", "Unity.TextMeshPro.Editor", "UnityEngine.UI", "UnityEditor.UI", "Unity.InputSystem", "Unity.RenderPipelines.Core.Runtime", "Unity.RenderPipelines.Universal.Runtime"],
   "includePlatforms": ["Editor"],
   "autoReferenced": true,
   "noEngineReferences": false

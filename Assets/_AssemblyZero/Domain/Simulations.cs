@@ -81,6 +81,18 @@ namespace AssemblyZero.Domain
             h = StateHasher.Add(h, TickNumber); h = StateHasher.Add(h, NextItemId); h = StateHasher.Add(h, Spawned); h = StateHasher.Add(h, SinkCount); h = StateHasher.Add(h, GateOpen ? 1 : 0);
             return h;
         }
+
+        protected int InitialCountForLane(int laneIndex)
+        {
+            var laneCount = Math.Max(1, Topology.Lanes.Length);
+            return Scenario.InitialItems / laneCount + (laneIndex < Scenario.InitialItems % laneCount ? 1 : 0);
+        }
+
+        protected ItemType NextItemType(int laneIndex)
+        {
+            if (!Scenario.AlternateItemTypes) return Topology.Lanes[laneIndex].ItemType;
+            return (NextItemId & 1) == 1 ? ItemType.ServoCore : ItemType.SensorPack;
+        }
     }
 
     public sealed class NaiveItemBeltSimulation : BeltSimulationBase
@@ -94,9 +106,9 @@ namespace AssemblyZero.Domain
             lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
             for (var laneIndex = 0; laneIndex < topology.Lanes.Length; laneIndex++)
             {
-                var lane = new List<SimItem>(Math.Max(16, scenario.InitialItemsPerLane)); lanes.Add(lane);
-                var count = Math.Min(scenario.InitialItemsPerLane, topology.Lanes[laneIndex].Length / Math.Max(1, scenario.MinimumSpacing)); var front = scenario.InitialFrontDistance >= 0 ? Math.Min(topology.Lanes[laneIndex].Length, scenario.InitialFrontDistance) : topology.Lanes[laneIndex].Length;
-                for (var i = 0; i < count; i++) { lane.Add(new SimItem(NextItemId++, topology.Lanes[laneIndex].ItemType, front - i * scenario.MinimumSpacing)); Spawned++; }
+                var lane = new List<SimItem>(Math.Max(16, InitialCountForLane(laneIndex))); lanes.Add(lane);
+                var count = Math.Min(InitialCountForLane(laneIndex), topology.Lanes[laneIndex].Length / Math.Max(1, scenario.MinimumSpacing)); var front = scenario.InitialFrontDistance >= 0 ? Math.Min(topology.Lanes[laneIndex].Length, scenario.InitialFrontDistance) : topology.Lanes[laneIndex].Length;
+                for (var i = 0; i < count; i++) { lane.Add(new SimItem(NextItemId, NextItemType(laneIndex), front - i * scenario.MinimumSpacing)); NextItemId++; Spawned++; }
             }
             FinishTick(TotalItems(), ActiveLines()); CalculateStateHash();
         }
@@ -115,7 +127,7 @@ namespace AssemblyZero.Domain
                     item.Distance = Math.Min(item.Distance + Scenario.SpeedUnitsPerTick, max); lane[i] = item; ValuesTouched++;
                 }
                 if (Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Count == 0 || lane[lane.Count - 1].Distance >= Scenario.MinimumSpacing))
-                { lane.Add(new SimItem(NextItemId++, Topology.Lanes[li].ItemType, 0)); Spawned++; ValuesTouched++; }
+                { lane.Add(new SimItem(NextItemId, NextItemType(li), 0)); NextItemId++; Spawned++; ValuesTouched++; }
             }
             FinishTick(TotalItems(), ActiveLines());
         }
@@ -147,7 +159,7 @@ namespace AssemblyZero.Domain
         {
             Scenario = scenario ?? throw new ArgumentNullException(nameof(scenario)); Topology = topology ?? throw new ArgumentNullException(nameof(topology));
             lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
-            for (var li = 0; li < topology.Lanes.Length; li++) { var lane = new GapLane(); lanes.Add(lane); var count = Math.Min(scenario.InitialItemsPerLane, topology.Lanes[li].Length / Math.Max(1, scenario.MinimumSpacing)); var front = scenario.InitialFrontDistance >= 0 ? Math.Min(topology.Lanes[li].Length, scenario.InitialFrontDistance) : topology.Lanes[li].Length; for (var i = 0; i < count; i++) { lane.Items.AddLast(new SimItem(NextItemId++, topology.Lanes[li].ItemType, front - i * scenario.MinimumSpacing)); Spawned++; } }
+            for (var li = 0; li < topology.Lanes.Length; li++) { var lane = new GapLane(); lanes.Add(lane); var count = Math.Min(InitialCountForLane(li), topology.Lanes[li].Length / Math.Max(1, scenario.MinimumSpacing)); var front = scenario.InitialFrontDistance >= 0 ? Math.Min(topology.Lanes[li].Length, scenario.InitialFrontDistance) : topology.Lanes[li].Length; for (var i = 0; i < count; i++) { lane.Items.AddLast(new SimItem(NextItemId, NextItemType(li), front - i * scenario.MinimumSpacing)); NextItemId++; Spawned++; } }
             FinishTick(TotalItems(), ActiveLines()); CalculateStateHash();
         }
 
@@ -167,7 +179,7 @@ namespace AssemblyZero.Domain
                     for (var i = 0; i < lane.Items.Count; i++) { var item = lane.Items[i]; var max = i == 0 ? limit : Absolute(lane, i - 1) - Scenario.MinimumSpacing; var next = Math.Min(Absolute(lane, i) + Scenario.SpeedUnitsPerTick, max); item.Distance = next - lane.Offset; lane.Items[i] = item; ValuesTouched++; if (i > 0 && next < max) lane.CompressionBoundary = i; }
                 }
                 if (Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Items.Count == 0 || Absolute(lane, lane.Items.Count - 1) >= Scenario.MinimumSpacing))
-                { lane.Items.AddLast(new SimItem(NextItemId++, Topology.Lanes[li].ItemType, -lane.Offset)); Spawned++; ValuesTouched++; }
+                { lane.Items.AddLast(new SimItem(NextItemId, NextItemType(li), -lane.Offset)); NextItemId++; Spawned++; ValuesTouched++; }
             }
             FinishTick(TotalItems(), ActiveLines());
         }
