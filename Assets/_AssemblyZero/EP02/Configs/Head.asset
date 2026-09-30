@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66631eadbc736cc4e8b6e4cbdef57480, type: 3}
+  m_Name: Head
+  m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.RobotPartDefinition
+  PartTypeId: 2
+  SocketId: 0
+  PartName: Head
+  CarrierType: StandardPallet
+  SourcePrefab: {fileID: 4607856364710218615, guid: ccd21e125f01a9f41b9548e03a73b587, type: 3}
+  WrapperPrefab: {fileID: 1076232371188474775, guid: 51689a9a82e65ab4b88ef7c7252c5362, type: 3}
+  BeltPose:
+    Position: {x: -1.0296755, y: 1.8174417, z: 0.122801416}
+    Euler: {x: 90, y: 0, z: 0}
+    Scale: {x: 0.20847724, y: 0.20847724, z: 0.20847724}
+  GripPose:
+    Position: {x: -2.4235961, y: 0.28904378, z: -3.7129}
+    Euler: {x: 1.1500878e-13, y: 0, z: 0}
+    Scale: {x: 0.4907028, y: 0.4907028, z: 0.4907028}
+  AssemblyPose:
+    Position: {x: -2.4235961, y: 0.28904378, z: -3.7129}
+    Euler: {x: 1.1500878e-13, y: 0, z: 0}
+    Scale: {x: 0.4907028, y: 0.4907028, z: 0.4907028}
+  AssemblySocketPosition: {x: -0.34769553, y: 2.979637, z: 0}
+  Color: {r: 0, g: 1, b: 1, a: 1}
+  OccupancyUnits: 768
+  Icon: {fileID: 0}

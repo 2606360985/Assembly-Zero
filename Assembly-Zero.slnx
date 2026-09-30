@@ -1,0 +1,9 @@
+﻿<Solution>
+  <Project Path="AssemblyZero.Unity.Editor.csproj" />
+  <Project Path="AssemblyZero.Unity.csproj" />
+  <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="AssemblyZero.PlayModeTests.csproj" />
+  <Project Path="AssemblyZero.Tests.csproj" />
+  <Project Path="AssemblyZero.Domain.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+</Solution>

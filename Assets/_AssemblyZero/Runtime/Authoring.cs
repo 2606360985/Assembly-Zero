@@ -20,14 +20,16 @@ namespace AssemblyZero.Unity
         public BeltAuthoring[] OrderedPieces = Array.Empty<BeltAuthoring>();
         public Vector3[] WorldCenters = Array.Empty<Vector3>();
         public List<TopologyIssue> Issues = new List<TopologyIssue>();
+        public float LaneSeparation;
         public int BeltPieceCount => OrderedPieces.Length;
     }
 
     public static class BeltTopologyBuilder
     {
-        public static BakedBeltTopology Bake(IReadOnlyList<BeltAuthoring> pieces)
+        public static BakedBeltTopology Bake(IReadOnlyList<BeltAuthoring> pieces, int laneCount = 1, float laneSeparation = 0.46f)
         {
-            var result = new BakedBeltTopology();
+            if (laneCount < 1 || laneCount > 64) throw new ArgumentOutOfRangeException(nameof(laneCount));
+            var result = new BakedBeltTopology { LaneSeparation = laneSeparation };
             if (pieces == null || pieces.Count == 0) { result.Issues.Add(new TopologyIssue(null, "No belt pieces found.")); result.DomainTopology = new BeltTopology(Array.Empty<LaneDefinition>()); return result; }
             var byGrid = new Dictionary<Vector2Int, BeltAuthoring>();
             for (var i = 0; i < pieces.Count; i++)
@@ -46,9 +48,10 @@ namespace AssemblyZero.Unity
             for (var i = 0; i < ordered.Count; i++) result.WorldCenters[i] = ordered[i].transform.position;
             var length = Math.Max(BeltConstants.UnitsPerGrid, ordered.Count * BeltConstants.UnitsPerGrid);
             var line = new TransportLineDefinition(new LineId(0), length, 0, ordered.Count);
-            var lanes = new[] { new LaneDefinition(new LaneId(0), line.Id, length, ItemType.ServoCore) };
+            var lanes = new LaneDefinition[laneCount]; var connections = new LineConnection[laneCount];
+            for (var i = 0; i < laneCount; i++) { lanes[i] = new LaneDefinition(new LaneId(i), line.Id, length, ItemType.ServoCore); connections[i] = new LineConnection(lanes[i].Id, default, EndpointKind.Sink); }
             var samples = new PathSample[ordered.Count + 1]; for (var i = 0; i < samples.Length; i++) samples[i] = new PathSample(i * BeltConstants.UnitsPerGrid, Math.Min(i, Math.Max(0, ordered.Count - 1)), i == ordered.Count ? BeltConstants.UnitsPerGrid : 0);
-            result.DomainTopology = new BeltTopology(lanes, new[] { line }, new[] { new LineConnection(lanes[0].Id, default, EndpointKind.Sink) }, samples);
+            result.DomainTopology = new BeltTopology(lanes, new[] { line }, connections, samples);
             return result;
         }
 
@@ -81,7 +84,7 @@ namespace AssemblyZero.Unity
                 center = centers[piece] + entry * Mathf.Lerp(-entryHalf, exitHalf, t);
                 tangent = entry;
             }
-            return center + Vector3.up * 0.24f;
+            return center + Vector3.up * 0.24f + Vector3.Cross(Vector3.up, tangent) * ((laneId - (topology.DomainTopology.Lanes.Length - 1) * 0.5f) * topology.LaneSeparation);
         }
 
         private static Vector3 PieceEntry(Vector3[] centers, int piece)

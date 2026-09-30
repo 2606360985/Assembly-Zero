@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Assembly-Zero EP01：拆解两万件传送带物料的模拟方式、确定性验证与堵塞退化。">
+  <title>Assembly-Zero EP01｜两万个箱子，真的要逐个移动吗？</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23070a0d'/%3E%3Cpath d='M10 38h44v11H10z' fill='%23242c31'/%3E%3Cpath d='M14 43h36' stroke='%2300e5ff' stroke-width='3' stroke-dasharray='7 5'/%3E%3Cpath d='M23 17h18v18H23z' fill='%23ff9d24'/%3E%3Cpath d='m23 17 9 5 9-5M32 22v13' fill='none' stroke='%23070a0d' stroke-width='2'/%3E%3C/svg%3E">
+  <style>
+    :root{--ink:#eef5f6;--muted:#91a0a7;--bg:#070a0d;--panel:#0d1216;--line:#263138;--cyan:#36e0f3;--orange:#ff9d24;--red:#ff5a52;--green:#8fe27d;--grid:rgba(54,224,243,.055)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font:16px/1.7 Inter,"Noto Sans SC","Microsoft YaHei",system-ui,sans-serif;overflow-x:hidden}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:42px 42px;mask-image:linear-gradient(to bottom,#000,transparent 70%);z-index:-1}
+    a{color:inherit}.progress{position:fixed;inset:0 auto auto 0;height:3px;width:0;background:linear-gradient(90deg,var(--orange),var(--cyan));z-index:20}
+    nav{position:sticky;top:0;z-index:10;background:rgba(7,10,13,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+    .navin{max-width:1180px;margin:auto;padding:13px 24px;display:flex;align-items:center;gap:28px}.brand{font:700 14px/1 ui-monospace,monospace;letter-spacing:.14em}.brand b{color:var(--orange)}.links{margin-left:auto;display:flex;gap:20px}.links a{color:var(--muted);text-decoration:none;font-size:14px}.links a:hover{color:var(--cyan)}
+    main{max-width:1180px;margin:auto;padding:0 24px}.hero{min-height:calc(100vh - 55px);display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center;padding:72px 0}
+    .eyebrow,.kicker{font:700 12px/1 ui-monospace,monospace;letter-spacing:.19em;text-transform:uppercase;color:var(--cyan)}h1{font-size:clamp(46px,7vw,92px);line-height:.98;letter-spacing:-.055em;margin:22px 0 28px;max-width:830px}h1 em{font-style:normal;color:var(--orange)}
+    .lede{font-size:clamp(18px,2vw,23px);line-height:1.65;color:#c2cdd1;max-width:700px}.answer{margin-top:36px;border-left:3px solid var(--orange);padding:7px 0 7px 18px;color:var(--muted)}.answer strong{display:block;color:var(--ink);font-size:22px}
+    .machine{border:1px solid var(--line);background:linear-gradient(145deg,#11181d,#090d10);padding:22px;box-shadow:18px 18px 0 #030506;position:relative}.machine:before{content:"LIVE MODEL";position:absolute;right:14px;top:12px;color:var(--green);font:700 10px/1 ui-monospace,monospace;letter-spacing:.15em}
+    .screen{height:330px;position:relative;overflow:hidden;background:#05080a;border:1px solid #303b42}.belt{position:absolute;left:8%;right:8%;top:48%;height:76px;background:#20292e;border-block:7px solid #39464d}.belt:after{content:"";position:absolute;inset:9px 0;background:repeating-linear-gradient(90deg,transparent 0 34px,var(--cyan) 35px 38px);opacity:.28;animation:flow 1.2s linear infinite}.lane{position:absolute;left:8%;right:8%;top:calc(48% + 15px);height:40px}.box{position:absolute;width:34px;height:34px;top:3px;background:var(--orange);border:2px solid #ffd08a;box-shadow:inset -6px -6px 0 rgba(0,0,0,.22);transition:background .2s}.gate{position:absolute;right:9%;top:calc(48% - 8px);height:92px;width:7px;background:var(--green);box-shadow:0 0 18px currentColor;color:var(--green);transition:.25s}.gate.closed{background:var(--red);color:var(--red)}
+    .hud{position:absolute;inset:16px auto auto 16px;font:12px/1.7 ui-monospace,monospace;color:var(--muted)}.hud b{color:var(--cyan)}.controls{display:grid;grid-template-columns:1fr auto;gap:15px;margin-top:18px;align-items:center}.controls label{font:12px/1.4 ui-monospace,monospace;color:var(--muted)}input[type=range]{width:100%;accent-color:var(--orange)}button{border:1px solid var(--line);background:#141b20;color:var(--ink);padding:10px 16px;font:700 12px/1 ui-monospace,monospace;cursor:pointer}button:hover,button[aria-pressed=true]{border-color:var(--cyan);color:var(--cyan)}
+    section{padding:110px 0;border-top:1px solid var(--line)}.section-head{display:grid;grid-template-columns:140px 1fr;gap:28px;margin-bottom:48px}.num{font:700 52px/1 ui-monospace,monospace;color:#263239}.section-head h2{font-size:clamp(30px,4vw,55px);line-height:1.08;letter-spacing:-.035em;margin:10px 0 14px}.section-head p{color:var(--muted);max-width:760px;margin:0;font-size:18px}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:22px}.card{border:1px solid var(--line);background:rgba(13,18,22,.88);padding:28px;position:relative}.card h3{font-size:23px;margin:0 0 10px}.card p{color:var(--muted);margin:0}.tag{font:700 11px/1 ui-monospace,monospace;color:var(--orange);letter-spacing:.12em}.equation{margin-top:24px;padding:22px;background:#070a0d;border:1px solid var(--line);font:700 clamp(17px,2.5vw,27px)/1.4 ui-monospace,monospace}.naive .equation{color:var(--red)}.gap .equation{color:var(--cyan)}
+    .line-demo{margin-top:25px;height:90px;display:flex;align-items:center;gap:5px;overflow:hidden}.item{min-width:14px;height:30px;background:var(--orange);border:1px solid #ffc66f}.gap .item{transform:translateX(22px)}.offset{height:1px;flex:1;border-top:2px dashed var(--cyan);position:relative}.offset:after{content:"OFFSET + 8";position:absolute;right:0;top:7px;color:var(--cyan);font:11px ui-monospace,monospace}
+    .metric{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--line);border:1px solid var(--line)}.metric article{background:var(--panel);padding:34px}.metric strong{display:block;font:700 clamp(42px,6vw,78px)/1 ui-monospace,monospace;letter-spacing:-.06em}.metric .old strong{color:var(--red)}.metric .new strong{color:var(--cyan)}.metric small{color:var(--muted)}
+    .bars{margin-top:25px}.bar{display:grid;grid-template-columns:105px 1fr 120px;gap:14px;align-items:center;margin:13px 0;font:13px ui-monospace,monospace}.track{height:12px;background:#1b2429}.fill{height:100%;background:var(--red)}.fill.tiny{width:max(2px,.032%);background:var(--cyan)}
+    .code-card{background:#080c0f;border:1px solid var(--line);overflow:hidden}.code-head{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font:12px ui-monospace,monospace}.dots{letter-spacing:5px;color:#596970}.code-card pre{margin:0;padding:26px;overflow:auto;font:14px/1.75 "Cascadia Code",Consolas,monospace;tab-size:4}.kw{color:#d98cff}.ty{color:#6dd9ff}.fn{color:#ffd166}.cm{color:#65747c}.hl{display:inline-block;background:rgba(54,224,243,.11);border-left:2px solid var(--cyan);margin-left:-12px;padding-left:10px;width:calc(100% + 12px)}
+    .pipeline{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.step{min-height:190px;border-top:3px solid var(--cyan);background:var(--panel);padding:22px}.step b{font:700 12px ui-monospace,monospace;color:var(--cyan)}.step h3{font-size:19px;margin:42px 0 8px}.step p{font-size:14px;color:var(--muted);margin:0}
+    .truth{display:grid;grid-template-columns:1fr 1.2fr;gap:30px;align-items:center}.sample{display:grid;grid-template-columns:repeat(16,1fr);gap:5px;padding:25px;background:var(--panel);border:1px solid var(--line)}.sample i{aspect-ratio:1;background:#28343a}.sample i:nth-child(7n){background:var(--orange);box-shadow:0 0 8px rgba(255,157,36,.45)}.ratio{font:700 clamp(38px,7vw,84px)/1 ui-monospace,monospace;color:var(--orange);letter-spacing:-.07em}.truth p{color:var(--muted);font-size:18px}
+    .warning{border:1px solid #653a36;background:linear-gradient(90deg,rgba(255,90,82,.12),rgba(255,90,82,.02));padding:30px;display:grid;grid-template-columns:auto 1fr;gap:24px}.warning .icon{font:700 44px/1 ui-monospace,monospace;color:var(--red)}.warning h3{margin:0 0 8px;font-size:25px}.warning p{margin:0;color:#c7b2af}.ticks{margin-top:28px;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:var(--line)}.ticks div{background:var(--panel);padding:22px}.ticks b{display:block;color:var(--orange);font:700 22px ui-monospace,monospace}.ticks span{color:var(--muted);font-size:14px}
+    .conclusion{padding:130px 0}.quote{max-width:960px;font-size:clamp(31px,5vw,64px);line-height:1.16;letter-spacing:-.04em}.quote em{font-style:normal;color:var(--cyan)}.sign{margin-top:50px;color:var(--muted)}footer{border-top:1px solid var(--line);padding:28px 0 42px;color:var(--muted);font:12px ui-monospace,monospace;display:flex;justify-content:space-between}
+    @keyframes flow{to{background-position:38px 0}}@media(max-width:850px){.hero,.two,.truth{grid-template-columns:1fr}.hero{padding-top:44px}.machine{box-shadow:8px 8px 0 #030506}.links{display:none}.section-head{grid-template-columns:1fr}.num{font-size:28px}.pipeline{grid-template-columns:1fr 1fr}.metric{grid-template-columns:1fr}.ticks{grid-template-columns:1fr}.bar{grid-template-columns:85px 1fr}.bar span:last-child{display:none}}
+    @media(max-width:520px){main{padding:0 16px}h1{font-size:44px}.screen{height:270px}.pipeline{grid-template-columns:1fr}.controls{grid-template-columns:1fr}.section-head{margin-bottom:30px}section{padding:78px 0}.warning{grid-template-columns:1fr}.sample{gap:3px;padding:14px}.code-card pre{font-size:12px;padding:18px}}
+    @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.belt:after{animation:none}}
+  </style>
+</head>
+<body>
+  <div class="progress" id="progress"></div>
+  <nav><div class="navin"><div class="brand"><b>ASSEMBLY</b>—ZERO / EP01</div><div class="links"><a href="#principle">原理</a><a href="#code">代码</a><a href="#proof">验证</a><a href="#limits">边界</a></div></div></nav>
+  <main>
+    <header class="hero">
+      <div><div class="eyebrow">GAME ENGINEERING DETECTIVE · CASE 001</div><h1>两万个箱子，真的要<em>逐个移动</em>吗？</h1><p class="lede">《Factorio》式传送带优化的关键，不是把两万次移动做得更快，而是识别哪些相对关系根本没有发生变化。</p><div class="answer"><strong>畅通阶段：不需要。</strong>32 段传送带烘焙成一条运输线，每条车道每 Tick 只更新一个 Offset。</div></div>
+      <div class="machine" aria-label="传送带算法交互演示"><div class="screen"><div class="hud">TICK <b id="tick">0000</b><br>LOGICAL ITEMS <b id="logical">20,000</b><br>VALUES TOUCHED <b id="touched">2</b><br>GATE <b id="gateState">OPEN</b></div><div class="belt"></div><div class="lane" id="lane"></div><div class="gate" id="gate"></div></div><div class="controls"><label>逻辑物料 <b id="countLabel">20,000</b><input id="count" type="range" min="100" max="20000" step="100" value="20000"></label><button id="gateBtn" type="button" aria-pressed="false">关闭末端闸门</button></div></div>
+    </header>
+
+    <section id="principle"><div class="section-head"><div class="num">01</div><div><div class="kicker">THE FIRST SUSPECT</div><h2>传统方案：每个箱子保存绝对位置</h2><p>从出口向入口遍历。前方有空间就推进；被挡住，就停在前一个箱子后面。直观、准确，但工作量会随物料数量线性增长。</p></div></div><div class="two">
+      <article class="card naive"><span class="tag">NAIVE / O(N)</span><h3>逐件推进</h3><p>20,000 件物料意味着每个 Tick 至少访问 20,000 个位置值。</p><div class="line-demo" aria-hidden="true"><i class="item"></i><i class="item"></i><i class="item"></i><i class="item"></i><i class="item"></i><i class="item"></i><i class="item"></i><i class="item"></i></div><div class="equation">cost ≈ items × ticks</div></article>
+      <article class="card gap"><span class="tag">TRANSPORT LINE / O(1)*</span><h3>整线位移</h3><p>物料保存相对距离。畅通时相对关系不变，只需推进每条车道的 Offset。</p><div class="line-demo" aria-hidden="true"><i class="item"></i><i class="item"></i><i class="item"></i><div class="offset"></div></div><div class="equation">absolute = relative + offset</div></article>
+    </div></section>
+
+    <section><div class="section-head"><div class="num">02</div><div><div class="kicker">BAKE THE ROUTE</div><h2>32 段外观，1 条逻辑运输线</h2><p>Unity 场景里的直线段和弯道只是作者工具。运行前，拓扑构建器按网格连接顺序烘焙成连续逻辑距离，并拆成两条车道。</p></div></div><div class="pipeline"><article class="step"><b>01 / AUTHOR</b><h3>场景传送段</h3><p>32 个 BeltAuthoring，保存输入方向、输出网格和形状。</p></article><article class="step"><b>02 / BAKE</b><h3>拓扑诊断</h3><p>发现重复格、断链、孤岛与闭环，得到有序段列表。</p></article><article class="step"><b>03 / DOMAIN</b><h3>1 Line · 2 Lanes</h3><p>世界坐标退出模拟层，只留下整数逻辑距离。</p></article><article class="step"><b>04 / PRESENT</b><h3>按需采样</h3><p>生成快照时才把逻辑距离映射回直线与弯道的世界姿态。</p></article></div></section>
+
+    <section id="code"><div class="section-head"><div class="num">03</div><div><div class="kicker">THE DECISIVE LINE</div><h2>核心差别，就在这个分支</h2><p>头部还能完整前进时，Gap 后端不碰任何物料记录；每条车道只增加一次 Offset。只有抵达末端或发生堵塞，才进入压缩循环。</p></div></div><div class="code-card"><div class="code-head"><span>Domain / Simulations.cs · GapTransportLineSimulation.Tick</span><span class="dots">● ● ●</span></div><pre><code><span class="kw">if</span> (lane.Items.Count &gt; <span class="ty">0</span> &amp;&amp;
+    <span class="fn">Absolute</span>(lane, <span class="ty">0</span>) + Scenario.SpeedUnitsPerTick &lt;= limit)
+{
+<span class="hl">    lane.Offset += Scenario.SpeedUnitsPerTick;</span>
+    lane.CompressionBoundary = -<span class="ty">1</span>;
+    ValuesTouched++;
+}
+<span class="kw">else if</span> (lane.Items.Count &gt; <span class="ty">0</span>)
+{
+    <span class="cm">// 堵塞出现：从出口向后逐件压实</span>
+    <span class="kw">for</span> (<span class="kw">var</span> i = <span class="ty">0</span>; i &lt; lane.Items.Count; i++)
+    {
+        <span class="kw">var</span> max = i == <span class="ty">0</span> ? limit
+            : <span class="fn">Absolute</span>(lane, i - <span class="ty">1</span>) - Scenario.MinimumSpacing;
+        <span class="kw">var</span> next = Math.<span class="fn">Min</span>(<span class="fn">Absolute</span>(lane, i) + speed, max);
+        item.Distance = next - lane.Offset;
+    }
+}</code></pre></div></section>
+
+    <section><div class="section-head"><div class="num">04</div><div><div class="kicker">MEASURED, NOT IMPLIED</div><h2>同样两万件，不同的每 Tick 成本</h2><p>README 记录的 Editor 本机测试：20,000 件物料、300 Tick、畅通时间窗。数值用于说明数量级，不是跨机器性能承诺。</p></div></div><div class="metric"><article class="old"><small>NAIVE · POSITION VALUES / TICK</small><strong>20,000</strong><div class="bars"><div class="bar"><span>耗时</span><div class="track"><div class="fill" style="width:100%"></div></div><span>≈ 0.31 ms</span></div></div></article><article class="new"><small>GAP · LANE OFFSETS / TICK</small><strong>2</strong><div class="bars"><div class="bar"><span>耗时</span><div class="track"><div class="fill tiny"></div></div><span>≈ 0.0001 ms</span></div></div></article></div></section>
+
+    <section id="proof"><div class="section-head"><div class="num">05</div><div><div class="kicker">SAME WORLD, SAME RESULT</div><h2>优化不能改变模拟结果</h2><p>两套后端共享 Scenario、Topology、Snapshot 与状态哈希。模拟层是纯 C#：没有 GameObject、Transform、Rigidbody，也不依赖渲染帧率。</p></div></div><div class="two"><div class="code-card"><div class="code-head"><span>Domain / Model.cs</span><span>60 TICK/S</span></div><pre><code><span class="kw">public interface</span> <span class="ty">IBeltSimulationBackend</span>
+{
+    <span class="kw">void</span> <span class="fn">Reset</span>(ScenarioDefinition scenario,
+               BeltTopology topology);
+    <span class="kw">void</span> <span class="fn">Tick</span>(<span class="kw">in</span> TickInput input);
+    <span class="kw">void</span> <span class="fn">CreateSnapshot</span>(BeltSnapshotWriter writer);
+    <span class="ty">ulong</span> <span class="fn">CalculateStateHash</span>();
+}</code></pre></div><article class="card"><span class="tag">DETERMINISM CHECK</span><h3>每一步，都能对账</h3><p>Naive 与 Gap 在每个 Tick 都按相同字段计算 FNV-1a 状态哈希。只要任意箱子的 ID、类型、车道或绝对距离不同，哈希就会分叉。</p><div class="equation" style="color:var(--green)">hash_naive == hash_gap ✓</div></article></div></section>
+
+    <section><div class="section-head"><div class="num">06</div><div><div class="kicker">SIMULATION ≠ RENDERING</div><h2>后台算两万件，画面只画 128 件</h2><p>这是刻意分离，而不是偷换概念。逻辑物料全部参与模拟；表现层均匀抽样代表箱，再通过 RenderMeshInstanced 批量绘制。</p></div></div><div class="truth"><div class="sample" aria-label="128 个抽样点示意" id="sample"></div><div><div class="ratio">128 / 20,000</div><p>约每 156 件逻辑物料取一个可见代表。快照展开、世界坐标采样、矩阵构建与绘制都计入“表现耗时”，不会混进模拟耗时。</p></div></div></section>
+
+    <section id="limits"><div class="section-head"><div class="num">07</div><div><div class="kicker">WHERE THE TRICK ENDS</div><h2>优化不是魔法：堵塞会让成本回来</h2><p>闸门关闭后，出口物料先停下，间隙从前向后缩小。压缩边界扫过的物料必须被重新计算，因此 Gap 后端也会从 O(1) 逐渐回到 O(n)。</p></div></div><div class="warning"><div class="icon">!</div><div><h3>准确结论：只跳过没有变化的相对关系</h3><p>不是“两万个物品永远只算一次”，而是当大量物料保持同样的相对排列时，没有必要反复更新每一个绝对位置。</p></div></div><div class="ticks"><div><b>TICK 000</b><span>两条车道各更新一次 Offset</span></div><div><b>TICK ~346</b><span>线头触及封闭端，压缩开始</span></div><div><b>BOUNDARY ←</b><span>堵塞向入口传播，ValuesTouched 上升</span></div></div></section>
+
+    <section class="conclusion"><div class="kicker">CASE CONCLUSION</div><div class="quote">真正的优化，不是更快地移动两万个物品。<br>而是先找到那些<em>根本不用计算的变化</em>。</div><div class="sign">RepinSKY · 游戏工程侦探 / 下一期：机械臂为什么会让整座工厂堵起来？</div></section>
+    <footer><span>ASSEMBLY-ZERO / EP01</span><span>Unity 6000.4 · URP 17.4 · FIXED 60 TICK</span></footer>
+  </main>
+  <script>
+    const lane=document.querySelector('#lane'), gate=document.querySelector('#gate'), btn=document.querySelector('#gateBtn');
+    const count=document.querySelector('#count'), countLabel=document.querySelector('#countLabel'), logical=document.querySelector('#logical'), touched=document.querySelector('#touched'), tickEl=document.querySelector('#tick');
+    let closed=false,tick=0,offset=0; for(let i=0;i<11;i++){const b=document.createElement('i');b.className='box';b.style.left=(i*48)+'px';lane.appendChild(b)}
+    function paint(){tick++;offset=(offset+0.8)%48;const boxes=[...lane.children];boxes.forEach((b,i)=>{let x=i*48+offset;if(closed){const max=lane.clientWidth-48-(boxes.length-1-i)*36;x=Math.min(x,max);b.style.background=x>=max-1?'var(--red)':'var(--orange)'}else b.style.background='var(--orange)';b.style.transform=`translateX(${x}px)`});tickEl.textContent=String(tick).padStart(4,'0');if(closed)touched.textContent=Math.min(+count.value,2+Math.floor((tick%420)/420*count.value)).toLocaleString('en-US');requestAnimationFrame(paint)}
+    btn.addEventListener('click',()=>{closed=!closed;gate.classList.toggle('closed',closed);btn.setAttribute('aria-pressed',closed);btn.textContent=closed?'打开末端闸门':'关闭末端闸门';document.querySelector('#gateState').textContent=closed?'CLOSED':'OPEN';document.querySelector('#gateState').style.color=closed?'var(--red)':'var(--cyan)';if(!closed)touched.textContent='2'});
+    count.addEventListener('input',()=>{const v=(+count.value).toLocaleString('en-US');countLabel.textContent=v;logical.textContent=v;if(!closed)touched.textContent='2'});
+    for(let i=0;i<128;i++)document.querySelector('#sample').appendChild(document.createElement('i'));requestAnimationFrame(paint);
+    addEventListener('scroll',()=>{const h=document.documentElement;document.querySelector('#progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
+  </script>
+</body>
+</html>

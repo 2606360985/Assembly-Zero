@@ -31,6 +31,8 @@ namespace AssemblyZero.Domain
         public int GateOpenTick = -1;
         public int Seed = 101;
         public int VisibleItems = 20000;
+        // EP02 owns source and sink scheduling; EP01 keeps its original Tick contract.
+        public bool ExternalLogistics;
 
         public ScenarioDefinition Clone() => (ScenarioDefinition)MemberwiseClone();
     }
@@ -106,6 +108,7 @@ namespace AssemblyZero.Domain
         public readonly LaneId LaneId;
         public readonly int Distance;
         public readonly int GapAhead;
+        public PartTypeId PartType => new PartTypeId((int)ItemType);
         public BeltItemSnapshot(ItemId itemId, ItemType itemType, LineId lineId, LaneId laneId, int distance, int gapAhead) { ItemId = itemId; ItemType = itemType; LineId = lineId; LaneId = laneId; Distance = distance; GapAhead = gapAhead; }
     }
 
@@ -144,9 +147,39 @@ namespace AssemblyZero.Domain
         ulong CalculateStateHash();
     }
 
-    public readonly struct BeltAccessPort { public readonly LaneId LaneId; public readonly int StartDistance; public readonly int EndDistance; public BeltAccessPort(LaneId laneId, int startDistance, int endDistance) { LaneId = laneId; StartDistance = startDistance; EndDistance = endDistance; } }
-    public readonly struct BeltItemHandle { public readonly ItemId ItemId; public readonly LaneId LaneId; public BeltItemHandle(ItemId itemId, LaneId laneId) { ItemId = itemId; LaneId = laneId; } public bool IsValid => ItemId.Value > 0; }
+    public readonly struct BeltAccessPort
+    {
+        public readonly LaneId LaneId;
+        public readonly LineId TransportLineId;
+        public readonly ulong LaneMask, AcceptedPartTypeMask;
+        public readonly int StartDistance, EndDistance, PreferredDistance;
+        public BeltAccessPort(LaneId laneId, int startDistance, int endDistance)
+            : this(new LineId(0), laneId.Value >= 0 && laneId.Value < 64 ? 1UL << laneId.Value : 0, startDistance, endDistance, endDistance, ulong.MaxValue) { }
+        public BeltAccessPort(LineId line, ulong laneMask, int start, int end, int preferred, ulong types)
+        { LaneId = new LaneId(FirstBit(laneMask)); TransportLineId = line; LaneMask = laneMask; StartDistance = start; EndDistance = end; PreferredDistance = preferred; AcceptedPartTypeMask = types; }
+        private static int FirstBit(ulong mask) { for (var i = 0; i < 64; i++) if ((mask & (1UL << i)) != 0) return i; return -1; }
+    }
+    public readonly struct BeltItemHandle
+    {
+        public readonly ItemId ItemId;
+        public readonly LaneId LaneId;
+        public readonly LineId LineId;
+        public readonly long ResetToken;
+        public BeltItemHandle(ItemId itemId, LaneId laneId) : this(itemId, laneId, new LineId(0), 0) { }
+        public BeltItemHandle(ItemId itemId, LaneId laneId, LineId lineId, long resetToken)
+        { ItemId = itemId; LaneId = laneId; LineId = lineId; ResetToken = resetToken; }
+        public bool IsValid => ItemId.Value > 0;
+    }
     public interface IBeltAccess { bool TryQuery(in BeltAccessPort port, out BeltItemHandle handle); bool TryRemove(in BeltItemHandle handle); bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle); }
+
+    public interface ITransactionalBeltAccess : IBeltAccess
+    {
+        void QueryCandidates(in BeltAccessPort port, List<BeltAccessCandidate> results);
+        bool TryValidate(in BeltItemHandle handle, out BeltAccessCandidate item);
+        bool TryTake(in BeltItemHandle handle, out BeltAccessCandidate item);
+        bool TryInsertPart(in BeltAccessPort port, PartTypeId part, out BeltItemHandle handle);
+        void TransportTick(long tick);
+    }
 
     public static class StateHasher
     {

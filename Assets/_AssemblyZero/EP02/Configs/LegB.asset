@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66631eadbc736cc4e8b6e4cbdef57480, type: 3}
+  m_Name: LegB
+  m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.RobotPartDefinition
+  PartTypeId: 7
+  SocketId: 5
+  PartName: LegB
+  CarrierType: StandardPallet
+  SourcePrefab: {fileID: 8809892237962003549, guid: 27b17c5100c673a4da483b05b54dace7, type: 3}
+  WrapperPrefab: {fileID: 7175273641664067492, guid: 87323ee8167460446aec529eb2f792ff, type: 3}
+  BeltPose:
+    Position: {x: -0.42281592, y: 2.4834287, z: 0.63771397}
+    Euler: {x: 90, y: 0, z: 0}
+    Scale: {x: 0.3308607, y: 0.3308607, z: 0.3308607}
+  GripPose:
+    Position: {x: -0.6270825, y: 0.9458002, z: -3.3272512}
+    Euler: {x: 1.1500878e-13, y: 0, z: 0}
+    Scale: {x: 0.4907028, y: 0.4907028, z: 0.4907028}
+  AssemblyPose:
+    Position: {x: -0.6270825, y: 0.9458002, z: -3.3272512}
+    Euler: {x: 1.1500878e-13, y: 0, z: 0}
+    Scale: {x: 0.4907028, y: 0.4907028, z: 0.4907028}
+  AssemblySocketPosition: {x: -0.35657412, y: 1.210477, z: 0.008527917}
+  Color: {r: 0.7, g: 0.5, b: 1, a: 1}
+  OccupancyUnits: 768
+  Icon: {fileID: 0}

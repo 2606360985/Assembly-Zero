@@ -37,7 +37,7 @@ namespace AssemblyZero.Domain
         private void Ensure() { if (Count < data.Length) return; var next = new T[data.Length * 2]; for (var i = 0; i < Count; i++) next[i] = this[i]; data = next; head = 0; }
     }
 
-    public abstract class BeltSimulationBase : IBeltSimulationBackend, IBeltAccess
+    public abstract class BeltSimulationBase : IBeltSimulationBackend, ITransactionalBeltAccess
     {
         protected ScenarioDefinition Scenario;
         protected BeltTopology Topology;
@@ -54,9 +54,69 @@ namespace AssemblyZero.Domain
         public abstract void Tick(in TickInput input);
         public abstract void CreateSnapshot(BeltSnapshotWriter writer);
         public abstract ulong CalculateStateHash();
-        public abstract bool TryQuery(in BeltAccessPort port, out BeltItemHandle handle);
-        public abstract bool TryRemove(in BeltItemHandle handle);
-        public abstract bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle);
+
+
+        private static long nextResetToken;
+        protected long resetToken;
+        protected abstract int LaneCount { get; }
+        protected abstract int ItemCount(int lane);
+        private protected abstract SimItem ReadItem(int lane, int index);
+        private protected abstract void DeleteItem(int lane, int index);
+        private protected abstract void InsertItem(int lane, int index, SimItem item);
+        private readonly List<BeltAccessCandidate> candidates = new List<BeltAccessCandidate>();
+
+        protected void NewResetToken() => resetToken = System.Threading.Interlocked.Increment(ref nextResetToken);
+        public void TransportTick(long tick) { if (!Scenario.ExternalLogistics) throw new InvalidOperationException("External logistics must be enabled."); Tick(new TickInput(tick, false)); }
+        public void QueryCandidates(in BeltAccessPort port, List<BeltAccessCandidate> results)
+        {
+            results.Clear();
+            for (var li = 0; li < LaneCount; li++)
+            {
+                var def = Topology.Lanes[li];
+                if (def.LineId.Value != port.TransportLineId.Value || def.Id.Value < 0 || def.Id.Value >= 64 || (port.LaneMask & (1UL << def.Id.Value)) == 0) continue;
+                for (var i = 0; i < ItemCount(li); i++)
+                {
+                    var x = ReadItem(li, i); var part = new PartTypeId((int)x.Type);
+                    if (x.Distance < port.StartDistance || x.Distance > port.EndDistance || (part.Mask & port.AcceptedPartTypeMask) == 0) continue;
+                    results.Add(new BeltAccessCandidate(new BeltItemHandle(new ItemId(x.Id), def.Id, def.LineId, resetToken), part, x.Distance));
+                }
+            }
+            var preferred = port.PreferredDistance;
+            results.Sort((a, b) => { var c = Math.Abs((long)a.Distance - preferred).CompareTo(Math.Abs((long)b.Distance - preferred)); return c != 0 ? c : a.Handle.ItemId.Value.CompareTo(b.Handle.ItemId.Value); });
+        }
+        public bool TryQuery(in BeltAccessPort port, out BeltItemHandle handle)
+        { QueryCandidates(port, candidates); handle = candidates.Count > 0 ? candidates[0].Handle : default; return candidates.Count > 0; }
+        private bool Locate(in BeltItemHandle handle, out int lane, out int index)
+        {
+            lane = -1; index = -1;
+            if (!handle.IsValid || handle.ResetToken != resetToken) return false;
+            for (var li = 0; li < LaneCount; li++) if (Topology.Lanes[li].Id.Value == handle.LaneId.Value && Topology.Lanes[li].LineId.Value == handle.LineId.Value)
+                for (var i = 0; i < ItemCount(li); i++) if (ReadItem(li, i).Id == handle.ItemId.Value) { lane = li; index = i; return true; }
+            return false;
+        }
+        public bool TryValidate(in BeltItemHandle handle, out BeltAccessCandidate item)
+        { if (Locate(handle, out var li, out var at)) { var x = ReadItem(li, at); item = new BeltAccessCandidate(handle, new PartTypeId((int)x.Type), x.Distance); return true; } item = default; return false; }
+        public bool TryTake(in BeltItemHandle handle, out BeltAccessCandidate item)
+        { if (!TryValidate(handle, out item) || !Locate(handle, out var li, out var at)) return false; DeleteItem(li, at); ValuesTouched++; return true; }
+        public bool TryRemove(in BeltItemHandle handle) => TryTake(handle, out _);
+        public bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle) => TryInsertPart(port, new PartTypeId((int)type), out handle);
+        public bool TryInsertPart(in BeltAccessPort port, PartTypeId part, out BeltItemHandle handle)
+        {
+            handle = default;
+            if (part.Mask == 0 || (port.AcceptedPartTypeMask & part.Mask) == 0) return false;
+            for (var li = 0; li < LaneCount; li++)
+            {
+                var def = Topology.Lanes[li];
+                if (def.LineId.Value != port.TransportLineId.Value || def.Id.Value < 0 || def.Id.Value >= 64 || (port.LaneMask & (1UL << def.Id.Value)) == 0) continue;
+                var d = port.StartDistance; if (d < 0 || d > def.Length || d > port.EndDistance) continue;
+                var at = ItemCount(li); var fits = true;
+                for (var i = 0; i < ItemCount(li); i++) { var x = ReadItem(li, i); if (Math.Abs((long)x.Distance - d) < Scenario.MinimumSpacing) { fits = false; break; } if (x.Distance < d && at == ItemCount(li)) at = i; }
+                if (!fits) continue;
+                var item = new SimItem(NextItemId++, (ItemType)part.Value, d); InsertItem(li, at, item); Spawned++; ValuesTouched++;
+                handle = new BeltItemHandle(new ItemId(item.Id), def.Id, def.LineId, resetToken); return true;
+            }
+            return false;
+        }
 
         protected void ApplyGate(in TickInput input)
         {
@@ -103,7 +163,7 @@ namespace AssemblyZero.Domain
         public override void Reset(ScenarioDefinition scenario, BeltTopology topology)
         {
             Scenario = scenario ?? throw new ArgumentNullException(nameof(scenario)); Topology = topology ?? throw new ArgumentNullException(nameof(topology));
-            lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
+            NewResetToken(); lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
             for (var laneIndex = 0; laneIndex < topology.Lanes.Length; laneIndex++)
             {
                 var lane = new List<SimItem>(Math.Max(16, InitialCountForLane(laneIndex))); lanes.Add(lane);
@@ -119,14 +179,14 @@ namespace AssemblyZero.Domain
             for (var li = 0; li < lanes.Count; li++)
             {
                 var lane = lanes[li]; var length = Topology.Lanes[li].Length;
-                if (GateOpen && lane.Count > 0 && lane[0].Distance >= length) { lane.RemoveAt(0); SinkCount++; ValuesTouched++; }
+                if (!Scenario.ExternalLogistics && GateOpen && lane.Count > 0 && lane[0].Distance >= length) { lane.RemoveAt(0); SinkCount++; ValuesTouched++; }
                 var limit = GateOpen ? length : length - Scenario.MinimumSpacing;
                 for (var i = 0; i < lane.Count; i++)
                 {
                     var item = lane[i]; var max = i == 0 ? limit : lane[i - 1].Distance - Scenario.MinimumSpacing;
                     item.Distance = Math.Min(item.Distance + Scenario.SpeedUnitsPerTick, max); lane[i] = item; ValuesTouched++;
                 }
-                if (Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Count == 0 || lane[lane.Count - 1].Distance >= Scenario.MinimumSpacing))
+                if (!Scenario.ExternalLogistics && Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Count == 0 || lane[lane.Count - 1].Distance >= Scenario.MinimumSpacing))
                 { lane.Add(new SimItem(NextItemId, NextItemType(li), 0)); NextItemId++; Spawned++; ValuesTouched++; }
             }
             FinishTick(TotalItems(), ActiveLines());
@@ -144,9 +204,12 @@ namespace AssemblyZero.Domain
         private ulong BuildHash() { var h = HashHeader(); for (var li = 0; li < lanes.Count; li++) for (var i = 0; i < lanes[li].Count; i++) { var x = lanes[li][i]; h = StateHasher.Add(h, x.Id); h = StateHasher.Add(h, (int)x.Type); h = StateHasher.Add(h, Topology.Lanes[li].LineId.Value); h = StateHasher.Add(h, Topology.Lanes[li].Id.Value); h = StateHasher.Add(h, x.Distance); } return h; }
         public override ulong CalculateStateHash() => CommitHash(BuildHash());
 
-        public override bool TryQuery(in BeltAccessPort port, out BeltItemHandle handle) { var li = port.LaneId.Value; if (li >= 0 && li < lanes.Count) for (var i = 0; i < lanes[li].Count; i++) if (lanes[li][i].Distance >= port.StartDistance && lanes[li][i].Distance <= port.EndDistance) { handle = new BeltItemHandle(new ItemId(lanes[li][i].Id), port.LaneId); return true; } handle = default; return false; }
-        public override bool TryRemove(in BeltItemHandle handle) { var li = handle.LaneId.Value; if (li < 0 || li >= lanes.Count) return false; var itemId = handle.ItemId.Value; var index = lanes[li].FindIndex(x => x.Id == itemId); if (index < 0) return false; lanes[li].RemoveAt(index); return true; }
-        public override bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle) { var li = port.LaneId.Value; if (li < 0 || li >= lanes.Count) { handle = default; return false; } var d = port.StartDistance; for (var i = 0; i < lanes[li].Count; i++) if (Math.Abs(lanes[li][i].Distance - d) < Scenario.MinimumSpacing) { handle = default; return false; } var item = new SimItem(NextItemId++, type, d); var at = lanes[li].FindIndex(x => x.Distance < d); if (at < 0) lanes[li].Add(item); else lanes[li].Insert(at, item); Spawned++; handle = new BeltItemHandle(new ItemId(item.Id), port.LaneId); return true; }
+        protected override int LaneCount => lanes.Count;
+        protected override int ItemCount(int lane) => lanes[lane].Count;
+        private protected override SimItem ReadItem(int lane, int index) => lanes[lane][index];
+        private protected override void DeleteItem(int lane, int index) => lanes[lane].RemoveAt(index);
+        private protected override void InsertItem(int lane, int index, SimItem item) => lanes[lane].Insert(index, item);
+
     }
 
     public sealed class GapTransportLineSimulation : BeltSimulationBase
@@ -158,7 +221,7 @@ namespace AssemblyZero.Domain
         public override void Reset(ScenarioDefinition scenario, BeltTopology topology)
         {
             Scenario = scenario ?? throw new ArgumentNullException(nameof(scenario)); Topology = topology ?? throw new ArgumentNullException(nameof(topology));
-            lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
+            NewResetToken(); lanes.Clear(); TickNumber = 0; NextItemId = 1; Spawned = 0; SinkCount = 0; ValuesTouched = 0; GateOpen = true;
             for (var li = 0; li < topology.Lanes.Length; li++) { var lane = new GapLane(); lanes.Add(lane); var count = Math.Min(InitialCountForLane(li), topology.Lanes[li].Length / Math.Max(1, scenario.MinimumSpacing)); var front = scenario.InitialFrontDistance >= 0 ? Math.Min(topology.Lanes[li].Length, scenario.InitialFrontDistance) : topology.Lanes[li].Length; for (var i = 0; i < count; i++) { lane.Items.AddLast(new SimItem(NextItemId, NextItemType(li), front - i * scenario.MinimumSpacing)); NextItemId++; Spawned++; } }
             FinishTick(TotalItems(), ActiveLines()); CalculateStateHash();
         }
@@ -169,7 +232,7 @@ namespace AssemblyZero.Domain
             for (var li = 0; li < lanes.Count; li++)
             {
                 var lane = lanes[li]; var length = Topology.Lanes[li].Length;
-                if (GateOpen && lane.Items.Count > 0 && Absolute(lane, 0) >= length) { lane.Items.RemoveFirst(); SinkCount++; ValuesTouched++; }
+                if (!Scenario.ExternalLogistics && GateOpen && lane.Items.Count > 0 && Absolute(lane, 0) >= length) { lane.Items.RemoveFirst(); SinkCount++; ValuesTouched++; }
                 var limit = GateOpen ? length : length - Scenario.MinimumSpacing;
                 if (lane.Items.Count > 0 && Absolute(lane, 0) + Scenario.SpeedUnitsPerTick <= limit)
                 { lane.Offset += Scenario.SpeedUnitsPerTick; lane.CompressionBoundary = -1; ValuesTouched++; }
@@ -178,7 +241,7 @@ namespace AssemblyZero.Domain
                     lane.CompressionBoundary = 0;
                     for (var i = 0; i < lane.Items.Count; i++) { var item = lane.Items[i]; var max = i == 0 ? limit : Absolute(lane, i - 1) - Scenario.MinimumSpacing; var next = Math.Min(Absolute(lane, i) + Scenario.SpeedUnitsPerTick, max); item.Distance = next - lane.Offset; lane.Items[i] = item; ValuesTouched++; if (i > 0 && next < max) lane.CompressionBoundary = i; }
                 }
-                if (Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Items.Count == 0 || Absolute(lane, lane.Items.Count - 1) >= Scenario.MinimumSpacing))
+                if (!Scenario.ExternalLogistics && Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Items.Count == 0 || Absolute(lane, lane.Items.Count - 1) >= Scenario.MinimumSpacing))
                 { lane.Items.AddLast(new SimItem(NextItemId, NextItemType(li), -lane.Offset)); NextItemId++; Spawned++; ValuesTouched++; }
             }
             FinishTick(TotalItems(), ActiveLines());
@@ -193,13 +256,11 @@ namespace AssemblyZero.Domain
         private int ActiveLines() { var n = 0; for (var i = 0; i < lanes.Count; i++) if (lanes[i].Items.Count > 0) n++; return n; }
         private ulong BuildHash() { var h = HashHeader(); for (var li = 0; li < lanes.Count; li++) for (var i = 0; i < lanes[li].Items.Count; i++) { var x = lanes[li].Items[i]; h = StateHasher.Add(h, x.Id); h = StateHasher.Add(h, (int)x.Type); h = StateHasher.Add(h, Topology.Lanes[li].LineId.Value); h = StateHasher.Add(h, Topology.Lanes[li].Id.Value); h = StateHasher.Add(h, Absolute(lanes[li], i)); } return h; }
         public override ulong CalculateStateHash() => CommitHash(BuildHash());
-        public override bool TryQuery(in BeltAccessPort port, out BeltItemHandle handle) { var li = port.LaneId.Value; if (li >= 0 && li < lanes.Count) for (var i = 0; i < lanes[li].Items.Count; i++) { var d = Absolute(lanes[li], i); if (d >= port.StartDistance && d <= port.EndDistance) { handle = new BeltItemHandle(new ItemId(lanes[li].Items[i].Id), port.LaneId); return true; } } handle = default; return false; }
-        public override bool TryRemove(in BeltItemHandle handle) { var li = handle.LaneId.Value; if (li < 0 || li >= lanes.Count) return false; var lane = lanes[li]; for (var i = 0; i < lane.Items.Count; i++) if (lane.Items[i].Id == handle.ItemId.Value) { lane.Items.RemoveAt(i); return true; } return false; }
-        public override bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle)
-        {
-            var li = port.LaneId.Value; if (li < 0 || li >= lanes.Count) { handle = default; return false; } var lane = lanes[li]; var distance = port.StartDistance;
-            var at = lane.Items.Count; for (var i = 0; i < lane.Items.Count; i++) { var d = Absolute(lane, i); if (Math.Abs(d - distance) < Scenario.MinimumSpacing) { handle = default; return false; } if (d < distance) { at = i; break; } }
-            var item = new SimItem(NextItemId++, type, distance - lane.Offset); lane.Items.InsertAt(at, item); Spawned++; handle = new BeltItemHandle(new ItemId(item.Id), port.LaneId); return true;
-        }
+        protected override int LaneCount => lanes.Count;
+        protected override int ItemCount(int lane) => lanes[lane].Items.Count;
+        private protected override SimItem ReadItem(int lane, int index) { var x = lanes[lane].Items[index]; x.Distance += lanes[lane].Offset; return x; }
+        private protected override void DeleteItem(int lane, int index) => lanes[lane].Items.RemoveAt(index);
+        private protected override void InsertItem(int lane, int index, SimItem item) { item.Distance -= lanes[lane].Offset; lanes[lane].Items.InsertAt(index, item); }
+
     }
 }
