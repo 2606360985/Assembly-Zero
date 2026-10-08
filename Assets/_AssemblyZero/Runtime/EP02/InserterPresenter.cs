@@ -1,57 +1,43 @@
+using System.Linq;
 using AssemblyZero.Domain;
 using UnityEngine;
 namespace AssemblyZero.Unity
 {
     public sealed class InserterPresenter : MonoBehaviour
     {
+        public static Quaternion ToolRotation => Quaternion.Euler(180, 0, 0);
         public EP02LayoutAuthoring Layout;
-        public Transform AnimationOnlyGrip;
         private MaterialPropertyBlock block;
-        public void Present(AssemblySnapshot snapshot, BakedBeltTopology topology, float fraction)
+        public static Vector3 Motion(InserterState state, float t, Vector3 rest, Vector3 pickup, Vector3 socket)
+        {
+            var across = socket - pickup; across.y = 0;
+            // Both outbound and inbound motions use the same side of the pedestal,
+            // avoiding a yaw flip above the base and leaving room for the payload.
+            var aroundBase = Vector3.Cross(Vector3.up, across).normalized * Mathf.Sin(t * Mathf.PI) * .8f;
+            return state switch
+            {
+                InserterState.Picking => Vector3.Lerp(rest, pickup, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * .35f + aroundBase,
+                InserterState.Carrying => Vector3.Lerp(pickup, socket + Vector3.up * .32f, t) + Vector3.up * Mathf.Sin(t * Mathf.PI) * .7f + aroundBase,
+                InserterState.Placing => Vector3.Lerp(socket + Vector3.up * .32f, socket, t),
+                InserterState.Returning => Vector3.Lerp(socket, rest, t),
+                _ => rest
+            };
+        }
+        public void Present(AssemblySnapshot snapshot, EP02BakedLayout topology, float fraction)
         {
             foreach (var author in Layout.Inserters)
             {
-                var active = false;
-                foreach (var arm in snapshot.Inserters) if (arm.Id == author.StableId)
-                {
-                    active = true; var position = Target(arm, snapshot, topology, fraction); Solve(author, position);
-                    var color = arm.State == InserterState.WaitingForTarget ? Color.red : arm.HeldItem != 0 ? Color.cyan : arm.ReservedItem != 0 ? Color.yellow : Color.green;
-                    Colorize(author.StatusLight, color); break;
-                }
-                if (!active) { Solve(author, author.transform.position + Vector3.up * 2); Colorize(author.StatusLight, Color.gray); }
-            }
-            if (AnimationOnlyGrip != null) { AnimationOnlyGrip.gameObject.SetActive(snapshot.Inserters.Count == 1); AnimationOnlyGrip.position = new Vector3(3, 1.8f + Mathf.Sin((snapshot.Tick + fraction) * .06f) * .7f, -2.8f); }
-        }
-        private Vector3 Target(InserterSnapshot arm, AssemblySnapshot snapshot, BakedBeltTopology topology, float fraction)
-        {
-            var author = Layout.Arm(arm.Id); var rest = author.transform.position + Vector3.up * 2;
-            var pickup = BeltTopologyBuilder.SampleWorld(topology, arm.PickupDistance, arm.PickupLane) + Vector3.up * .28f;
-            var preferred = arm.Id <= 1 && snapshot.Inserters.Count <= 2 ? Layout.Arm(0) : author;
-            var query = BeltTopologyBuilder.SampleWorld(topology, preferred.PreferredDistance, 0) + Vector3.up * .28f;
-            foreach (var item in snapshot.Items) if (item.ItemId == arm.ReservedItem) { query = BeltTopologyBuilder.SampleWorld(topology, item.Distance, item.Lane) + Vector3.up * .28f; break; }
-            var socket = Layout.Socket(arm.TargetSocket).transform.position; var t = (float)arm.Progress(snapshot.Tick, fraction);
-            switch (arm.State)
-            {
-                case InserterState.Reserving: return rest;
-                case InserterState.Picking: return Vector3.Lerp(rest, query, Mathf.SmoothStep(0, 1, t));
-                case InserterState.Carrying: return Vector3.Lerp(pickup, socket + Vector3.up * .5f, Mathf.SmoothStep(0, 1, t)) + Vector3.up * Mathf.Sin(t * Mathf.PI) * 1.2f;
-                case InserterState.Placing: return Vector3.Lerp(socket + Vector3.up * .5f, socket, t);
-                case InserterState.Returning: return Vector3.Lerp(socket, rest, t);
-                case InserterState.WaitingForTarget: return arm.HeldItem != 0 ? socket + Vector3.up * 1.1f : rest;
-                default: return rest;
+                var arm = snapshot.Inserters.Single(a => a.Id == author.StableId);
+                var product = topology.Product.Sample(topology.Product.CenterDistance(author.StationPiece), out var tangent);
+                var socket = product + Quaternion.LookRotation(tangent) * Layout.SocketOffset(author.SocketId);
+                var pickup = topology.Supply[Mathf.Clamp(arm.PickupLane,0,1)].Sample(arm.PickupDistance, out _) + Vector3.up * .26f;
+                var query = topology.Supply[0].Sample(author.PickupDistances[0], out _) + Vector3.up * .26f;
+                foreach (var item in snapshot.Items) if (item.ItemId == arm.ReservedItem) { query = topology.Supply[item.Lane].Sample(item.Distance, out _) + Vector3.up * .26f; break; }
+                var t = Mathf.SmoothStep(0, 1, (float)arm.Progress(snapshot.Tick, fraction)); var rest = author.RestPosition;
+                var target = arm.State == InserterState.WaitingForTarget && arm.HeldItem != 0 ? socket + Vector3.up * .32f : Motion(arm.State, t, rest, arm.State == InserterState.Picking ? query : pickup, socket);
+                author.Solve(target, ToolRotation);
+                if (author.StatusLight != null) { block ??= new MaterialPropertyBlock(); var color = arm.State == InserterState.Disabled ? Color.gray : arm.State == InserterState.WaitingForTarget && arm.HeldItem != 0 ? Color.red : arm.HeldItem != 0 ? Color.cyan : arm.ReservedItem != 0 ? Color.yellow : Color.green; block.SetColor("_BaseColor", color); block.SetColor("_EmissionColor", color); author.StatusLight.SetPropertyBlock(block); }
             }
         }
-        // Analytic two-link geometry; no physics or animation callback controls ownership.
-        private static void Solve(InserterAuthoring arm, Vector3 target)
-        {
-            var shoulder = arm.transform.position + Vector3.up * .8f; var direction = target - shoulder; var length = arm.Reach * .5f;
-            var distance = Mathf.Clamp(direction.magnitude, .01f, length * 2 - .001f); var forward = direction.normalized;
-            var bend = Vector3.ProjectOnPlane(Vector3.up, forward).normalized; if (bend.sqrMagnitude < .01f) bend = Vector3.forward;
-            var elbow = shoulder + forward * (distance * .5f) + bend * Mathf.Sqrt(Mathf.Max(0, length * length - distance * distance * .25f));
-            arm.Shoulder.position = shoulder; arm.Elbow.position = elbow; arm.Grip.position = target; arm.Grip.rotation = Quaternion.identity;
-            Link(arm.Links[0], shoulder, elbow); Link(arm.Links[1], elbow, target);
-        }
-        private static void Link(Transform link, Vector3 a, Vector3 b) { link.position = (a + b) * .5f; link.rotation = Quaternion.FromToRotation(Vector3.up, b - a); link.localScale = new Vector3(.12f, (b - a).magnitude * .5f, .12f); }
-        private void Colorize(Renderer r, Color color) { if (r == null) return; block ??= new MaterialPropertyBlock(); block.SetColor("_BaseColor", color); block.SetColor("_EmissionColor", color * 1.5f); r.SetPropertyBlock(block); }
     }
 }

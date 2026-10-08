@@ -1,61 +1,47 @@
 using System;
-
 namespace AssemblyZero.Domain
 {
     public sealed class InserterSystem
     {
-        internal static void Enter(InserterData arm, InserterState state, long tick) { arm.State = state; arm.StateEnterTick = tick; }
-        public void Tick(EP02Simulation world, InserterData arm)
+        internal static void Enter(InserterData a, InserterState s, long t) { a.State = s; a.StateEnterTick = t; }
+        public void Tick(EP02Simulation w, InserterData a)
         {
-            if (!arm.Enabled) { EnterIfDifferent(arm, InserterState.Disabled, world.TickNumber); return; }
-            var target = world.Socket(arm.TargetSocket.Value); var elapsed = world.TickNumber - arm.StateEnterTick;
-            if (arm.HeldItem == 0 && arm.ReservedItem != 0 && (!world.Access.TryValidate(world.Item(arm.ReservedItem).Handle, out var check) || check.Distance > arm.Port.EndDistance || target.Locked || target.ItemId != 0))
-            { world.Reservations.Release(world, arm); Enter(arm, target.Locked || target.ItemId != 0 ? InserterState.WaitingForTarget : InserterState.WaitingForItem, world.TickNumber); return; }
-            if (arm.HeldItem != 0 && target.Locked && arm.State != InserterState.WaitingForTarget)
-            { Enter(arm, InserterState.WaitingForTarget, world.TickNumber); return; }
-            switch (arm.State)
+            if (!a.Enabled) { Change(a, InserterState.Disabled, w.TickNumber); return; }
+            var target = w.Target(a); var elapsed = w.TickNumber - a.StateEnterTick;
+            if (a.State == InserterState.Returning) { if (elapsed >= a.ReturningTicks) Enter(a, InserterState.WaitingForItem, w.TickNumber); return; }
+            if (target == null) { Change(a, InserterState.WaitingForTarget, w.TickNumber); return; }
+            if (a.ReservedItem != 0 && (!w.Access.TryValidate(w.Item(a.ReservedItem).Handle, out var check) || !w.InPort(a, check) || target.Locked || target.ItemId != 0))
+            { w.Reservations.Release(w, a); Enter(a, InserterState.WaitingForItem, w.TickNumber); return; }
+            if (a.HeldItem != 0 && target.Locked) { Change(a, InserterState.WaitingForTarget, w.TickNumber); return; }
+            switch (a.State)
             {
-                case InserterState.WaitingForItem:
-                case InserterState.WaitingForTarget:
-                    if (arm.HeldItem != 0 && !target.Locked && target.ItemId == 0) Enter(arm, InserterState.Placing, world.TickNumber);
-                    else if (arm.HeldItem == 0 && arm.ReservedItem != 0) Enter(arm, InserterState.Reserving, world.TickNumber);
-                    else if (target.Locked || target.ItemId != 0 || world.Cell.State != AssemblyCellState.Filling || (target.ReservedBy >= 0 && target.ReservedBy != arm.Id.Value)) EnterIfDifferent(arm, InserterState.WaitingForTarget, world.TickNumber);
-                    else EnterIfDifferent(arm, InserterState.WaitingForItem, world.TickNumber);
+                case InserterState.WaitingForItem: case InserterState.WaitingForTarget: case InserterState.Disabled:
+                    if (a.HeldItem != 0 && !target.Locked) Enter(a, InserterState.Placing, w.TickNumber);
+                    else if (a.ReservedItem != 0) Enter(a, InserterState.Reserving, w.TickNumber);
+                    else Change(a, target.Locked || target.ItemId != 0 ? InserterState.WaitingForTarget : InserterState.WaitingForItem, w.TickNumber);
                     break;
-                case InserterState.Reserving:
-                    if (elapsed >= 1) Enter(arm, InserterState.Picking, world.TickNumber);
-                    break;
+                case InserterState.Reserving: if (elapsed >= 1) Enter(a, InserterState.Picking, w.TickNumber); break;
                 case InserterState.Picking:
-                    if (elapsed < arm.PickingTicks) break;
-                    var item = world.Item(arm.ReservedItem);
-                    if (!target.Locked && target.ItemId == 0 && item != null && world.Access.TryValidate(item.Handle, out var candidate) && candidate.Distance >= arm.Port.StartDistance && candidate.Distance <= arm.Port.EndDistance && world.Access.TryTake(item.Handle, out candidate))
+                    if (elapsed < a.PickingTicks) break;
+                    var item = w.Item(a.ReservedItem);
+                    if (item != null && w.Access.TryValidate(item.Handle, out var candidate) && w.InPort(a, candidate) && w.Access.TryTake(item.Handle, out candidate))
                     {
-                        arm.PickupDistance = candidate.Distance; arm.PickupLane = candidate.Handle.LaneId.Value;
-                        item.Ownership = ItemOwnership.HeldByInserter; arm.HeldItem = item.ItemId; arm.ReservedItem = 0;
-                        Enter(arm, InserterState.Carrying, world.TickNumber); world.Emit(AssemblyEventKind.Pick, arm.Id.Value, item.ItemId);
+                        a.PickupDistance = candidate.Distance; a.PickupLane = candidate.Handle.LaneId.Value;
+                        item.Ownership = ItemOwnership.HeldByInserter; a.HeldItem = item.ItemId; a.ReservedItem = 0;
+                        Enter(a, InserterState.Carrying, w.TickNumber); w.Emit(AssemblyEventKind.Pick, a.Id.Value, item.ItemId);
                     }
-                    else { world.Reservations.Release(world, arm); Enter(arm, InserterState.WaitingForItem, world.TickNumber); }
+                    else { w.Reservations.Release(w, a); Enter(a, InserterState.WaitingForItem, w.TickNumber); }
                     break;
-                case InserterState.Carrying:
-                    if (elapsed >= arm.CarryingTicks) Enter(arm, InserterState.Placing, world.TickNumber);
-                    break;
+                case InserterState.Carrying: if (elapsed >= a.CarryingTicks) Enter(a, InserterState.Placing, w.TickNumber); break;
                 case InserterState.Placing:
-                    if (elapsed < arm.PlacingTicks) break;
-                    if (target.Locked || target.ItemId != 0) { Enter(arm, InserterState.WaitingForTarget, world.TickNumber); break; }
-                    var held = world.Item(arm.HeldItem);
-                    if (held == null || held.Part.Value != target.AcceptedPart.Value || target.ReservedBy != arm.Id.Value) throw new InvalidOperationException("Invalid atomic socket placement.");
-                    held.Ownership = ItemOwnership.InAssemblySocket; held.OwnerId = target.Id.Value; target.ItemId = held.ItemId; target.ReservedBy = -1; arm.HeldItem = 0; arm.Transfers++;
-                    if (world.Cell.FirstInstallTick < 0) world.Cell.FirstInstallTick = world.TickNumber;
-                    Enter(arm, InserterState.Returning, world.TickNumber); world.Emit(AssemblyEventKind.Lock, arm.Id.Value, held.ItemId);
-                    break;
-                case InserterState.Returning:
-                    if (elapsed >= arm.ReturningTicks) Enter(arm, InserterState.WaitingForItem, world.TickNumber);
-                    break;
-                case InserterState.Disabled:
-                    Enter(arm, InserterState.WaitingForItem, world.TickNumber);
-                    break;
+                    if (elapsed < a.PlacingTicks) break;
+                    if (target.ItemId != 0) throw new InvalidOperationException("Target product already owns a part.");
+                    var held = w.Item(a.HeldItem);
+                    if (held == null || held.Part.Value != target.AcceptedPart.Value || held.ProductId != a.TargetProductId || target.ReservedBy != a.Id.Value) throw new InvalidOperationException("Invalid product placement.");
+                    held.Ownership = ItemOwnership.InAssemblySocket; held.OwnerId = target.Id.Value; target.ItemId = held.ItemId; target.ReservedBy = -1; a.HeldItem = 0; a.Transfers++;
+                    Enter(a, InserterState.Returning, w.TickNumber); w.Emit(AssemblyEventKind.Lock, a.Id.Value, held.ItemId); break;
             }
         }
-        private static void EnterIfDifferent(InserterData arm, InserterState state, long tick) { if (arm.State != state) Enter(arm, state, tick); }
+        private static void Change(InserterData a, InserterState s, long tick) { if (a.State != s) Enter(a, s, tick); }
     }
 }

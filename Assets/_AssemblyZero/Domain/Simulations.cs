@@ -47,6 +47,7 @@ namespace AssemblyZero.Domain
         protected int SinkCount;
         protected int ValuesTouched;
         protected bool GateOpen;
+        protected int Speed(int lane) => Scenario.LaneSpeeds.Length == 0 ? Scenario.SpeedUnitsPerTick : Scenario.LaneSpeeds[lane];
         protected ulong Hash;
         public abstract string Name { get; }
         public SimulationStatistics Statistics { get; protected set; }
@@ -184,7 +185,7 @@ namespace AssemblyZero.Domain
                 for (var i = 0; i < lane.Count; i++)
                 {
                     var item = lane[i]; var max = i == 0 ? limit : lane[i - 1].Distance - Scenario.MinimumSpacing;
-                    item.Distance = Math.Min(item.Distance + Scenario.SpeedUnitsPerTick, max); lane[i] = item; ValuesTouched++;
+                    item.Distance = Math.Min(item.Distance + Speed(li), max); lane[i] = item; ValuesTouched++;
                 }
                 if (!Scenario.ExternalLogistics && Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Count == 0 || lane[lane.Count - 1].Distance >= Scenario.MinimumSpacing))
                 { lane.Add(new SimItem(NextItemId, NextItemType(li), 0)); NextItemId++; Spawned++; ValuesTouched++; }
@@ -234,12 +235,12 @@ namespace AssemblyZero.Domain
                 var lane = lanes[li]; var length = Topology.Lanes[li].Length;
                 if (!Scenario.ExternalLogistics && GateOpen && lane.Items.Count > 0 && Absolute(lane, 0) >= length) { lane.Items.RemoveFirst(); SinkCount++; ValuesTouched++; }
                 var limit = GateOpen ? length : length - Scenario.MinimumSpacing;
-                if (lane.Items.Count > 0 && Absolute(lane, 0) + Scenario.SpeedUnitsPerTick <= limit)
-                { lane.Offset += Scenario.SpeedUnitsPerTick; lane.CompressionBoundary = -1; ValuesTouched++; }
+                if (lane.Items.Count > 0 && Absolute(lane, 0) + Speed(li) <= limit)
+                { lane.Offset += Speed(li); lane.CompressionBoundary = -1; ValuesTouched++; }
                 else if (lane.Items.Count > 0)
                 {
                     lane.CompressionBoundary = 0;
-                    for (var i = 0; i < lane.Items.Count; i++) { var item = lane.Items[i]; var max = i == 0 ? limit : Absolute(lane, i - 1) - Scenario.MinimumSpacing; var next = Math.Min(Absolute(lane, i) + Scenario.SpeedUnitsPerTick, max); item.Distance = next - lane.Offset; lane.Items[i] = item; ValuesTouched++; if (i > 0 && next < max) lane.CompressionBoundary = i; }
+                    for (var i = 0; i < lane.Items.Count; i++) { var item = lane.Items[i]; var max = i == 0 ? limit : Absolute(lane, i - 1) - Scenario.MinimumSpacing; var next = Math.Min(Absolute(lane, i) + Speed(li), max); item.Distance = next - lane.Offset; lane.Items[i] = item; ValuesTouched++; if (i > 0 && next < max) lane.CompressionBoundary = i; }
                 }
                 if (!Scenario.ExternalLogistics && Spawned < Scenario.MaxItems && Scenario.SpawnIntervalTicks > 0 && input.Tick % Scenario.SpawnIntervalTicks == 0 && (lane.Items.Count == 0 || Absolute(lane, lane.Items.Count - 1) >= Scenario.MinimumSpacing))
                 { lane.Items.AddLast(new SimItem(NextItemId, NextItemType(li), -lane.Offset)); NextItemId++; Spawned++; ValuesTouched++; }

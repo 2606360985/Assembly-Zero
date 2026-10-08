@@ -14,6 +14,22 @@ namespace AssemblyZero.Domain
     }
     public readonly struct InserterId { public readonly int Value; public InserterId(int value) { Value = value; } }
     public readonly struct AssemblySocketId { public readonly int Value; public AssemblySocketId(int value) { Value = value; } }
+    public readonly struct ProductId { public readonly int Value; public ProductId(int value) { Value = value; } }
+    public enum ProductState : byte { Moving, WaitingForPart, Assembling, Locked, Disabled, WaitingForDownstream, Scanning, Completed }
+    public sealed class AssemblyStationDefinition
+    {
+        public int Id, Distance, SocketId, PartType;
+        public AssemblyStationDefinition Clone() => (AssemblyStationDefinition)MemberwiseClone();
+    }
+    internal sealed class ProductData
+    {
+        public ProductId Id;
+        public int Distance, Segment, NextStation;
+        public long GeneratedTick, ScanEnterTick = -1, CompletedTick = -1;
+        public bool Completed, Exited;
+        public ProductState State;
+        public AssemblySocketData[] Sockets;
+    }
     public enum ItemOwnership : byte { OnBelt, ReservedOnBelt, HeldByInserter, InAssemblySocket, InRejectSink, CompletedProduct }
     public enum InserterState : byte { WaitingForItem, Reserving, Picking, Carrying, Placing, Returning, WaitingForTarget, Disabled }
     public enum AssemblyCellState : byte { Filling, AwaitingSafe, Scanning, Showcase, Clearing }
@@ -34,6 +50,7 @@ namespace AssemblyZero.Domain
         public PartTypeId Part;
         public ItemOwnership Ownership;
         public int OwnerId = -1;
+        public int ProductId;
         public long GeneratedTick;
         public BeltItemHandle Handle;
         public AssemblyRejectReason RejectReason;
@@ -44,6 +61,8 @@ namespace AssemblyZero.Domain
         public PartTypeId AllowedPart;
         public AssemblySocketId TargetSocket;
         public BeltAccessPort Port;
+        public BeltAccessPort[] Ports = Array.Empty<BeltAccessPort>();
+        public int StationId, TargetProductId;
         public InserterState State;
         public long StateEnterTick;
         public int ReservedItem, HeldItem, IntentItem;
@@ -53,7 +72,7 @@ namespace AssemblyZero.Domain
         public int PhaseTicks, PickingTicks = 12, CarryingTicks = 24, PlacingTicks = 12, ReturningTicks = 24;
         public int PickupDistance, PickupLane;
         public long EnabledTicks, BusyTicks, StarvedTicks, BlockedTicks, Transfers;
-        public InserterData Clone() => (InserterData)MemberwiseClone();
+        public InserterData Clone() { var result = (InserterData)MemberwiseClone(); result.Ports = (BeltAccessPort[])Ports.Clone(); return result; }
         public int Duration => State == InserterState.Reserving ? 1 : State == InserterState.Picking ? PickingTicks : State == InserterState.Carrying ? CarryingTicks : State == InserterState.Placing ? PlacingTicks : State == InserterState.Returning ? ReturningTicks : 1;
     }
     public sealed class AssemblySocketData

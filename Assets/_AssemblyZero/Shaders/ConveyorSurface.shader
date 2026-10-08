@@ -5,6 +5,10 @@ Shader "AssemblyZero/ConveyorSurface"
         _BaseColor("Base Color", Color) = (0.025, 0.035, 0.05, 1)
         _StripeColor("Moving Stripe", Color) = (0.08, 0.32, 0.38, 1)
         _FlowSpeed("Flow Speed", Float) = 1.2
+        _UseSimulationPhase("Use Simulation Phase", Float) = 0
+        _FlowPhase("Simulation Phase", Float) = 0
+        _FlowOffset("Path Offset", Float) = 0
+        _FlowCoordScale("Path Length", Float) = 1
         _Tiling("Stripe Tiling", Float) = 10
         _Direction("Flow Direction", Vector) = (1, 0, 0, 0)
         [Toggle] _Corner("Corner 90", Float) = 0
@@ -35,6 +39,10 @@ Shader "AssemblyZero/ConveyorSurface"
                 half4 _BaseColor;
                 half4 _StripeColor;
                 float _FlowSpeed;
+                float _UseSimulationPhase;
+                float _FlowPhase;
+                float _FlowOffset;
+                float _FlowCoordScale;
                 float _Tiling;
                 float4 _Direction;
                 float _Corner;
@@ -74,7 +82,7 @@ Shader "AssemblyZero/ConveyorSurface"
                     float2 direction = normalize(_Direction.xy + float2(0.0001, 0));
                     flowCoord = dot(input.uv, direction);
                 }
-                float flow = flowCoord * _Tiling - _Time.y * _FlowSpeed;
+                float flow = _UseSimulationPhase > 0.5 ? flowCoord * _FlowCoordScale + _FlowOffset - _FlowPhase : flowCoord * _Tiling - _Time.y * _FlowSpeed;
                 float stripe = smoothstep(0.06, 0.16, abs(frac(flow) - 0.5));
                 half3 albedo = lerp(_StripeColor.rgb, _BaseColor.rgb, stripe);
                 Light mainLight = GetMainLight();

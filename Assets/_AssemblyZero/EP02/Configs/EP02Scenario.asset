@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: EP02Scenario
   m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.EP02ScenarioConfig
   Backend: 1
-  BeltSpeed: 32
+  SupplySpeedA: 32
+  SupplySpeedB: 24
+  ProductSpeed: 16
   OccupancyUnits: 768
-  BalancedSourceInterval: 24
-  OverloadSourceInterval: 6
+  SourceInterval: 24
+  ProductInterval: 240
   RejectInterval: 60
   ScanTicks: 90
   ShowcaseTicks: 180

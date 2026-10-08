@@ -1,36 +1,29 @@
+using System.Linq;
 namespace AssemblyZero.Domain
 {
     public sealed class AssemblyCellSystem
     {
-        public void Tick(EP02Simulation world)
+        public void Tick(EP02Simulation w)
         {
-            var cell = world.Cell; var elapsed = world.TickNumber - cell.StateEnterTick;
-            switch (cell.State)
+            foreach (var p in w.Products)
             {
-                case AssemblyCellState.Filling:
-                    var full = true; foreach (var socket in world.Sockets) if (socket.ItemId == 0) full = false;
-                    if (full) Enter(world, AssemblyCellState.AwaitingSafe);
-                    break;
-                case AssemblyCellState.AwaitingSafe:
-                    var safe = true; foreach (var arm in world.Inserters) if (arm.HeldItem != 0 || arm.ReservedItem != 0 || arm.State == InserterState.Returning) safe = false;
-                    if (safe) { Enter(world, AssemblyCellState.Scanning); world.Emit(AssemblyEventKind.Scan, -1); }
-                    break;
-                case AssemblyCellState.Scanning:
-                    if (elapsed < world.Config.ScanTicks) break;
-                    foreach (var socket in world.Sockets) { var item = world.Item(socket.ItemId); item.Ownership = ItemOwnership.CompletedProduct; item.OwnerId = cell.CompletedRobotCount; }
-                    // Partial teaching manifests are transfers, never a completed robot.
-                    if (world.Config.FullRobotManifest) { cell.CompletedRobotCount++; cell.TotalAssemblyTicks += world.TickNumber - cell.FirstInstallTick; world.Emit(AssemblyEventKind.Complete, -1); }
-                    Enter(world, AssemblyCellState.Showcase);
-                    break;
-                case AssemblyCellState.Showcase:
-                    if (elapsed >= world.Config.ShowcaseTicks) Enter(world, AssemblyCellState.Clearing);
-                    break;
-                case AssemblyCellState.Clearing:
-                    foreach (var socket in world.Sockets) { socket.ItemId = 0; socket.ReservedBy = -1; }
-                    cell.FirstInstallTick = -1; Enter(world, AssemblyCellState.Filling);
-                    break;
+                if (p.Exited || p.Completed || p.NextStation >= w.Config.Stations.Length) continue;
+                var s = w.Config.Stations[p.NextStation]; if (p.Distance != s.Distance) continue;
+                var socket = p.Sockets.Single(x => x.Id.Value == s.SocketId);
+                var arms = w.Inserters.Where(a => a.StationId == s.Id).ToArray();
+                if (socket.ItemId == 0) { p.State = socket.Locked ? ProductState.Locked : arms.All(a => !a.Enabled) ? ProductState.Disabled : arms.Any(a => a.HeldItem != 0 || a.ReservedItem != 0) ? ProductState.Assembling : ProductState.WaitingForPart; continue; }
+                if (arms.Any(a => a.HeldItem != 0 || a.ReservedItem != 0 || a.State == InserterState.Returning)) { p.State = ProductState.Assembling; continue; }
+                if (p.NextStation == w.Config.Stations.Length - 1)
+                {
+                    if (p.ScanEnterTick < 0) { p.ScanEnterTick = w.TickNumber; w.Emit(AssemblyEventKind.Scan, s.Id); }
+                    p.State = ProductState.Scanning; if (w.TickNumber - p.ScanEnterTick < w.Config.ScanTicks) continue;
+                    p.Completed = true; p.CompletedTick = w.TickNumber; p.State = ProductState.Completed;
+                    foreach (var t in p.Sockets) { var item = w.Item(t.ItemId); item.Ownership = ItemOwnership.CompletedProduct; }
+                    if (w.Config.FullRobotManifest) { w.Cell.CompletedRobotCount++; w.Cell.TotalAssemblyTicks += w.TickNumber - p.GeneratedTick; w.Emit(AssemblyEventKind.Complete, s.Id, p.Id.Value); }
+                    w.LatestCompleted = p;
+                }
+                p.NextStation++; foreach (var a in arms) a.TargetProductId = 0;
             }
         }
-        private static void Enter(EP02Simulation world, AssemblyCellState state) { world.Cell.State = state; world.Cell.StateEnterTick = world.TickNumber; }
     }
 }

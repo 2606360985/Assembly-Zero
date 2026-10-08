@@ -20,6 +20,8 @@ namespace AssemblyZero.Domain
     {
         public int TickRate = BeltConstants.TickRate;
         public int SpeedUnitsPerTick = 8;
+        // Optional per-lane drives. Empty keeps the EP01 contract unchanged.
+        public int[] LaneSpeeds = Array.Empty<int>();
         public int MinimumSpacing = 16;
         public int SpawnIntervalTicks = 3;
         public int MaxItems = 200;

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using AssemblyZero.Domain;
 using UnityEngine;
 namespace AssemblyZero.Unity
@@ -8,26 +8,15 @@ namespace AssemblyZero.Unity
     public sealed class EP02ScenarioConfig : ScriptableObject
     {
         public BackendKind Backend = BackendKind.Gap;
-        public int BeltSpeed = 32, OccupancyUnits = 768, BalancedSourceInterval = 24, OverloadSourceInterval = 6, RejectInterval = 60, ScanTicks = 90, ShowcaseTicks = 180;
-        public AssemblyScenarioDefinition Create(int stage, EP02LayoutAuthoring layout, BakedBeltTopology topology)
+        public int SupplySpeedA = 32, SupplySpeedB = 24, ProductSpeed = 16, OccupancyUnits = 768, SourceInterval = 24, ProductInterval = 240, RejectInterval = 60, ScanTicks = 90, ShowcaseTicks = 180;
+        public AssemblyScenarioDefinition Create(EP02LayoutAuthoring layout, EP02BakedLayout topology)
         {
-            if (stage < 1 || stage > 6) throw new ArgumentOutOfRangeException(nameof(stage));
-            var c = new AssemblyScenarioDefinition { Seed = 2000 + stage, BeltSpeed = BeltSpeed, MinimumSpacing = OccupancyUnits, SourceInterval = stage == 5 ? OverloadSourceInterval : BalancedSourceInterval, RejectInterval = RejectInterval, ScanTicks = ScanTicks, ShowcaseTicks = ShowcaseTicks, FullRobotManifest = stage > 2, SourceEnabled = stage > 2 };
-            var arms = new List<InserterData>(); var sockets = new List<AssemblySocketData>(); var parts = new List<PartTypeId>();
-            foreach (var socket in layout.Sockets) if (stage > 2 || socket.PartTypeId == 2) { sockets.Add(new AssemblySocketData { Id = new AssemblySocketId(socket.StableId), AcceptedPart = new PartTypeId(socket.PartTypeId), Locked = socket.InitiallyLocked }); parts.Add(new PartTypeId(socket.PartTypeId)); }
-            Array.Sort(layout.Inserters, (a, b) => a.StableId.CompareTo(b.StableId));
-            foreach (var author in layout.Inserters)
-            {
-                if (stage <= 2 && author.StableId >= stage) continue;
-                var pickup = stage <= 2 ? layout.Arm(0) : author;
-                var type = stage <= 2 ? 2 : author.PartTypeId; var target = stage <= 2 ? layout.Part(2).SocketId : author.SocketId; var slow = stage == 5 ? 2 : 1;
-                arms.Add(new InserterData { Id = new InserterId(author.StableId), AllowedPart = new PartTypeId(type), TargetSocket = new AssemblySocketId(target), Port = new BeltAccessPort(new LineId(0), (ulong)pickup.LaneMask, pickup.PreferredDistance - pickup.PortWidth / 2, pickup.PreferredDistance + pickup.PortWidth / 2, pickup.PreferredDistance, new PartTypeId(type).Mask), PhaseTicks = stage <= 2 ? 0 : author.PhaseTicks, PickingTicks = author.PickingTicks * slow, CarryingTicks = author.CarryingTicks * slow, PlacingTicks = author.PlacingTicks * slow, ReturningTicks = author.ReturningTicks * slow });
-            }
-            c.Inserters = arms.ToArray(); c.Sockets = sockets.ToArray(); c.SourceParts = parts.ToArray(); c.Manifest = new AssemblyManifest { RequiredParts = parts.ToArray() };
-            var initial = new List<InitialAssemblyPart>();
-            if (stage <= 2) initial.Add(new InitialAssemblyPart(2, 0, layout.Arm(0).PreferredDistance - 256));
-            else foreach (var arm in arms) initial.Add(new InitialAssemblyPart(arm.AllowedPart.Value, arm.Id.Value % 2, arm.Port.PreferredDistance - 256));
-            c.InitialParts = initial.ToArray(); c.Validate(topology.DomainTopology); return c;
+            var c = new AssemblyScenarioDefinition { SupplySpeeds = new[] { SupplySpeedA, SupplySpeedB }, ProductSpeed = ProductSpeed, ProductInterval = ProductInterval, MinimumSpacing = OccupancyUnits, SourceInterval = SourceInterval, RejectInterval = RejectInterval, ScanTicks = ScanTicks, ShowcaseTicks = ShowcaseTicks, ProductLength = topology.Product.Length, ProductSpacing = Mathf.CeilToInt(layout.ProductSpacing * EP02Route.UnitsPerMeter), SegmentEnds = (int[])topology.Product.Ends.Clone() };
+            c.Sockets = layout.Sockets.Select(s => new AssemblySocketData { Id = new AssemblySocketId(s.StableId), AcceptedPart = new PartTypeId(s.PartTypeId), Locked = s.InitiallyLocked }).ToArray();
+            c.Manifest = new AssemblyManifest { RequiredParts = c.Sockets.Select(s => s.AcceptedPart).ToArray() };
+            c.Stations = layout.Inserters.OrderBy(a => a.StableId).Select(a => new AssemblyStationDefinition { Id = a.StableId, Distance = topology.Product.CenterDistance(a.StationPiece), SocketId = a.SocketId, PartType = a.PartTypeId }).ToArray();
+            c.Inserters = layout.Inserters.Select(a => new InserterData { Id = new InserterId(a.StableId), AllowedPart = new PartTypeId(a.PartTypeId), TargetSocket = new AssemblySocketId(a.SocketId), StationId = a.StableId, PickingTicks = a.PickingTicks, CarryingTicks = a.CarryingTicks, PlacingTicks = a.PlacingTicks, ReturningTicks = a.ReturningTicks, Ports = Enumerable.Range(0,2).Select(l => new BeltAccessPort(new LineId(l), 1UL << l, a.PickupDistances[l] - a.PortWidth / 2, a.PickupDistances[l] + a.PortWidth / 2, a.PickupDistances[l], new PartTypeId(a.PartTypeId).Mask)).ToArray() }).ToArray();
+            c.Validate(topology.SupplyTopology); return c;
         }
     }
 }

@@ -1,50 +1,59 @@
 using System;
-
+using System.Linq;
 namespace AssemblyZero.Domain
 {
     public readonly struct InitialAssemblyPart
     {
-        public readonly PartTypeId Part;
-        public readonly int Lane, Distance;
+        public readonly PartTypeId Part; public readonly int Lane, Distance;
         public InitialAssemblyPart(int part, int lane, int distance) { Part = new PartTypeId(part); Lane = lane; Distance = distance; }
     }
     public sealed class AssemblyScenarioDefinition
     {
-        public int Seed = 2003, BeltSpeed = 32, MinimumSpacing = 768, SourceInterval = 24, RejectInterval = 60;
+        public int Seed = 2006, BeltSpeed = 32, MinimumSpacing = 768, SourceInterval = 24, RejectInterval = 60;
         public int ScanTicks = 90, ShowcaseTicks = 180, MaxGenerated;
         public bool SourceEnabled = true, FullRobotManifest = true;
+        public int[] SupplySpeeds = { 32, 24 };
+        public int ProductSpeed = 16, ProductInterval = 240, ProductSpacing = 2048, ProductLength;
+        public int[] SegmentEnds = Array.Empty<int>();
+        public AssemblyStationDefinition[] Stations = Array.Empty<AssemblyStationDefinition>();
         public PartTypeId[] SourceParts = { new PartTypeId(2), new PartTypeId(3), new PartTypeId(4), new PartTypeId(5), new PartTypeId(6), new PartTypeId(7) };
         public InserterData[] Inserters = Array.Empty<InserterData>();
         public AssemblySocketData[] Sockets = Array.Empty<AssemblySocketData>();
         public InitialAssemblyPart[] InitialParts = Array.Empty<InitialAssemblyPart>();
-        public AssemblyManifest Manifest = new AssemblyManifest { RequiredParts = new[] { new PartTypeId(2), new PartTypeId(3), new PartTypeId(4), new PartTypeId(5), new PartTypeId(6), new PartTypeId(7) } };
-
+        public AssemblyManifest Manifest = new AssemblyManifest();
+        public AssemblyScenarioDefinition Clone()
+        {
+            var c = (AssemblyScenarioDefinition)MemberwiseClone(); c.SupplySpeeds = (int[])SupplySpeeds.Clone(); c.SegmentEnds = (int[])SegmentEnds.Clone();
+            c.Stations = Stations.Select(s => s.Clone()).ToArray(); c.SourceParts = (PartTypeId[])SourceParts.Clone(); c.InitialParts = (InitialAssemblyPart[])InitialParts.Clone();
+            c.Inserters = Inserters.Select(a => a.Clone()).ToArray(); c.Sockets = Sockets.Select(s => s.Clone()).ToArray(); c.Manifest = new AssemblyManifest { RequiredParts = (PartTypeId[])Manifest.RequiredParts.Clone() }; return c;
+        }
         public void Validate(BeltTopology topology)
         {
-            if (topology == null || topology.Lanes.Length == 0 || topology.Lanes.Length > 64) throw new ArgumentException("EP02 requires 1..64 belt lanes.");
-            if (BeltSpeed < 0 || MinimumSpacing < 1 || SourceInterval < 1 || RejectInterval < 1 || ScanTicks < 1 || ShowcaseTicks < 1) throw new ArgumentException("EP02 timings and spacing must be positive (belt speed may be zero).");
-            var lanes = new System.Collections.Generic.HashSet<int>();
-            foreach (var lane in topology.Lanes) if (lane.Id.Value < 0 || lane.Id.Value >= 64 || !lanes.Add(lane.Id.Value) || lane.Length <= MinimumSpacing) throw new ArgumentException("Invalid/duplicate lane ID or insufficient belt length.");
-            var socketIds = new System.Collections.Generic.HashSet<int>();
-            var types = new System.Collections.Generic.HashSet<int>();
-            foreach (var socket in Sockets) if (socket == null || socket.Id.Value < 0 || !socketIds.Add(socket.Id.Value) || socket.AcceptedPart.Mask == 0 || !types.Add(socket.AcceptedPart.Value)) throw new ArgumentException("Sockets require unique IDs and accepted part types.");
-            if (Manifest == null || Manifest.RequiredParts.Length != Sockets.Length) throw new ArgumentException("Manifest must describe every socket.");
-            var required = new System.Collections.Generic.HashSet<int>();
-            foreach (var part in Manifest.RequiredParts) if (!required.Add(part.Value) || !types.Contains(part.Value)) throw new ArgumentException("Manifest types must be unique and match sockets.");
-            if (FullRobotManifest && (required.Count != 6 || !required.SetEquals(new[] { 2, 3, 4, 5, 6, 7 }))) throw new ArgumentException("A complete robot requires the six unique body parts.");
-            var ids = new System.Collections.Generic.HashSet<int>();
-            foreach (var arm in Inserters)
+            if (topology == null || topology.Lanes.Length == 0 || SupplySpeeds.Length != topology.Lanes.Length || SupplySpeeds.Any(s => s < 0)) throw new ArgumentException("Supply lines require a nonnegative speed for each lane.");
+            if (MinimumSpacing < 1 || SourceInterval < 1 || RejectInterval < 1 || ScanTicks < 1 || ShowcaseTicks < 1 || ProductSpeed < 1 || ProductInterval < 1 || ProductSpacing < 1 || ProductLength < ProductSpacing) throw new ArgumentException("Invalid production timing or spacing.");
+            if (SegmentEnds.Length == 0 || SegmentEnds.Last() != ProductLength || SegmentEnds[0] < ProductSpacing) throw new ArgumentException("Product segments must cover the route.");
+            for (var i = 1; i < SegmentEnds.Length; i++) if (SegmentEnds[i] - SegmentEnds[i - 1] < ProductSpacing) throw new ArgumentException("Product segment is smaller than the pallet clearance.");
+            if (Sockets.Any(s => s == null) || Sockets.Select(s => s.Id.Value).Distinct().Count() != Sockets.Length || Sockets.Select(s => s.AcceptedPart.Value).Distinct().Count() != Sockets.Length) throw new ArgumentException("Duplicate or missing socket.");
+            if (Manifest == null || !Manifest.RequiredParts.Select(p => p.Value).OrderBy(x => x).SequenceEqual(Sockets.Select(s => s.AcceptedPart.Value).OrderBy(x => x))) throw new ArgumentException("Manifest and sockets disagree.");
+            if (FullRobotManifest && !Manifest.RequiredParts.Select(p => p.Value).OrderBy(x => x).SequenceEqual(new[] { 2, 3, 4, 5, 6, 7 })) throw new ArgumentException("A robot requires all six unique parts.");
+            if (Stations.Length != Sockets.Length || Stations.Select(s => s.Id).Distinct().Count() != Stations.Length) throw new ArgumentException("Every socket requires a unique station.");
+            for (var i = 0; i < Stations.Length; i++)
             {
-                if (arm == null || arm.Id.Value < 0 || !ids.Add(arm.Id.Value) || arm.PickingTicks < 1 || arm.CarryingTicks < 1 || arm.PlacingTicks < 1 || arm.ReturningTicks < 1 || arm.PhaseTicks < 0) throw new ArgumentException("Invalid inserter ID or timing.");
-                AssemblySocketData target = null; foreach (var socket in Sockets) if (socket.Id.Value == arm.TargetSocket.Value) target = socket;
-                if (target == null || target.AcceptedPart.Value != arm.AllowedPart.Value) throw new ArgumentException("Inserter part must match its target socket.");
-                var port = arm.Port; ulong validMask = 0; var maxLength = 0;
-                foreach (var lane in topology.Lanes) if (lane.LineId.Value == port.TransportLineId.Value) { validMask |= 1UL << lane.Id.Value; maxLength = Math.Max(maxLength, lane.Length); }
-                if (port.LaneMask == 0 || (port.LaneMask & ~validMask) != 0 || port.StartDistance < 0 || port.EndDistance > maxLength || port.EndDistance <= port.StartDistance || port.PreferredDistance < port.StartDistance || port.PreferredDistance > port.EndDistance || (port.AcceptedPartTypeMask & arm.AllowedPart.Mask) == 0) throw new ArgumentException("Invalid pickup port.");
-                if ((long)BeltSpeed * (arm.PickingTicks + 1) > port.EndDistance - port.StartDistance) throw new ArgumentException("Pickup port is too short for the configured picking duration.");
+                var s = Stations[i]; if (s.Distance < 0 || s.Distance >= ProductLength || (i > 0 && s.Distance <= Stations[i - 1].Distance) || !Sockets.Any(t => t.Id.Value == s.SocketId && t.AcceptedPart.Value == s.PartType)) throw new ArgumentException("Invalid station order or socket mapping.");
+                if (SegmentEnds.TakeWhile(e => e <= s.Distance).Count() != SegmentEnds.TakeWhile(e => e <= Math.Min(ProductLength - 1, s.Distance + ProductSpacing / 2)).Count() || (s.Distance - (SegmentEnds.LastOrDefault(e => e <= s.Distance))) < ProductSpacing / 2) throw new ArgumentException("Station must leave pallet clearance at segment boundaries.");
             }
-            if (SourceEnabled && SourceParts.Length == 0) throw new ArgumentException("Source requires configured part types.");
-            foreach (var part in SourceParts) if (part.Mask == 0 || !types.Contains(part.Value)) throw new ArgumentException("Source contains an unknown part type.");
+            if (Inserters.Select(a => a.Id.Value).Distinct().Count() != Inserters.Length) throw new ArgumentException("Duplicate arm ID.");
+            foreach (var a in Inserters)
+            {
+                if (!Stations.Any(s => s.Id == a.StationId && s.SocketId == a.TargetSocket.Value && s.PartType == a.AllowedPart.Value) || a.PickingTicks < 1 || a.CarryingTicks < 1 || a.PlacingTicks < 1 || a.ReturningTicks < 1) throw new ArgumentException("Invalid arm timing or station.");
+                foreach (var p in a.Ports.Length == 0 ? new[] { a.Port } : a.Ports)
+                {
+                    var lanes = topology.Lanes.Where(l => l.LineId.Value == p.TransportLineId.Value && (p.LaneMask & (1UL << l.Id.Value)) != 0).ToArray();
+                    if (lanes.Length == 0 || p.StartDistance < 0 || p.EndDistance <= p.StartDistance || p.PreferredDistance < p.StartDistance || p.PreferredDistance > p.EndDistance || (p.AcceptedPartTypeMask & a.AllowedPart.Mask) == 0) throw new ArgumentException("Invalid pickup port.");
+                    foreach (var l in lanes) if (p.EndDistance > l.Length || (long)SupplySpeeds[Array.IndexOf(topology.Lanes, l)] * (a.PickingTicks + 1) > p.EndDistance - p.PreferredDistance) throw new ArgumentException("Pickup port cannot retain the part for the picking duration.");
+                }
+            }
+            if (SourceEnabled && SourceParts.Length == 0 || SourceParts.Any(p => !Sockets.Any(s => s.AcceptedPart.Value == p.Value))) throw new ArgumentException("Source contains unknown parts.");
         }
     }
 }

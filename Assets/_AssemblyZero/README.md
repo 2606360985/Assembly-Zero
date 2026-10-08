@@ -4,7 +4,7 @@ EP01 用桌面微缩机器人装配厂演示一个问题：两万件物料运输
 
 ## 启动
 
-- Unity：`6000.6.3f1`，URP `17.6.0`；沿用当前项目版本，不执行升级。
+- Unity：`6000.4.0f1`，URP `17.6.0`；沿用当前项目版本，不执行升级。
 - 打开 `Assets/_AssemblyZero/Scenes/EP01_Demo.unity` 后进入 Play Mode。
 - 数字键 `1`–`6` 切换固定演示阶段；Stage 6 中 `R` 重播，`G` 手动覆盖闸门状态。
 - 场景和参数由 `Tools > Assembly Zero > Rebuild EP01 Demo Scene` 重建，生成内容仅位于 `Assets/_AssemblyZero`。
@@ -68,8 +68,8 @@ EP01 用桌面微缩机器人装配厂演示一个问题：两万件物料运输
 命令行示例：
 
 ```powershell
-unity test . --editor-version 6000.6.3f1 --mode EditMode --output Temp/AssemblyZero-EditMode.xml --timeout 600
-unity test . --editor-version 6000.6.3f1 --mode PlayMode --output Temp/AssemblyZero-PlayMode.xml --timeout 600
+unity test . --editor-version 6000.4.0f1 --mode EditMode --output Temp/AssemblyZero-EditMode.xml --timeout 600
+unity test . --editor-version 6000.4.0f1 --mode PlayMode --output Temp/AssemblyZero-PlayMode.xml --timeout 600
 ```
 
 运行 CLI 测试前需关闭同一工程的交互式 Unity Editor，否则 Unity 会因工程锁拒绝第二个实例。
@@ -80,76 +80,47 @@ unity test . --editor-version 6000.6.3f1 --mode PlayMode --output Temp/AssemblyZ
 
 ## 已知限制
 
-- EP01 场景为单车道；后端支持多车道，EP02 使用双车道。仅支持普通直线、90° 弯道、Source、Gate、Sink 和一条主要 Transport Line；不支持分流、地下带、动态铺设或复杂交叉。
+- EP01 场景为单车道；后端支持多车道，EP02 使用两条独立供料线与一条分段产品线。仅支持普通直线、90° 弯道、Source、Gate、Sink 和一条主要 Transport Line；不支持分流、地下带、动态铺设或复杂交叉。
 - 压力阶段的 20,000 是逻辑物料数，画面只提交 128 个代表箱；因此该演示比较的是后端模拟工作量，不代表“同时渲染 20,000 个纸箱”的 GPU 压力测试。不得把 Presentation/Rendering 时间归入 Simulation。
 - 当前不使用 DOTS/ECS、Jobs、Burst、Compute Shader 或物理系统。
 - Corner90 仍使用方形模块表现；运动采样已使用连续圆弧、切线朝向与法向 Lane 偏移，圆弧美术网格留待下一轮。
 - 项目未导入 TMP Essentials；为避免在 `Assets/TextMesh Pro` 生成额外资源，HUD 使用 `_AssemblyZero/UI` 内的本地字体与 uGUI Text。
-- EP02 是固定 U 形单线、六类部件、六臂、单装配单元和末端回收；闭环、分合流、自由建造与加工配方不在本期范围。
+- EP02 为三条并列 U 形线路、六类部件与六个固定装配工位；闭环、分合流、自由建造与加工配方不在本期范围。
 
-## EP02：机械臂与机器人最终装配单元
+## EP02：六轴机械臂连续装配产线
 
-入口：`Assets/_AssemblyZero/Scenes/EP02_Demo.unity`。重建菜单为 `Tools > Assembly Zero > Rebuild EP02 Demo Scene`，需先保存当前场景；不会自动重建或覆盖原始六个身体 prefab。新增资产集中在 `_AssemblyZero/EP02`，代码沿用原程序集，Domain 仍不引用 UnityEngine。
+打开 `Assets/_AssemblyZero/Scenes/EP02_Demo.unity` 并进入 Play Mode，直接运行连续生产，不再有 1–6 教学阶段。
 
-`1`–`6` 切换阶段，`R` 重播并重置全部状态，`Space` 暂停，`N` 单步，`L` 切换 HeadSocket 锁定，`C` 轮换四镜头；HUD 数字按钮也可切换阶段。EP01 的数字键及 `G` 保持原样。
+- **R**：重播，清理产品、载荷、预订及展示副本。
+- **Space**：暂停；**N**：暂停时单步一个固定 Tick。
+- **L**：切换 Head 工位锁定；持料等待，解锁恢复。
+- **C**：切换总览、六轴抓取、产品装配、中央展示与 Head 工位镜头。
 
-| 阶段 | 可验证的现象 |
-|---|---|
-| 1 | 单臂抓放；旁侧球形动画没有物流权限，Picking 完成 Tick 才切换所有权 |
-| 2 | 两臂查询同一物料与 Socket，意图相同但稳定 ID 0 获得唯一预订 |
-| 3 | 六类固定种子混合来料，按类型安装，连续装配 |
-| 4 | 第 16 Tick 锁定 HeadSocket，Head 已持料而进入 WaitingForTarget；L 解锁恢复，漏抓件到末端回收 |
-| 5 | 来料间隔 6 Tick、机械臂耗时 ×2；有限回收区 60 Tick/件，末端物料仍在皮带上形成真实背压 |
-| 6 | 恢复 24 Tick 来料，六槽完成后等待安全返回、扫描 90 Tick、展示 180 Tick，再清空 |
+### 生产布局
 
-所有阶段都会预置教学物料，使开始播放即可观察抓取。Stage 1/2 是单槽教学 Manifest，不增加完整机器人计数。种子为 2001–2006，重播可复现；阶段 4 的锁定命令本身也进入状态哈希。Stage 2 的「最近意图 / Tick」保留冲突证据，避免只显示一 Tick 而无法读清。Stage 5 从无拥堵到明显背压需要时间，可暂停后逐 Tick 检查或加速手动 Tick。Stage 6 的「平衡」指恢复指定的教学参数，不保证无限时长稳态吞吐；扫描／展示期间仍有来料，长时间运行也可能积压。
+两条独立单排供料线共用一个物料账本和 Naive/Gap 后端，分别具有独立路径、带面与速度。产品输送线使用独立驱动的工位段与过渡段，每段最多承载一个产品托盘。六个工位按 Body → LegA → LegB → ArmA → ArmB → Head 顺序安装原始六个身体 prefab；ArmA/B、LegA/B 不推断左右语义。
 
-### 配置与资源
+产品到站后停带等待正确物料。安装完成且夹爪安全返回后放行；缺料、锁定、禁用或下游占用会保持产品并向后传播堵塞。末站装齐六件后等待安全返回，检测 90 Tick，只触发一次完成事件，随后继续到出口出库。
 
-- U 形线路：27 个 1.2 m 模块、两个 90° 转弯、双车道；速度 32 单位/Tick，托盘占位 768 单位，Port 宽 2048 单位。
-- `EP02Scenario.asset` 配置速度、来料／回收／扫描／展示时长与 Naive/Gap 后端。
-- `InserterAuthoring` 配置稳定 ID、部件、Socket、Port、LaneMask、四段动作时间和初相位；六臂基础动作 12/24/12/24 Tick，按稳定 ID 加少量固定差异。
-- 六个 `RobotPartDefinition` 为 Head=2、Body=3、ArmA=4、ArmB=5、LegA=6、LegB=7；EP01 ID 0/1 不变。定义包含原 prefab、三个 Pose、Socket、Carrier、占位、颜色及可选图标。
-- 包装为 `CarrierRoot → PayloadRoot → PartVisualAnchor → SourcePrefab`。共同 FBX 网格注册验证 67 个网格无遗漏／重复；装配姿态共用一种尺度，原 prefab 和子网格导入变换不变。ArmA/B、LegA/B 不推断左右语义。
-- Socket 位姿、部件 Pose、动作、Port 和镜头均可在 Inspector 调整。重建时保留已有 PartDefinition、Scenario 和机械臂 prefab 配置；如果想重新烘焙包装，先在 Inspector 清空对应 Definition 的 WrapperPrefab 引用，再执行重建。
-- 启动前检查缺失引用、重复 ID、六类映射、Port 范围、动作时长和可达性；失败时 HUD 与 Console 给出明确错误。
+中央台只显示独立视觉副本，自动跟随最早进入产线的未完成产品。被跟随产品完成后展示 180 Tick，再切换下一台；展示不会占用实际工位或影响生产节拍。
 
-### 固定 Tick 与所有权
+### 资源与配置
 
-```text
-ApplyCommands → ItemSource → BeltTransport → BeltAccessQuery
-→ ItemReservation → Inserter → AssemblyCell → RejectSink
-→ Statistics → StateHash → PublishSnapshot
-```
+- 六轴 Prefab：`_AssemblyZero/EP02/Prefabs/SixAxisIndustrialArm.prefab`。J1 底座回转、J2 肩、J3 肘、J4 腕回转、J5 腕摆动、J6 法兰，固定两段 1.5 m 连杆、0.3 m 工具偏移；旋转关节使用角度限位和位姿 IK，不缩放连杆。
+- 产品托盘：`ProductCarrier.prefab`，包含承载面、躯干支撑夹具；宽度与间距由原机器人共同包围盒计算。
+- `EP02Scenario.asset`：供料 A/B 默认 32/24 单位每 Tick，产品带 16 单位每 Tick，零件生成间隔 24 Tick，产品托盘生成间隔 240 Tick。入口占用时等待，不穿插生成。
+- 回收区共用接收能力为 60 Tick/件，未抓取零件留在供料线末端等待回收，能够产生背压。
+- 所有 U 形转角复用 `AssemblyZero/ConveyorSurface` 的弧形裁切。EP02 按弧长烘焙路径，并通过仿真位移驱动条纹相位；暂停、单步和工位停段同步呈现。EP01 保留原 Shader 默认时间驱动行为。
+- 重建菜单：`Tools > Assembly Zero > Rebuild EP02 Demo Scene`，先保存打开场景；通过 Editor 生成并保存场景与 Prefab。原始身体 Prefab、导入变换和装配比例保持不变。
 
-后端新增 `TransportTick` 只运输；EP01 的旧 `Tick` 顺序及结果不变。EP02 不同时启用内置生成与出库，统一账本分配单调递增 ItemId。命令按 Tick/Sequence，机械臂与 Socket 按稳定 ID 执行；候选按距 PreferredDistance 的差值、ItemId 排序。
+### 仿真与验证
 
-```text
-OnBelt → ReservedOnBelt → HeldByInserter → InAssemblySocket → CompletedProduct
-   └──────────────────────────────→ InRejectSink
-```
+Domain 不引用 UnityEngine。产品记录具有独立 ProductId、六个 Socket、当前工位和完成状态；机械臂同时预订物料与具体产品的 Socket。已安装零件归属对应产品，随产品移动。
 
-预订同时锁定物料和 Socket，物料仍随皮带运动；离开范围会释放。Picking 结束原子移除，Placing 结束原子安装，单 Tick 不跨多个动作状态。占用／锁定／类型不符的目标不能从皮带偷取物料；持料时锁定则保留载荷等待。禁用空臂释放预订，禁用持料臂明确记为 `InserterDisabledWhileHolding` 回收；末端漏抓记为 `MissedPickupAtLineEnd`。Reset token 使旧句柄失效，但不进入确定性哈希。
+固定 Tick 顺序：命令 → 零件生成 → 供料运输 → 产品运输 → 查询 → 预订 → 机械臂 → 产品装配 → 回收 → 统计 → 哈希 → 快照。动作与完成事件由仿真决定，表现层不回写物流。
 
-八态：WaitingForItem、Reserving、Picking、Carrying、Placing、Returning、WaitingForTarget、Disabled。机械臂没有 Rigidbody 或 Animator；三关节几何只读取快照进度，不以动画结束／碰撞回调驱动物流。载荷根据所有权切换到皮带、夹爪或 Socket；空托盘进入纯视觉回收动画，不参与物料账本。
+物料守恒：`Generated = OnBelt + Reserved + Held + Installed + Rejected + CompletedConsumed`。产品守恒：`GeneratedProducts = ActiveProducts + ExitedProducts`。完成产品出库后零件仍保留于历史账本，但不再保留运行中的视觉对象。
 
-每 Tick 检查：`Generated = OnBelt + Reserved + Held + Installed + Rejected + CompletedConsumed`，预订不重复计为 OnBelt。扫描结束只触发一次完整机器人完成事件，消耗六件；平均时长从该轮第一件安装到完成事件。Busy/Starved/Blocked 只统计启用 Tick。
+HUD 显示在制、完成、出库数量，产品状态、工位、预订和持料、利用率、入口等待、守恒、哈希及分区性能。历史账本与状态哈希成本会随总生成数量增长，本版本不宣称整座装配系统 O(1)。
 
-### 表现、性能与验证
-
-HUD 显示守恒、完整数量、平均装配时间、输入阻塞、哈希和每臂状态／意图／预订／持料／交接数／利用率。五色 Gizmo：绿抓取区、蓝目标、黄预订、红锁定、白可达范围。音频用 Tick 事件去重，可选 Inspector 音频未配置时静默。
-
-EP02 分开测量模拟、查询／预订、状态哈希、表现（含 Snapshot）；Profiler 提供 `EP02.FixedTick` 与 `EP02.Presentation` 样本。Belt touched 只表示运输后端的工作量，不包含查询、账本、哈希或渲染。查询当前使用扫描，哈希与历史账本成本会随生成物料总量增加；这里不宣称整座装配系统 O(1)。EP02 载荷使用多网格 prefab 呈现，不是 EP01 的代表箱批量渲染压力测试。
-
-新增测试覆盖竞争互斥、禁用释放／回收、持料锁定、所有权守恒、六槽唯一完成、Reset 句柄、多 Lane 类型过滤、头／中／尾移除、双后端 10,000 Tick 哈希、帧率独立性、六阶段行为、资源覆盖和场景载荷挂接。PlayMode 验证重复呈现不重复计数、重播不残留载荷。EP01 原 15 个 EditMode 和 1 个 PlayMode 基线继续运行。
-
-`Tools > Assembly Zero > Build EP02 Windows Development Player` 生成 `Build/EP02/AssemblyZero.exe`，以 EP02 为启动场景，同时包含原有启用场景；项目 Build Settings 只追加 EP02，不调整原条目。构建与测试结果以本次执行报告为准。
-
-### 本轮验收记录（2026-09-30）
-
-- 当前五个程序集编译成功；EditMode **38/38**、PlayMode **2/2** 通过，包含原 EP01 **15+1** 基线；六阶段行为和双后端 10,000 Tick 对照均通过。
-- 原始六个身体 prefab 的 SHA-256 与实施前完全一致。Build Settings 只新增 EP02 条目；编辑器恢复到原 SampleScene。
-- Windows x64 Development Build：**Succeeded**，224,881,346 bytes。报告的两条 Error 均为构建期间 CLI `/api/exec` 等待主线程超过 5000 ms，不是编译失败；两条 Warning 来自 EP01 的 Unity 6.6 已弃用 FindObjectsByType 排序重载，未改动该旧驱动器。
-- 独立 Player 以 `-batchmode -nographics` 启动检查，未发现 EP02 启动错误或异常；检查后已退出测试进程。画面验收来自 Editor PlayMode，不把无图形启动称为独立 Player GPU 性能测试。
-- `Temp/EP02Profiler.raw` 已读取到 279 个 `EP02.FixedTick` 样本（累计约 16.31 ms）和 22 个 `EP02.Presentation` 样本（累计约 46.98 ms）。包含冷启动和手动推进，仅证明分区采样有效，不作为稳态帧率或跨硬件基准。
-- 演示截图：`Temp/EP02_Stage6.png`；Player 启动日志：`Temp/EP02Player.log`。Temp 与 Build 为忽略目录，不进入源码版本控制。
+EditMode 覆盖产品停段、锁定/禁用恢复、预订互斥、唯一完成、出库、弧形路径、固定连杆、工作空间和 Naive/Gap 10,000 Tick 确定性。PlayMode 检查载荷挂接、表现不修改物流、重播无残留，并保留 EP01 回归。
