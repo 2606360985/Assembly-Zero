@@ -62,9 +62,13 @@ namespace AssemblyZero.Unity
         public Renderer Renderer; public int Line, Segment; public bool Product;
         public float StartMeters, LengthMeters;
     }
+    [Serializable] public sealed class SupplyRouteAuthoring { public BeltAuthoring[] Pieces = Array.Empty<BeltAuthoring>(); }
     public sealed class EP02LayoutAuthoring : MonoBehaviour
     {
         public BeltAuthoring[] SupplyA = Array.Empty<BeltAuthoring>(), SupplyB = Array.Empty<BeltAuthoring>(), ProductBelts = Array.Empty<BeltAuthoring>();
+        public SupplyRouteAuthoring[] DedicatedSupplies = Array.Empty<SupplyRouteAuthoring>();
+        public bool HasDedicatedSupplies => DedicatedSupplies.Length != 0;
+        public int[] PickupLanes(InserterAuthoring arm) => HasDedicatedSupplies ? new[] { Array.IndexOf(Inserters, arm) } : new[] { 0, 1 };
         public InserterAuthoring[] Inserters = Array.Empty<InserterAuthoring>();
         public AssemblySocketAuthoring[] Sockets = Array.Empty<AssemblySocketAuthoring>();
         public RobotPartDefinition[] Parts = Array.Empty<RobotPartDefinition>();
@@ -76,17 +80,18 @@ namespace AssemblyZero.Unity
         {
             if (Inserters.Length != 6 || Sockets.Length != 6 || Parts.Length != 6 || RejectPoint == null || ProductCarrierPrefab == null || DisplayRoot == null) throw new InvalidOperationException("Missing EP02 production references.");
             if (Parts.Any(p => p == null || p.SourcePrefab == null || p.WrapperPrefab == null) || !Parts.Select(p => p.PartTypeId).OrderBy(x => x).SequenceEqual(new[] { 2, 3, 4, 5, 6, 7 }) || Sockets.Select(s => s.StableId).Distinct().Count() != 6) throw new InvalidOperationException("Invalid part/socket identities.");
-            var b = new EP02BakedLayout { Supply = new[] { new EP02Route(SupplyA), new EP02Route(SupplyB) }, Product = new EP02Route(ProductBelts) };
-            var lanes = new LaneDefinition[2]; var lines = new TransportLineDefinition[2];
-            for (var i = 0; i < 2; i++) { lanes[i] = new LaneDefinition(new LaneId(i), new LineId(i), b.Supply[i].Length, ItemType.ServoCore); lines[i] = new TransportLineDefinition(new LineId(i), b.Supply[i].Length, 0, b.Supply[i].Pieces.Length); }
+            var b = new EP02BakedLayout { Supply = HasDedicatedSupplies ? DedicatedSupplies.Select(s => new EP02Route(s.Pieces)).ToArray() : new[] { new EP02Route(SupplyA), new EP02Route(SupplyB) }, Product = new EP02Route(ProductBelts) };
+            var lanes = new LaneDefinition[b.Supply.Length]; var lines = new TransportLineDefinition[b.Supply.Length];
+            for (var i = 0; i < b.Supply.Length; i++) { lanes[i] = new LaneDefinition(new LaneId(i), new LineId(i), b.Supply[i].Length, ItemType.ServoCore); lines[i] = new TransportLineDefinition(new LineId(i), b.Supply[i].Length, 0, b.Supply[i].Pieces.Length); }
             b.SupplyTopology = new BeltTopology(lanes, lines);
             foreach (var a in Inserters)
             {
+                if (PickupLanes(a).Any(l => l < 0 || l >= b.Supply.Length || l >= a.PickupDistances.Length)) throw new InvalidOperationException("Missing pickup lane/distance on arm " + a.StableId);
                 if (a.Joints.Length != 6 || a.Joints.Any(j => j == null) || a.Grip == null || a.PartTypeId != PartBySocket(a.SocketId).PartTypeId || a.StationPiece < 0 || a.StationPiece >= ProductBelts.Length || ProductBelts[a.StationPiece].Shape == BeltPieceShape.Corner90) throw new InvalidOperationException("Invalid six-axis arm or station.");
                 var product = b.Product.Sample(b.Product.CenterDistance(a.StationPiece), out var tangent);
                 var target = product + Quaternion.LookRotation(tangent) * SocketOffset(a.SocketId);
                 var poses = new List<Vector3> { target, target + Vector3.up * .32f, a.RestPosition };
-                for (var l = 0; l < 2; l++) for (var d = -a.PortWidth / 2; d <= a.PortWidth / 2; d += 128)
+                foreach (var l in PickupLanes(a)) for (var d = -a.PortWidth / 2; d <= a.PortWidth / 2; d += 128)
                 {
                     var pickup = b.Supply[l].Sample(a.PickupDistances[l] + d, out _) + Vector3.up * .26f;
                     for (var tick = 0; tick <= 10; tick++) foreach (var state in new[] { InserterState.Picking, InserterState.Carrying, InserterState.Placing, InserterState.Returning }) poses.Add(InserterPresenter.Motion(state, tick / 10f, a.RestPosition, pickup, target));

@@ -183,6 +183,13 @@ namespace AssemblyZero.Domain
         void TransportTick(long tick);
     }
 
+    /// <summary>External owners retain identity when moving cargo. Original insertion still allocates IDs.</summary>
+    public interface IIdentityBeltAccess : ITransactionalBeltAccess
+    {
+        bool TryInsertExisting(in BeltAccessPort port, ItemId id, PartTypeId part, out BeltItemHandle handle);
+        bool TryTransfer(in BeltItemHandle source, IIdentityBeltAccess destination, in BeltAccessPort port, out BeltItemHandle handle);
+    }
+
     public static class StateHasher
     {
         public const ulong Offset = 14695981039346656037UL;

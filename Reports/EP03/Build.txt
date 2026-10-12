@@ -1,0 +1,10 @@
+Target: Windows x64 Development
+Unity: 6000.4.0f1
+Result: Failed
+Build seconds: 0.9838535
+Bytes: 0
+Warnings: 0
+Errors: 2
+Output: Builds/EP03/AssemblyZero.exe
+Build result does not certify standalone player frame performance.
+Build preflight: UniversalRenderPipelineGlobalSettings is not at last version. Existing asset version 11; resolved URP 17.4.0 requires 10. Manifest declares 17.6.0. No Player produced; original shared settings and package declarations retained.

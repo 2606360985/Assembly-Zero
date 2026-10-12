@@ -1,0 +1,10 @@
+Batch Editor PlayMode, not a standalone player benchmark
+Unity: 6000.4.0f1
+CPU: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+GPU: NVIDIA Quadro RTX 5000
+Render size: 640x480
+Sampling seconds: 10.004
+Samples: 1494
+Simulation field: accumulated fixed-tick CPU time per frame; zero when no tick.
+Audit field: conservation audit time in that frame; zero when no audit.
+GC recorder includes the test runner and CSV sampling overhead.

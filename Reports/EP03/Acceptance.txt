@@ -1,0 +1,27 @@
+EP03 Unity Editor acceptance
+UTC: 2026-10-12T08:51:05.1081729Z
+Unity: 6000.4.0f1
+CPU: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
+GPU: NVIDIA Quadro RTX 5000
+Memory MB: 32415
+Resolution: 1920x1080 captures
+Mode: Editor fixed-tick CPU run, not a player frame-rate benchmark
+Ticks: 19123
+Recipe machines: 30
+Routes: 83
+Delivered: 10
+Active transport cargo: 915
+Buffer cargo: 162
+Ledger entries: 4042
+Batches: 1951
+Tick including route snapshots mean ms: 0.4245
+p95 ms: 0.6655
+max ms: 40.2303
+Full outlet backpressure: passed
+Outlet recovery: passed
+Stopped supply starvation: passed
+Supply recovery: passed
+Representative Visual replacement: interface signature unchanged
+One presentation including initial visual allocation ms: 120.6800
+All 30 machines completed at least one batch.
+GC/frame and Development Player performance require separate frame sampling.

@@ -37,7 +37,7 @@ namespace AssemblyZero.Domain
         private void Ensure() { if (Count < data.Length) return; var next = new T[data.Length * 2]; for (var i = 0; i < Count; i++) next[i] = this[i]; data = next; head = 0; }
     }
 
-    public abstract class BeltSimulationBase : IBeltSimulationBackend, ITransactionalBeltAccess
+    public abstract class BeltSimulationBase : IBeltSimulationBackend, IIdentityBeltAccess
     {
         protected ScenarioDefinition Scenario;
         protected BeltTopology Topology;
@@ -102,9 +102,41 @@ namespace AssemblyZero.Domain
         public bool TryRemove(in BeltItemHandle handle) => TryTake(handle, out _);
         public bool TryInsert(in BeltAccessPort port, ItemType type, out BeltItemHandle handle) => TryInsertPart(port, new PartTypeId((int)type), out handle);
         public bool TryInsertPart(in BeltAccessPort port, PartTypeId part, out BeltItemHandle handle)
+            => InsertIdentity(port, new ItemId(NextItemId), part, true, out handle);
+        public bool TryInsertExisting(in BeltAccessPort port, ItemId id, PartTypeId part, out BeltItemHandle handle)
+            => InsertIdentity(port, id, part, false, out handle);
+        public bool TryTransfer(in BeltItemHandle source, IIdentityBeltAccess destination, in BeltAccessPort port, out BeltItemHandle handle)
         {
             handle = default;
-            if (part.Mask == 0 || (port.AcceptedPartTypeMask & part.Mask) == 0) return false;
+            if (destination == null || !TryValidate(source, out var item)) return false;
+            if (ReferenceEquals(this, destination)) return MoveWithin(source, item.Part, port, out handle);
+            if (!destination.TryInsertExisting(port, source.ItemId, item.Part, out handle)) return false;
+            if (TryTake(source, out _)) return true;
+            destination.TryTake(handle, out _); handle = default; return false;
+        }
+        private bool MoveWithin(in BeltItemHandle source, PartTypeId part, in BeltAccessPort port, out BeltItemHandle handle)
+        {
+            handle = default;
+            if ((part.Mask & port.AcceptedPartTypeMask) == 0 || !Locate(source, out var sourceLane, out var sourceIndex)) return false;
+            for (var lane = 0; lane < LaneCount; lane++)
+            {
+                var def = Topology.Lanes[lane]; var distance = port.StartDistance;
+                if (def.LineId.Value != port.TransportLineId.Value || def.Id.Value < 0 || def.Id.Value >= 64 || (port.LaneMask & (1UL << def.Id.Value)) == 0 || distance < 0 || distance > def.Length || distance > port.EndDistance) continue;
+                var fits = true;
+                for (var i = 0; i < ItemCount(lane); i++) if (!(lane == sourceLane && i == sourceIndex) && Math.Abs((long)ReadItem(lane, i).Distance - distance) < Scenario.MinimumSpacing) { fits = false; break; }
+                if (!fits) continue;
+                DeleteItem(sourceLane, sourceIndex);
+                var at = 0; while (at < ItemCount(lane) && ReadItem(lane, at).Distance > distance) at++;
+                InsertItem(lane, at, new SimItem(source.ItemId.Value, (ItemType)part.Value, distance)); ValuesTouched++;
+                handle = new BeltItemHandle(source.ItemId, def.Id, def.LineId, resetToken); return true;
+            }
+            return false;
+        }
+        private bool InsertIdentity(in BeltAccessPort port, ItemId id, PartTypeId part, bool generated, out BeltItemHandle handle)
+        {
+            handle = default;
+            if (id.Value <= 0 || id.Value == int.MaxValue || part.Mask == 0 || (port.AcceptedPartTypeMask & part.Mask) == 0) return false;
+            if (!generated) for (var lane = 0; lane < LaneCount; lane++) for (var index = 0; index < ItemCount(lane); index++) if (ReadItem(lane,index).Id == id.Value) return false;
             for (var li = 0; li < LaneCount; li++)
             {
                 var def = Topology.Lanes[li];
@@ -113,7 +145,7 @@ namespace AssemblyZero.Domain
                 var at = ItemCount(li); var fits = true;
                 for (var i = 0; i < ItemCount(li); i++) { var x = ReadItem(li, i); if (Math.Abs((long)x.Distance - d) < Scenario.MinimumSpacing) { fits = false; break; } if (x.Distance < d && at == ItemCount(li)) at = i; }
                 if (!fits) continue;
-                var item = new SimItem(NextItemId++, (ItemType)part.Value, d); InsertItem(li, at, item); Spawned++; ValuesTouched++;
+                var item = new SimItem(id.Value, (ItemType)part.Value, d); InsertItem(li, at, item); NextItemId = Math.Max(NextItemId, id.Value + 1); if (generated) Spawned++; ValuesTouched++;
                 handle = new BeltItemHandle(new ItemId(item.Id), def.Id, def.LineId, resetToken); return true;
             }
             return false;

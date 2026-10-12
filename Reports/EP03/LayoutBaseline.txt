@@ -1,0 +1,3 @@
+Full and minimal layouts: Candidate (reference-layout revision, 2026-10-12)
+Previous V1 freeze revoked. Module placements, horizontal assembly and cardinal corridor routes were explicitly replanned.
+Not accepted/frozen as V1. Current render captures support visual review.

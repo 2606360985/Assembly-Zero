@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 namespace AssemblyZero.Unity
 {
-    [Serializable] public struct EP02CameraPose { public string Name; public Vector3 Position, Euler; public float FieldOfView; }
+    [Serializable] public struct EP02CameraPose { public string Name; public Vector3 Position, Euler; public float FieldOfView; public bool Orthographic; public float OrthographicSize; }
     public sealed class EP02CameraDirector : MonoBehaviour
     {
         public Camera Camera;
@@ -10,6 +10,6 @@ namespace AssemblyZero.Unity
         public int Selected { get; private set; }
 
         public void Next() { Select((Selected + 1) % Presets.Length); }
-        public void Select(int index) { if (Camera == null || Presets.Length == 0) return; Selected = Mathf.Clamp(index, 0, Presets.Length - 1); var p = Presets[Selected]; Camera.transform.SetPositionAndRotation(p.Position, Quaternion.Euler(p.Euler)); Camera.fieldOfView = p.FieldOfView; }
+        public void Select(int index) { if (Camera == null || Presets.Length == 0) return; Selected = Mathf.Clamp(index, 0, Presets.Length - 1); var p = Presets[Selected]; Camera.transform.SetPositionAndRotation(p.Position, Quaternion.Euler(p.Euler)); Camera.fieldOfView = p.FieldOfView; Camera.orthographic=p.Orthographic; if(p.Orthographic)Camera.orthographicSize=p.OrthographicSize>0?p.OrthographicSize:40; }
     }
 }

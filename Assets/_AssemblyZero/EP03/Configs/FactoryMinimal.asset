@@ -1,0 +1,1444 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 31854ea952c4dac4d8d12e5ef88bcf07, type: 3}
+  m_Name: FactoryMinimal
+  m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.FactoryLayoutAsset
+  GridMeters: 1.2
+  FactorySize: {x: 92, y: 64}
+  AssemblyOrigin: {x: 60, y: 0, z: 54}
+  Recipes:
+  - Id: plate
+    Name: "\u677F\u6750"
+    Output: 11
+    OutputQuantity: 1
+    Duration: 120
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 8
+      Quantity: 1
+  - Id: rod
+    Name: "\u6746\u4EF6"
+    Output: 12
+    OutputQuantity: 1
+    Duration: 120
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 8
+      Quantity: 1
+  - Id: shell
+    Name: "\u5851\u6599\u58F3"
+    Output: 13
+    OutputQuantity: 1
+    Duration: 120
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 9
+      Quantity: 1
+  - Id: gear
+    Name: "\u9F7F\u8F6E"
+    Output: 14
+    OutputQuantity: 1
+    Duration: 180
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 11
+      Quantity: 1
+    - Material: 12
+      Quantity: 1
+  - Id: motor
+    Name: "\u7535\u673A"
+    Output: 15
+    OutputQuantity: 1
+    Duration: 240
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 12
+      Quantity: 1
+    - Material: 10
+      Quantity: 1
+  - Id: circuit
+    Name: "\u7535\u8DEF\u677F"
+    Output: 16
+    OutputQuantity: 1
+    Duration: 180
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 10
+      Quantity: 1
+    - Material: 9
+      Quantity: 1
+  - Id: body
+    Name: "\u8EAF\u5E72"
+    Output: 3
+    OutputQuantity: 1
+    Duration: 360
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 11
+      Quantity: 2
+    - Material: 13
+      Quantity: 1
+    - Material: 16
+      Quantity: 1
+  - Id: leg-a
+    Name: LegA
+    Output: 6
+    OutputQuantity: 1
+    Duration: 240
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 12
+      Quantity: 1
+    - Material: 14
+      Quantity: 1
+    - Material: 15
+      Quantity: 1
+  - Id: leg-b
+    Name: LegB
+    Output: 7
+    OutputQuantity: 1
+    Duration: 240
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 12
+      Quantity: 1
+    - Material: 14
+      Quantity: 1
+    - Material: 15
+      Quantity: 1
+  - Id: arm-a
+    Name: ArmA
+    Output: 4
+    OutputQuantity: 1
+    Duration: 240
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 13
+      Quantity: 1
+    - Material: 14
+      Quantity: 1
+    - Material: 15
+      Quantity: 1
+  - Id: arm-b
+    Name: ArmB
+    Output: 5
+    OutputQuantity: 1
+    Duration: 240
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 13
+      Quantity: 1
+    - Material: 14
+      Quantity: 1
+    - Material: 15
+      Quantity: 1
+  - Id: head
+    Name: "\u5934\u90E8"
+    Output: 2
+    OutputQuantity: 1
+    Duration: 300
+    InputCapacity: 8
+    OutputCapacity: 4
+    Inputs:
+    - Material: 13
+      Quantity: 1
+    - Material: 16
+      Quantity: 2
+  Modules:
+  - Module:
+      Id: warehouse-8
+      RecipeId: 
+      Material: 8
+      Capacity: 256
+      InitialStock: 64
+      RefillQuantity: 32
+      AssemblyLane: -1
+      Warehouse: 1
+    Grid: {x: 2, y: 52}
+    Footprint: {x: 6, y: 8}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 5334953368972958262, guid: 6d735938a290fd245b4feb442bbe2c8e, type: 3}
+  - Module:
+      Id: warehouse-9
+      RecipeId: 
+      Material: 9
+      Capacity: 128
+      InitialStock: 32
+      RefillQuantity: 16
+      AssemblyLane: -1
+      Warehouse: 1
+    Grid: {x: 11, y: 52}
+    Footprint: {x: 6, y: 8}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 3028799684889949829, guid: 71049ef20fa75c14eb41623bf9789356, type: 3}
+  - Module:
+      Id: warehouse-10
+      RecipeId: 
+      Material: 10
+      Capacity: 128
+      InitialStock: 32
+      RefillQuantity: 16
+      AssemblyLane: -1
+      Warehouse: 1
+    Grid: {x: 20, y: 52}
+    Footprint: {x: 6, y: 8}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 295014523285133852, guid: 0a1746e1be7588548b93a8950aa9e2ae, type: 3}
+  - Module:
+      Id: plate-0
+      RecipeId: plate
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 2, y: 28}
+    Footprint: {x: 4, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 5423192270280246321, guid: a06013ff64b74fd418a0adaae8ffd6f4, type: 3}
+  - Module:
+      Id: hub-11
+      RecipeId: 
+      Material: 11
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 4}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 7455420933697946008, guid: f56b783a2744f424c9372da0f040d4c7, type: 3}
+  - Module:
+      Id: rod-0
+      RecipeId: rod
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 11, y: 28}
+    Footprint: {x: 4, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 537806388111465077, guid: 3c9d862c1779b5247b2a143222337c5f, type: 3}
+  - Module:
+      Id: hub-12
+      RecipeId: 
+      Material: 12
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 13}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 8862595990581193506, guid: a3adb91cc02b2a34398658bc175372f8, type: 3}
+  - Module:
+      Id: shell-0
+      RecipeId: shell
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 20, y: 28}
+    Footprint: {x: 4, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 8160823118756747146, guid: 4450db4bf8de96e4e9c4306fbb176b69, type: 3}
+  - Module:
+      Id: hub-13
+      RecipeId: 
+      Material: 13
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 22}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 7207203081563422412, guid: 2108c695d0ebea641ad26598539d780c, type: 3}
+  - Module:
+      Id: gear-0
+      RecipeId: gear
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 2, y: 3}
+    Footprint: {x: 6, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 6122729379318921621, guid: 73b7627328e401c449ddeda5055e7696, type: 3}
+  - Module:
+      Id: hub-14
+      RecipeId: 
+      Material: 14
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 31}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 4144481783178039641, guid: a2914fd7579c15c40b23e66162709e3e, type: 3}
+  - Module:
+      Id: motor-0
+      RecipeId: motor
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 2, y: 10}
+    Footprint: {x: 6, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 8950141705203304341, guid: c49b9f4c02a08b542851b6eed9a61e55, type: 3}
+  - Module:
+      Id: hub-15
+      RecipeId: 
+      Material: 15
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 40}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 5870206414725493027, guid: c402d58c646403e4fa5abfbac7f7c6eb, type: 3}
+  - Module:
+      Id: circuit-0
+      RecipeId: circuit
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 2, y: 17}
+    Footprint: {x: 6, y: 4}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 5558218157505684349, guid: e7c1c0197ac5ff2439ebcbf500efd423, type: 3}
+  - Module:
+      Id: hub-16
+      RecipeId: 
+      Material: 16
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 30, y: 49}
+    Footprint: {x: 1, y: 2}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 9166488715195941371, guid: d907382c8cea67a4e868df35bbc0aa9b, type: 3}
+  - Module:
+      Id: body-0
+      RecipeId: body
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 52}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 845249833019867334, guid: 80eb308d37d8175448f9bb11f781a869, type: 3}
+  - Module:
+      Id: assembly-in-3
+      RecipeId: 
+      Material: 3
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 0
+      Warehouse: 0
+    Grid: {x: 47, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: -0.0000022649765, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 6497073293109259718, guid: 782b07a3641c3df4d901365adedb4e27, type: 3}
+  - Module:
+      Id: leg-a-0
+      RecipeId: leg-a
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 43}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 7861835979115705909, guid: 709e99b76188cf74e96f32362582a8f7, type: 3}
+  - Module:
+      Id: assembly-in-6
+      RecipeId: 
+      Material: 6
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 1
+      Warehouse: 0
+    Grid: {x: 51, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: -0.0000022649765, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 3143068907222330364, guid: 8b5279a6cdb01f14297bf8fa05a03a35, type: 3}
+  - Module:
+      Id: leg-b-0
+      RecipeId: leg-b
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 34}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 2428111170210254580, guid: 94e0322ab330c294a8343facb1e8e9e5, type: 3}
+  - Module:
+      Id: assembly-in-7
+      RecipeId: 
+      Material: 7
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 2
+      Warehouse: 0
+    Grid: {x: 54, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: 1.1999985, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 1151866590672692332, guid: ee3c2cdb2b4fc954baf3e426770f52dd, type: 3}
+  - Module:
+      Id: arm-a-0
+      RecipeId: arm-a
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 25}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 854934054324828378, guid: 326b45f40b09b9b4abd2b00a1400b83a, type: 3}
+  - Module:
+      Id: assembly-in-4
+      RecipeId: 
+      Material: 4
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 3
+      Warehouse: 0
+    Grid: {x: 59, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: 0.0000015497208, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 5793642576420284056, guid: 9dafb1cf45e431747929efa1c47474e1, type: 3}
+  - Module:
+      Id: arm-b-0
+      RecipeId: arm-b
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 16}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 1973690061848698274, guid: 639bb41d71aade240a63e8ff730f3a24, type: 3}
+  - Module:
+      Id: assembly-in-5
+      RecipeId: 
+      Material: 5
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 4
+      Warehouse: 0
+    Grid: {x: 62, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: 1.1999985, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 5348487413983791367, guid: 5922db13c767fe341bf88ba174910d1a, type: 3}
+  - Module:
+      Id: head-0
+      RecipeId: head
+      Material: 0
+      Capacity: 32
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: -1
+      Warehouse: 0
+    Grid: {x: 35, y: 7}
+    Footprint: {x: 8, y: 6}
+    QuarterTurns: 0
+    PositionOffset: {x: 0, y: 0, z: 0}
+    Prefab: {fileID: 8457749892063168819, guid: ae49feaa41366504aa60c48a0e662c0d, type: 3}
+  - Module:
+      Id: assembly-in-2
+      RecipeId: 
+      Material: 2
+      Capacity: 4
+      InitialStock: 0
+      RefillQuantity: 0
+      AssemblyLane: 5
+      Warehouse: 0
+    Grid: {x: 67, y: 41}
+    Footprint: {x: 1, y: 1}
+    QuarterTurns: 0
+    PositionOffset: {x: 0.0000015497208, y: -0.52, z: -0.30000305}
+    Prefab: {fileID: 5843921940415047889, guid: 51e9bf9e82cc39c4d914d0b2fb79c3bd, type: 3}
+  Routes:
+  - Connection:
+      Id: head-0--assembly-in-2
+      From: head-0
+      To: assembly-in-2
+      Material: 2
+      Length: 57372
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 12}
+    - {x: 52.800003, y: 0.7, z: 12}
+    - {x: 52.800003, y: 0.7, z: 48}
+    - {x: 79.200005, y: 0.7, z: 48}
+    - {x: 79.200005, y: 0.7, z: 49.5}
+    - {x: 80.16, y: 0.7, z: 49.5}
+    - {x: 80.4, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: body-0--assembly-in-3
+      From: body-0
+      To: assembly-in-3
+      Material: 3
+      Length: 19484
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 66}
+    - {x: 52.800003, y: 0.7, z: 66}
+    - {x: 52.800003, y: 0.7, z: 49.2}
+    - {x: 55.2, y: 0.7, z: 49.2}
+    - {x: 55.2, y: 0.7, z: 49.5}
+    - {x: 56.16, y: 0.7, z: 49.5}
+    - {x: 56.4, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: arm-a-0--assembly-in-4
+      From: arm-a-0
+      To: assembly-in-4
+      Material: 4
+      Length: 33062
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 33.600002}
+    - {x: 52.320004, y: 0.7, z: 33.600002}
+    - {x: 52.56, y: 1.5999999, z: 33.600002}
+    - {x: 53.100002, y: 1.5999999, z: 33.600002}
+    - {x: 53.4, y: 0.7, z: 33.600002}
+    - {x: 54.600002, y: 0.7, z: 33.600002}
+    - {x: 54.600002, y: 0.7, z: 47.4}
+    - {x: 69.600006, y: 0.7, z: 47.4}
+    - {x: 69.600006, y: 1.5999999, z: 47.7}
+    - {x: 69.600006, y: 1.5999999, z: 48.4}
+    - {x: 69.600006, y: 0.7, z: 48.600002}
+    - {x: 69.600006, y: 0.7, z: 49.5}
+    - {x: 70.560005, y: 0.7, z: 49.5}
+    - {x: 70.8, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: arm-b-0--assembly-in-5
+      From: arm-b-0
+      To: assembly-in-5
+      Material: 5
+      Length: 48650
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 22.800001}
+    - {x: 52.320004, y: 0.7, z: 22.800001}
+    - {x: 52.56, y: 1.5999999, z: 22.800001}
+    - {x: 53.100002, y: 1.5999999, z: 22.800001}
+    - {x: 53.4, y: 0.7, z: 22.800001}
+    - {x: 54.000004, y: 0.7, z: 22.800001}
+    - {x: 54.000004, y: 0.7, z: 33}
+    - {x: 54.000004, y: 1.5999999, z: 33.2}
+    - {x: 54.000004, y: 1.5999999, z: 33.9}
+    - {x: 54.000004, y: 0.7, z: 34.2}
+    - {x: 54.000004, y: 0.7, z: 46.800003}
+    - {x: 54.300003, y: 1.5999999, z: 46.800003}
+    - {x: 54.9, y: 1.5999999, z: 46.800003}
+    - {x: 55.2, y: 0.7, z: 46.800003}
+    - {x: 74.4, y: 0.7, z: 46.800003}
+    - {x: 74.4, y: 0.7, z: 47.4}
+    - {x: 74.4, y: 1.5999999, z: 47.7}
+    - {x: 74.4, y: 1.5999999, z: 48.4}
+    - {x: 74.4, y: 0.7, z: 48.600002}
+    - {x: 74.4, y: 0.7, z: 49.5}
+    - {x: 75.36, y: 0.7, z: 49.5}
+    - {x: 75.6, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: leg-a-0--assembly-in-6
+      From: leg-a-0
+      To: assembly-in-6
+      Material: 6
+      Length: 25369
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 55.2}
+    - {x: 52.320004, y: 0.7, z: 55.2}
+    - {x: 52.56, y: 1.5999999, z: 55.2}
+    - {x: 53.100002, y: 1.5999999, z: 55.2}
+    - {x: 53.4, y: 0.7, z: 55.2}
+    - {x: 53.4, y: 0.7, z: 49.800003}
+    - {x: 53.4, y: 1.5999999, z: 49.600002}
+    - {x: 53.4, y: 1.5999999, z: 48.9}
+    - {x: 53.4, y: 0.7, z: 48.600002}
+    - {x: 53.4, y: 1.5999999, z: 48.4}
+    - {x: 53.4, y: 1.5999999, z: 47.7}
+    - {x: 53.4, y: 0.7, z: 47.4}
+    - {x: 53.4, y: 0.7, z: 46.2}
+    - {x: 53.600002, y: 1.5999999, z: 46.2}
+    - {x: 54.9, y: 1.5999999, z: 46.2}
+    - {x: 55.2, y: 0.7, z: 46.2}
+    - {x: 60.000004, y: 0.7, z: 46.2}
+    - {x: 60.000004, y: 1.5999999, z: 46.4}
+    - {x: 60.000004, y: 1.5999999, z: 48.4}
+    - {x: 60.000004, y: 0.7, z: 48.600002}
+    - {x: 60.000004, y: 0.7, z: 49.5}
+    - {x: 60.960003, y: 0.7, z: 49.5}
+    - {x: 61.2, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: leg-b-0--assembly-in-7
+      From: leg-b-0
+      To: assembly-in-7
+      Material: 7
+      Length: 20982
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 51.600002, y: 0.7, z: 44.4}
+    - {x: 52.320004, y: 0.7, z: 44.4}
+    - {x: 52.56, y: 1.5999999, z: 44.4}
+    - {x: 53.100002, y: 1.5999999, z: 44.4}
+    - {x: 53.4, y: 0.7, z: 44.4}
+    - {x: 53.600002, y: 1.5999999, z: 44.4}
+    - {x: 54.9, y: 1.5999999, z: 44.4}
+    - {x: 55.2, y: 0.7, z: 44.4}
+    - {x: 64.8, y: 0.7, z: 44.4}
+    - {x: 64.8, y: 0.7, z: 46.2}
+    - {x: 64.8, y: 1.5999999, z: 46.4}
+    - {x: 64.8, y: 1.5999999, z: 48.4}
+    - {x: 64.8, y: 0.7, z: 48.600002}
+    - {x: 64.8, y: 0.7, z: 49.5}
+    - {x: 65.76, y: 0.7, z: 49.5}
+    - {x: 66, y: 0.18, z: 49.5}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-8--plate-0
+      From: warehouse-8
+      To: plate-0
+      Material: 8
+      Length: 37377
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 9.6, y: 0.7, z: 67.200005}
+    - {x: 10.8, y: 0.7, z: 67.200005}
+    - {x: 10.8, y: 0.7, z: 39}
+    - {x: 1.2, y: 0.7, z: 39}
+    - {x: 1.2, y: 0.7, z: 36}
+    - {x: 2.4, y: 0.7, z: 36}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-8--rod-0
+      From: warehouse-8
+      To: rod-0
+      Material: 8
+      Length: 30209
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 9.6, y: 0.7, z: 67.200005}
+    - {x: 12, y: 0.7, z: 67.200005}
+    - {x: 12, y: 0.7, z: 36}
+    - {x: 13.200001, y: 0.7, z: 36}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-9--circuit-0
+      From: warehouse-9
+      To: circuit-0
+      Material: 9
+      Length: 57174
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 20.400002, y: 0.7, z: 67.200005}
+    - {x: 21.6, y: 0.7, z: 67.200005}
+    - {x: 21.6, y: 0.7, z: 25.800001}
+    - {x: 1.2, y: 0.7, z: 25.800001}
+    - {x: 1.2, y: 0.7, z: 23.6}
+    - {x: 2.3999999, y: 0.7, z: 23.6}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-9--shell-0
+      From: warehouse-9
+      To: shell-0
+      Material: 9
+      Length: 30209
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 20.400002, y: 0.7, z: 67.200005}
+    - {x: 22.800001, y: 0.7, z: 67.200005}
+    - {x: 22.800001, y: 0.7, z: 36}
+    - {x: 24.000002, y: 0.7, z: 36}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-10--circuit-0
+      From: warehouse-10
+      To: circuit-0
+      Material: 10
+      Length: 68779
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 31.2, y: 0.7, z: 67.200005}
+    - {x: 32.4, y: 0.7, z: 67.200005}
+    - {x: 32.4, y: 0.7, z: 26.400002}
+    - {x: 0.6, y: 0.7, z: 26.400002}
+    - {x: 0.6, y: 0.7, z: 22.2}
+    - {x: 1.2, y: 0.7, z: 22.2}
+    - {x: 1.2, y: 0.7, z: 22.000002}
+    - {x: 2.3999999, y: 0.7, z: 22.000002}
+    BridgeLevel: 0
+  - Connection:
+      Id: warehouse-10--motor-0
+      From: warehouse-10
+      To: motor-0
+      Material: 10
+      Length: 74582
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 31.2, y: 0.7, z: 67.200005}
+    - {x: 33, y: 0.7, z: 67.200005}
+    - {x: 33, y: 0.7, z: 17.400002}
+    - {x: 1.2, y: 0.7, z: 17.400002}
+    - {x: 1.2, y: 0.7, z: 15.200001}
+    - {x: 2.3999999, y: 0.7, z: 15.200001}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-11--body-0
+      From: hub-11
+      To: body-0
+      Material: 11
+      Length: 54273
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 6}
+    - {x: 38.4, y: 0.7, z: 6}
+    - {x: 38.4, y: 0.7, z: 64.200005}
+    - {x: 42.000004, y: 0.7, z: 64.2}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-11--gear-0
+      From: hub-11
+      To: gear-0
+      Material: 11
+      Length: 38742
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 6}
+    - {x: 38.4, y: 0.7, z: 6}
+    - {x: 38.4, y: 0.7, z: 3}
+    - {x: 1.2, y: 0.7, z: 3}
+    - {x: 1.2, y: 0.7, z: 5.2}
+    - {x: 2.3999999, y: 0.7, z: 5.2}
+    BridgeLevel: 0
+  - Connection:
+      Id: plate-0--hub-11
+      From: plate-0
+      To: hub-11
+      Material: 11
+      Length: 53153
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 7.2000003, y: 0.7, z: 36}
+    - {x: 8.400001, y: 0.7, z: 36}
+    - {x: 8.400001, y: 0.7, z: 27.000002}
+    - {x: 21, y: 0.7, z: 27.000002}
+    - {x: 21.2, y: 1.5999999, z: 27.000002}
+    - {x: 22, y: 1.5999999, z: 27.000002}
+    - {x: 22.2, y: 0.7, z: 27.000002}
+    - {x: 31.800001, y: 0.7, z: 27.000002}
+    - {x: 32, y: 1.5999999, z: 27.000002}
+    - {x: 33.4, y: 1.5999999, z: 27.000002}
+    - {x: 33.600002, y: 0.7, z: 27.000002}
+    - {x: 34.800003, y: 0.7, z: 27.000002}
+    - {x: 34.800003, y: 0.7, z: 6}
+    - {x: 36.000004, y: 0.7, z: 6}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-12--gear-0
+      From: hub-12
+      To: gear-0
+      Material: 12
+      Length: 44741
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 16.800001}
+    - {x: 37.920002, y: 0.7, z: 16.800001}
+    - {x: 38.16, y: 1.5999999, z: 16.800001}
+    - {x: 38.100002, y: 1.5999999, z: 16.800001}
+    - {x: 37.800003, y: 0.7, z: 16.800001}
+    - {x: 37.800003, y: 0.7, z: 9}
+    - {x: 35.4, y: 0.7, z: 9}
+    - {x: 35.100002, y: 1.5999999, z: 9}
+    - {x: 34.4, y: 1.5999999, z: 9}
+    - {x: 34.2, y: 0.7, z: 9}
+    - {x: 1.2, y: 0.7, z: 9}
+    - {x: 1.2, y: 0.7, z: 6.8}
+    - {x: 2.3999999, y: 0.7, z: 6.8}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-12--leg-a-0
+      From: hub-12
+      To: leg-a-0
+      Material: 12
+      Length: 36984
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 16.800001}
+    - {x: 37.920002, y: 0.7, z: 16.800001}
+    - {x: 38.16, y: 1.5999999, z: 16.800001}
+    - {x: 38.7, y: 1.5999999, z: 16.800001}
+    - {x: 39, y: 0.7, z: 16.800001}
+    - {x: 40.800003, y: 0.7, z: 16.800001}
+    - {x: 40.800003, y: 0.7, z: 53.4}
+    - {x: 42.000004, y: 0.7, z: 53.4}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-12--leg-b-0
+      From: hub-12
+      To: leg-b-0
+      Material: 12
+      Length: 27768
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 16.800001}
+    - {x: 37.920002, y: 0.7, z: 16.800001}
+    - {x: 38.16, y: 1.5999999, z: 16.800001}
+    - {x: 38.7, y: 1.5999999, z: 16.800001}
+    - {x: 39, y: 0.7, z: 16.800001}
+    - {x: 39, y: 0.7, z: 42.600002}
+    - {x: 42.000004, y: 0.7, z: 42.600002}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-12--motor-0
+      From: hub-12
+      To: motor-0
+      Material: 12
+      Length: 43035
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 16.800001}
+    - {x: 37.920002, y: 0.7, z: 16.800001}
+    - {x: 38.16, y: 1.5999999, z: 16.800001}
+    - {x: 38.100002, y: 1.5999999, z: 16.800001}
+    - {x: 37.800003, y: 0.7, z: 16.800001}
+    - {x: 37.800003, y: 0.7, z: 18.6}
+    - {x: 35.4, y: 0.7, z: 18.6}
+    - {x: 35.100002, y: 1.5999999, z: 18.6}
+    - {x: 34.4, y: 1.5999999, z: 18.6}
+    - {x: 34.2, y: 0.7, z: 18.6}
+    - {x: 0.6, y: 0.7, z: 18.6}
+    - {x: 0.6, y: 0.7, z: 13.8}
+    - {x: 1.2, y: 0.7, z: 13.8}
+    - {x: 1.2, y: 0.7, z: 13.6}
+    - {x: 2.3999999, y: 0.7, z: 13.6}
+    BridgeLevel: 0
+  - Connection:
+      Id: rod-0--hub-12
+      From: rod-0
+      To: hub-12
+      Material: 12
+      Length: 37034
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 18, y: 0.7, z: 36}
+    - {x: 19.2, y: 0.7, z: 36}
+    - {x: 19.2, y: 0.7, z: 27.6}
+    - {x: 19.2, y: 1.5999999, z: 27.300001}
+    - {x: 19.2, y: 1.5999999, z: 25.400002}
+    - {x: 19.2, y: 0.7, z: 25.2}
+    - {x: 19.2, y: 0.7, z: 19.2}
+    - {x: 19.2, y: 1.5999999, z: 19}
+    - {x: 19.2, y: 1.5999999, z: 18.2}
+    - {x: 19.2, y: 0.7, z: 18}
+    - {x: 19.2, y: 1.5999999, z: 17.7}
+    - {x: 19.2, y: 1.5999999, z: 17.000002}
+    - {x: 19.2, y: 0.7, z: 16.800001}
+    - {x: 34.2, y: 0.7, z: 16.800001}
+    - {x: 34.4, y: 1.5999999, z: 16.800001}
+    - {x: 35.040005, y: 1.5999999, z: 16.800001}
+    - {x: 35.280003, y: 0.7, z: 16.800001}
+    - {x: 36.000004, y: 0.7, z: 16.800001}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-13--arm-a-0
+      From: hub-13
+      To: arm-a-0
+      Material: 13
+      Length: 10605
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 27.6}
+    - {x: 37.920002, y: 0.7, z: 27.6}
+    - {x: 38.16, y: 1.5999999, z: 27.6}
+    - {x: 39.4, y: 1.5999999, z: 27.6}
+    - {x: 39.600002, y: 0.7, z: 27.6}
+    - {x: 40.2, y: 0.7, z: 27.6}
+    - {x: 40.2, y: 0.7, z: 31.800001}
+    - {x: 40.4, y: 1.5999999, z: 31.800001}
+    - {x: 41.040005, y: 1.5999999, z: 31.800003}
+    - {x: 41.280003, y: 0.7, z: 31.800003}
+    - {x: 42.000004, y: 0.7, z: 31.800003}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-13--arm-b-0
+      From: hub-13
+      To: arm-b-0
+      Material: 13
+      Length: 12653
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 27.6}
+    - {x: 37.920002, y: 0.7, z: 27.6}
+    - {x: 38.16, y: 1.5999999, z: 27.6}
+    - {x: 38.4, y: 1.5999999, z: 27.6}
+    - {x: 38.4, y: 1.5999999, z: 27.000002}
+    - {x: 39.4, y: 1.5999999, z: 27.000002}
+    - {x: 39.600002, y: 0.7, z: 27.000002}
+    - {x: 40.2, y: 0.7, z: 27.000002}
+    - {x: 40.2, y: 0.7, z: 21}
+    - {x: 40.4, y: 1.5999999, z: 21}
+    - {x: 41.040005, y: 1.5999999, z: 21.000002}
+    - {x: 41.280003, y: 0.7, z: 21.000002}
+    - {x: 42.000004, y: 0.7, z: 21.000002}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-13--body-0
+      From: hub-13
+      To: body-0
+      Material: 13
+      Length: 38400
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 27.6}
+    - {x: 38.4, y: 0.7, z: 27.6}
+    - {x: 38.4, y: 0.7, z: 28.2}
+    - {x: 37.800003, y: 0.7, z: 28.2}
+    - {x: 37.800003, y: 0.7, z: 66}
+    - {x: 42.000004, y: 0.7, z: 66}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-13--head-0
+      From: hub-13
+      To: head-0
+      Material: 13
+      Length: 23514
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 27.6}
+    - {x: 37.920002, y: 0.7, z: 27.6}
+    - {x: 38.16, y: 1.5999999, z: 27.6}
+    - {x: 38.4, y: 1.5999999, z: 27.6}
+    - {x: 38.4, y: 1.5999999, z: 27.000002}
+    - {x: 38.100002, y: 1.5999999, z: 27.000002}
+    - {x: 37.800003, y: 0.7, z: 27.000002}
+    - {x: 37.800003, y: 0.7, z: 19.2}
+    - {x: 38.100002, y: 1.5999999, z: 19.2}
+    - {x: 39.4, y: 1.5999999, z: 19.2}
+    - {x: 39.600002, y: 0.7, z: 19.2}
+    - {x: 40.2, y: 0.7, z: 19.2}
+    - {x: 40.2, y: 0.7, z: 17.400002}
+    - {x: 40.2, y: 1.5999999, z: 17.2}
+    - {x: 40.2, y: 1.5999999, z: 16.400002}
+    - {x: 40.2, y: 0.7, z: 16.2}
+    - {x: 40.2, y: 0.7, z: 10.8}
+    - {x: 42.000004, y: 0.7, z: 10.8}
+    BridgeLevel: 0
+  - Connection:
+      Id: shell-0--hub-13
+      From: shell-0
+      To: hub-13
+      Material: 13
+      Length: 15057
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 28.800001, y: 0.7, z: 36}
+    - {x: 30.000002, y: 0.7, z: 36}
+    - {x: 30.000002, y: 0.7, z: 27.6}
+    - {x: 31.800001, y: 0.7, z: 27.6}
+    - {x: 32, y: 1.5999999, z: 27.6}
+    - {x: 33.4, y: 1.5999999, z: 27.6}
+    - {x: 33.600002, y: 0.7, z: 27.6}
+    - {x: 36.000004, y: 0.7, z: 27.6}
+    BridgeLevel: 0
+  - Connection:
+      Id: gear-0--hub-14
+      From: gear-0
+      To: hub-14
+      Material: 14
+      Length: 60096
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 9.6, y: 0.7, z: 6}
+    - {x: 34.2, y: 0.7, z: 6}
+    - {x: 34.2, y: 0.7, z: 8.400001}
+    - {x: 34.2, y: 2.5, z: 8.700001}
+    - {x: 34.2, y: 2.5, z: 9.400001}
+    - {x: 34.2, y: 0.7, z: 9.6}
+    - {x: 34.2, y: 0.7, z: 16.2}
+    - {x: 34.2, y: 2.5, z: 16.400002}
+    - {x: 34.2, y: 2.5, z: 17.2}
+    - {x: 34.2, y: 0.7, z: 17.400002}
+    - {x: 34.2, y: 0.7, z: 18}
+    - {x: 34.2, y: 2.5, z: 18.2}
+    - {x: 34.2, y: 2.5, z: 19}
+    - {x: 34.2, y: 0.7, z: 19.2}
+    - {x: 34.2, y: 0.7, z: 26.400002}
+    - {x: 34.2, y: 1.5999999, z: 26.600002}
+    - {x: 34.2, y: 1.5999999, z: 28}
+    - {x: 34.2, y: 0.7, z: 28.2}
+    - {x: 34.2, y: 0.7, z: 38.4}
+    - {x: 36.000004, y: 0.7, z: 38.4}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-14--arm-a-0
+      From: hub-14
+      To: arm-a-0
+      Material: 14
+      Length: 11117
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 38.4}
+    - {x: 37.440002, y: 1.5999999, z: 38.4}
+    - {x: 39.4, y: 1.5999999, z: 38.4}
+    - {x: 39.600002, y: 0.7, z: 38.4}
+    - {x: 40.2, y: 0.7, z: 38.4}
+    - {x: 40.2, y: 0.7, z: 33.600002}
+    - {x: 40.4, y: 1.5999999, z: 33.600002}
+    - {x: 41.040005, y: 1.5999999, z: 33.600002}
+    - {x: 41.280003, y: 0.7, z: 33.600002}
+    - {x: 42.000004, y: 0.7, z: 33.600002}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-14--arm-b-0
+      From: hub-14
+      To: arm-b-0
+      Material: 14
+      Length: 23009
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 38.4}
+    - {x: 37.440002, y: 1.5999999, z: 38.4}
+    - {x: 38.4, y: 1.5999999, z: 38.4}
+    - {x: 38.4, y: 1.5999999, z: 37.800003}
+    - {x: 39.4, y: 1.5999999, z: 37.800003}
+    - {x: 39.600002, y: 0.7, z: 37.800003}
+    - {x: 39.600002, y: 0.7, z: 28.2}
+    - {x: 39.600002, y: 2.5, z: 28}
+    - {x: 39.600002, y: 2.5, z: 27.300001}
+    - {x: 39.600002, y: 0.7, z: 27.000002}
+    - {x: 39.600002, y: 0.7, z: 22.800001}
+    - {x: 40.2, y: 0.7, z: 22.800001}
+    - {x: 40.4, y: 1.5999999, z: 22.800001}
+    - {x: 41.040005, y: 1.5999999, z: 22.800001}
+    - {x: 41.280003, y: 0.7, z: 22.800001}
+    - {x: 42.000004, y: 0.7, z: 22.800001}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-14--leg-a-0
+      From: hub-14
+      To: leg-a-0
+      Material: 14
+      Length: 21320
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 38.4}
+    - {x: 37.440002, y: 1.5999999, z: 38.4}
+    - {x: 38.4, y: 1.5999999, z: 38.4}
+    - {x: 38.4, y: 1.5999999, z: 39}
+    - {x: 39.4, y: 1.5999999, z: 39}
+    - {x: 39.600002, y: 0.7, z: 39}
+    - {x: 40.2, y: 0.7, z: 39}
+    - {x: 40.2, y: 0.7, z: 42}
+    - {x: 40.2, y: 1.5999999, z: 42.2}
+    - {x: 40.2, y: 1.5999999, z: 42.9}
+    - {x: 40.2, y: 0.7, z: 43.2}
+    - {x: 40.2, y: 0.7, z: 55.2}
+    - {x: 42.000004, y: 0.7, z: 55.2}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-14--leg-b-0
+      From: hub-14
+      To: leg-b-0
+      Material: 14
+      Length: 12078
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 38.4}
+    - {x: 37.440002, y: 1.5999999, z: 38.4}
+    - {x: 38.7, y: 1.5999999, z: 38.4}
+    - {x: 39, y: 0.7, z: 38.4}
+    - {x: 39.600002, y: 0.7, z: 38.4}
+    - {x: 39.600002, y: 0.7, z: 44.4}
+    - {x: 40.2, y: 0.7, z: 44.4}
+    - {x: 40.4, y: 1.5999999, z: 44.4}
+    - {x: 41.040005, y: 1.5999999, z: 44.4}
+    - {x: 41.280003, y: 0.7, z: 44.4}
+    - {x: 42.000004, y: 0.7, z: 44.4}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-15--arm-a-0
+      From: hub-15
+      To: arm-a-0
+      Material: 15
+      Length: 24165
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 49.2}
+    - {x: 37.440002, y: 1.5999999, z: 49.2}
+    - {x: 38.7, y: 1.5999999, z: 49.2}
+    - {x: 39, y: 0.7, z: 49.2}
+    - {x: 39.600002, y: 0.7, z: 49.2}
+    - {x: 39.9, y: 1.5999999, z: 49.2}
+    - {x: 41.100002, y: 1.5999999, z: 49.2}
+    - {x: 41.4, y: 0.7, z: 49.2}
+    - {x: 41.4, y: 0.7, z: 45}
+    - {x: 41.4, y: 2.5, z: 44.7}
+    - {x: 41.4, y: 2.5, z: 44.100002}
+    - {x: 41.4, y: 0.7, z: 43.800003}
+    - {x: 41.4, y: 0.7, z: 43.2}
+    - {x: 41.4, y: 1.5999999, z: 42.9}
+    - {x: 41.4, y: 1.5999999, z: 42.2}
+    - {x: 41.4, y: 0.7, z: 42}
+    - {x: 41.4, y: 0.7, z: 35.4}
+    - {x: 41.100002, y: 1.5999999, z: 35.4}
+    - {x: 41.040005, y: 1.5999999, z: 35.4}
+    - {x: 41.280003, y: 0.7, z: 35.4}
+    - {x: 42.000004, y: 0.7, z: 35.4}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-15--arm-b-0
+      From: hub-15
+      To: arm-b-0
+      Material: 15
+      Length: 38773
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 49.2}
+    - {x: 37.440002, y: 1.5999999, z: 49.2}
+    - {x: 38.7, y: 1.5999999, z: 49.2}
+    - {x: 39, y: 0.7, z: 49.2}
+    - {x: 39, y: 0.7, z: 43.2}
+    - {x: 38.7, y: 1.5999999, z: 43.2}
+    - {x: 37.4, y: 1.5999999, z: 43.2}
+    - {x: 37.2, y: 0.7, z: 43.2}
+    - {x: 35.4, y: 0.7, z: 43.2}
+    - {x: 35.4, y: 0.7, z: 39}
+    - {x: 35.4, y: 1.5999999, z: 38.7}
+    - {x: 35.4, y: 1.5999999, z: 38.100002}
+    - {x: 35.4, y: 0.7, z: 37.800003}
+    - {x: 35.4, y: 0.7, z: 28.2}
+    - {x: 35.4, y: 1.5999999, z: 28}
+    - {x: 35.4, y: 1.5999999, z: 27.300001}
+    - {x: 35.4, y: 0.7, z: 27.000002}
+    - {x: 35.4, y: 0.7, z: 24.6}
+    - {x: 37.2, y: 0.7, z: 24.6}
+    - {x: 37.4, y: 1.5999999, z: 24.6}
+    - {x: 39.4, y: 1.5999999, z: 24.6}
+    - {x: 39.600002, y: 0.7, z: 24.6}
+    - {x: 40.2, y: 0.7, z: 24.6}
+    - {x: 40.4, y: 1.5999999, z: 24.6}
+    - {x: 41.040005, y: 1.5999999, z: 24.6}
+    - {x: 41.280003, y: 0.7, z: 24.6}
+    - {x: 42.000004, y: 0.7, z: 24.6}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-15--leg-a-0
+      From: hub-15
+      To: leg-a-0
+      Material: 15
+      Length: 12408
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 49.2}
+    - {x: 37.440002, y: 1.5999999, z: 49.2}
+    - {x: 38.7, y: 1.5999999, z: 49.2}
+    - {x: 39, y: 0.7, z: 49.2}
+    - {x: 39, y: 0.7, z: 57.000004}
+    - {x: 42.000004, y: 0.7, z: 57}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-15--leg-b-0
+      From: hub-15
+      To: leg-b-0
+      Material: 15
+      Length: 9456
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 49.2}
+    - {x: 37.440002, y: 1.5999999, z: 49.2}
+    - {x: 38.4, y: 1.5999999, z: 49.2}
+    - {x: 38.4, y: 1.5999999, z: 48.600002}
+    - {x: 38.7, y: 1.5999999, z: 48.600002}
+    - {x: 39, y: 0.7, z: 48.600002}
+    - {x: 39.600002, y: 0.7, z: 48.600002}
+    - {x: 39.600002, y: 0.7, z: 46.2}
+    - {x: 39.9, y: 1.5999999, z: 46.2}
+    - {x: 41.040005, y: 1.5999999, z: 46.2}
+    - {x: 41.280003, y: 0.7, z: 46.2}
+    - {x: 42.000004, y: 0.7, z: 46.2}
+    BridgeLevel: 0
+  - Connection:
+      Id: motor-0--hub-15
+      From: motor-0
+      To: hub-15
+      Material: 15
+      Length: 57950
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 9.6, y: 0.7, z: 14.400001}
+    - {x: 33.600002, y: 0.7, z: 14.400001}
+    - {x: 33.600002, y: 0.7, z: 16.2}
+    - {x: 33.600002, y: 1.5999999, z: 16.400002}
+    - {x: 33.600002, y: 1.5999999, z: 17.2}
+    - {x: 33.600002, y: 0.7, z: 17.400002}
+    - {x: 33.600002, y: 0.7, z: 18}
+    - {x: 33.600002, y: 1.5999999, z: 18.2}
+    - {x: 33.600002, y: 1.5999999, z: 19}
+    - {x: 33.600002, y: 0.7, z: 19.2}
+    - {x: 33.600002, y: 0.7, z: 26.400002}
+    - {x: 33.600002, y: 2.5, z: 26.600002}
+    - {x: 33.600002, y: 2.5, z: 28}
+    - {x: 33.600002, y: 0.7, z: 28.2}
+    - {x: 33.600002, y: 0.7, z: 49.2}
+    - {x: 36.000004, y: 0.7, z: 49.2}
+    BridgeLevel: 0
+  - Connection:
+      Id: circuit-0--hub-16
+      From: circuit-0
+      To: hub-16
+      Material: 16
+      Length: 59856
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 9.6, y: 0.7, z: 22.800001}
+    - {x: 18.6, y: 0.7, z: 22.800001}
+    - {x: 18.800001, y: 1.5999999, z: 22.800001}
+    - {x: 19.6, y: 1.5999999, z: 22.800001}
+    - {x: 19.800001, y: 0.7, z: 22.800001}
+    - {x: 31.800001, y: 0.7, z: 22.800001}
+    - {x: 31.800001, y: 0.7, z: 25.800001}
+    - {x: 31.800001, y: 1.5999999, z: 26.000002}
+    - {x: 31.800001, y: 1.5999999, z: 26.400002}
+    - {x: 31.800001, y: 2.5, z: 26.600002}
+    - {x: 31.800001, y: 2.5, z: 28}
+    - {x: 31.800001, y: 0.7, z: 28.2}
+    - {x: 31.800001, y: 0.7, z: 60.000004}
+    - {x: 32, y: 1.5999999, z: 60.000004}
+    - {x: 33.4, y: 1.5999999, z: 60.000004}
+    - {x: 33.600002, y: 0.7, z: 60.000004}
+    - {x: 36.000004, y: 0.7, z: 60.000004}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-16--body-0
+      From: hub-16
+      To: body-0
+      Material: 16
+      Length: 11265
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 60.000004}
+    - {x: 40.800003, y: 0.7, z: 60.000004}
+    - {x: 40.800003, y: 0.7, z: 67.8}
+    - {x: 42.000004, y: 0.7, z: 67.8}
+    BridgeLevel: 0
+  - Connection:
+      Id: hub-16--head-0
+      From: hub-16
+      To: head-0
+      Material: 16
+      Length: 75848
+      Speed: 32
+      Spacing: 512
+    Points:
+    - {x: 37.2, y: 0.7, z: 60.000004}
+    - {x: 37.440002, y: 1.5999999, z: 60.000004}
+    - {x: 38.7, y: 1.5999999, z: 60.000004}
+    - {x: 39, y: 0.7, z: 60.000004}
+    - {x: 39, y: 0.7, z: 59.4}
+    - {x: 52.2, y: 0.7, z: 59.4}
+    - {x: 52.2, y: 0.7, z: 55.800003}
+    - {x: 52.2, y: 2.5, z: 55.600002}
+    - {x: 52.2, y: 2.5, z: 54.9}
+    - {x: 52.2, y: 0.7, z: 54.600002}
+    - {x: 52.2, y: 0.7, z: 45}
+    - {x: 52.2, y: 2.5, z: 44.7}
+    - {x: 52.2, y: 2.5, z: 44.100002}
+    - {x: 52.2, y: 0.7, z: 43.800003}
+    - {x: 52.2, y: 0.7, z: 34.2}
+    - {x: 52.2, y: 2.5, z: 33.9}
+    - {x: 52.2, y: 2.5, z: 33.2}
+    - {x: 52.2, y: 0.7, z: 33}
+    - {x: 52.2, y: 0.7, z: 23.400002}
+    - {x: 52.2, y: 2.5, z: 23.2}
+    - {x: 52.2, y: 2.5, z: 22.400002}
+    - {x: 52.2, y: 0.7, z: 22.2}
+    - {x: 52.2, y: 0.7, z: 16.2}
+    - {x: 40.800003, y: 0.7, z: 16.2}
+    - {x: 40.800003, y: 0.7, z: 13.200001}
+    - {x: 42.000004, y: 0.7, z: 13.2}
+    BridgeLevel: 0
+  Regions:
+  - Name: "01 \u539F\u6599\u4ED3\u50A8"
+    Bounds:
+      x: 2
+      y: 50
+      width: 26
+      height: 12
+    Reserved: 0
+  - Name: "02 \u57FA\u7840\u52A0\u5DE5"
+    Bounds:
+      x: 2
+      y: 26
+      width: 26
+      height: 22
+    Reserved: 0
+  - Name: "03 \u96F6\u4EF6\u5236\u9020"
+    Bounds:
+      x: 2
+      y: 2
+      width: 26
+      height: 22
+    Reserved: 0
+  - Name: "04 \u516D\u7C7B\u90E8\u4EF6\u88C5\u914D"
+    Bounds:
+      x: 32
+      y: 4
+      width: 12
+      height: 56
+    Reserved: 0
+  - Name: "05 \u516D\u5DE5\u4F4D\u603B\u88C5"
+    Bounds:
+      x: 48
+      y: 32
+      width: 33
+      height: 26
+    Reserved: 0
+  - Name: "06 \u68C0\u6D4B\u51FA\u5E93"
+    Bounds:
+      x: 82
+      y: 32
+      width: 9
+      height: 30
+    Reserved: 0
+  - Name: "07 \u6269\u5EFA\u9884\u7559"
+    Bounds:
+      x: 48
+      y: 2
+      width: 42
+      height: 28
+    Reserved: 1
+  RefillInterval: 600
+  FinishedCapacity: 8
+  DispatchInterval: 240
+  Version: Candidate
+  FrozenInterfaceSignature: 

@@ -1,0 +1,56 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 60.25,
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.DemoSmokeTests.DemoSceneLoadsWithSingleSimulationDriver",
+          "Status": "Passed",
+          "Duration": 2.297466,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02SmokeTests.ProductionPresentationAndRestartDoNotOwnLogistics",
+          "Status": "Passed",
+          "Duration": 4.2772611,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership",
+          "Status": "Passed",
+          "Duration": 32.0727547,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates",
+          "Status": "Passed",
+          "Duration": 21.5141537,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

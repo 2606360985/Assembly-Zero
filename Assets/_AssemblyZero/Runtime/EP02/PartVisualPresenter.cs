@@ -16,8 +16,8 @@ namespace AssemblyZero.Unity
         public Transform ProductSocket(int product, int socket) => productSockets[product][socket];
         public void Clear()
         {
-            foreach (var v in visuals.Values) { if (v.Anchor.PayloadRoot != null && v.Anchor.PayloadRoot.parent != v.Root.transform) Destroy(v.Anchor.PayloadRoot.gameObject); Destroy(v.Root); }
-            foreach (var p in products.Values) Destroy(p);
+            foreach (var v in visuals.Values) { if (v.Anchor.PayloadRoot != null && v.Anchor.PayloadRoot.parent != v.Root.transform) Release(v.Anchor.PayloadRoot.gameObject); Release(v.Root); }
+            foreach (var p in products.Values) Release(p);
             visuals.Clear(); products.Clear(); productSockets.Clear();
         }
         public void Present(AssemblySnapshot snapshot, EP02BakedLayout topology)
@@ -57,10 +57,11 @@ namespace AssemblyZero.Unity
                     else { anchor.PayloadRoot.SetParent(ProductSocket(item.ProductId, item.OwnerId), false); def.AssemblyPose.Apply(anchor.SourceRoot); }
                 }
             }
-            foreach (var id in visuals.Keys.Where(id => !live.Contains(id)).ToArray()) { var v = visuals[id]; if (v.Anchor.PayloadRoot.parent != v.Root.transform) Destroy(v.Anchor.PayloadRoot.gameObject); Destroy(v.Root); visuals.Remove(id); }
+            foreach (var id in visuals.Keys.Where(id => !live.Contains(id)).ToArray()) { var v = visuals[id]; if (v.Anchor.PayloadRoot.parent != v.Root.transform) Release(v.Anchor.PayloadRoot.gameObject); Release(v.Root); visuals.Remove(id); }
             var active = new HashSet<int>(snapshot.Products.Select(p => p.Id));
-            foreach (var id in products.Keys.Where(id => !active.Contains(id)).ToArray()) { Destroy(products[id]); products.Remove(id); productSockets.Remove(id); }
+            foreach (var id in products.Keys.Where(id => !active.Contains(id)).ToArray()) { Release(products[id]); products.Remove(id); productSockets.Remove(id); }
         }
+        private static void Release(GameObject go) { if(go==null)return; if(Application.isPlaying)UnityEngine.Object.Destroy(go);else UnityEngine.Object.DestroyImmediate(go); }
         private void OnDestroy() { Clear(); }
     }
 }

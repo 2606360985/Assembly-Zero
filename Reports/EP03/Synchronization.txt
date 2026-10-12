@@ -1,0 +1,12 @@
+EP03 synchronization to primary project
+Source: C:\Users\ESI186\.codex\worktrees\55e3\Assembly-Zero
+Destination: E:\HP_E\GITHUB_SKY\Assembly-Zero
+Changed tracked files: 10
+New files: 155
+Total copied and SHA-256 verified: 165
+All copied files are byte-identical.
+No Library, Temp, .git, or package cache directories copied.
+Git diff --check: passed.
+Existing Unity validation reports were copied; Unity tests were not rerun as part of this file synchronization.
+Future changes in this chat must explicitly target E:\HP_E\GITHUB_SKY\Assembly-Zero.
+The source worktree remains present; no commits or worktree deletion were performed.

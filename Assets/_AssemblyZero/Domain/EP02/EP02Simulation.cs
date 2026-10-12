@@ -26,6 +26,8 @@ namespace AssemblyZero.Domain
         public double SnapshotMs { get; private set; }
         private readonly BeltTopology topology;
         private readonly List<AssemblyItemData> items = new List<AssemblyItemData>();
+        private readonly Dictionary<int, AssemblyItemData> itemIndex = new Dictionary<int, AssemblyItemData>();
+        public Func<ProductSnapshot, bool> TryAcceptProduct { get; set; }
         private readonly List<AssemblyCommand> commands = new List<AssemblyCommand>();
         private readonly List<AssemblyEvent> events = new List<AssemblyEvent>();
         private readonly List<BeltAccessCandidate>[] queries;
@@ -55,7 +57,15 @@ namespace AssemblyZero.Domain
             foreach (var x in Config.InitialParts) if (!Insert(x.Part, x.Lane, x.Distance)) throw new ArgumentException("Initial parts overlap or lie outside supply belts.");
             RefreshStatistics(0); RefreshStatistics(CalculateStateHash()); PublishSnapshot();
         }
-        internal AssemblyItemData Item(int id) => id > 0 && id <= items.Count ? items[id - 1] : null;
+        internal AssemblyItemData Item(int id) => itemIndex.TryGetValue(id, out var item) ? item : null;
+        public bool TrySupply(int itemId, PartTypeId part, int lane)
+        {
+            if (!Config.ExternalSupply || Item(itemId) != null || lane < 0 || lane >= topology.Lanes.Length || !Sockets.Any(s => s.AcceptedPart.Equals(part))) return false;
+            var l = topology.Lanes[lane];
+            if (!((IIdentityBeltAccess)Access).TryInsertExisting(new BeltAccessPort(l.LineId, 1UL << l.Id.Value, 0, 0, 0, part.Mask), new ItemId(itemId), part, out var handle)) return false;
+            Register(new AssemblyItemData { ItemId = itemId, Part = part, Handle = handle, Ownership = ItemOwnership.OnBelt, GeneratedTick = TickNumber }); return true;
+        }
+        private void Register(AssemblyItemData item) { items.Add(item); itemIndex.Add(item.ItemId, item); }
         internal AssemblySocketData Socket(int id) => Sockets.Single(s => s.Id.Value == id);
         internal AssemblySocketData Target(InserterData a)
         {
@@ -65,6 +75,11 @@ namespace AssemblyZero.Domain
         internal bool InPort(InserterData a, BeltAccessCandidate c) => Ports(a).Any(p => p.TransportLineId.Value == c.Handle.LineId.Value && (p.LaneMask & (1UL << c.Handle.LaneId.Value)) != 0 && c.Distance >= p.StartDistance && c.Distance <= p.EndDistance);
         private static IEnumerable<BeltAccessPort> Ports(InserterData a) => a.Ports.Length == 0 ? new[] { a.Port } : a.Ports;
         private int SupplySpeed(int lane) => Config.SupplySpeeds[Array.FindIndex(topology.Lanes, l => l.Id.Value == lane)];
+        private long PredictedPickupDistance(BeltAccessCandidate candidate, InserterData arm)
+        {
+            var distance = (long)candidate.Distance + (long)SupplySpeed(candidate.Handle.LaneId.Value) * (arm.PickingTicks + 1);
+            return Config.ExternalSupply ? Math.Min(distance, topology.Lanes.Single(l => l.Id.Value == candidate.Handle.LaneId.Value).Length - Config.MinimumSpacing) : distance;
+        }
         public bool TryGetItemRecord(int id, out AssemblyItemSnapshot record)
         {
             var item = Item(id); record = default; if (item == null) return false;
@@ -126,7 +141,7 @@ namespace AssemblyZero.Domain
             var l = topology.Lanes[lane]; var port = new BeltAccessPort(l.LineId, 1UL << l.Id.Value, distance, distance, distance, part.Mask);
             if (!Access.TryInsertPart(port, part, out var handle)) return false;
             if (handle.ItemId.Value != items.Count + 1) throw new InvalidOperationException("Item IDs must be monotonic.");
-            items.Add(new AssemblyItemData { ItemId = handle.ItemId.Value, Part = part, Handle = handle, Ownership = ItemOwnership.OnBelt, GeneratedTick = TickNumber }); return true;
+            Register(new AssemblyItemData { ItemId = handle.ItemId.Value, Part = part, Handle = handle, Ownership = ItemOwnership.OnBelt, GeneratedTick = TickNumber }); return true;
         }
         private void TransportProducts()
         {
@@ -144,7 +159,13 @@ namespace AssemblyZero.Domain
                 if (p.Distance == before && p.NextStation < Config.Stations.Length && p.Distance != Config.Stations[p.NextStation].Distance) p.State = ProductState.WaitingForDownstream;
                 else if (p.Distance > before) p.State = p.Completed ? ProductState.Completed : ProductState.Moving;
                 while (p.Segment < Config.SegmentEnds.Length - 1 && p.Distance >= Config.SegmentEnds[p.Segment]) p.Segment++;
-                if (p.Distance == Config.ProductLength) { if (!p.Completed) throw new InvalidOperationException("Unfinished product reached the outlet."); p.Exited = true; exitedProducts++; } else front = p;
+                if (p.Distance == Config.ProductLength)
+                {
+                    if (!p.Completed) throw new InvalidOperationException("Unfinished product reached the outlet.");
+                    if (TryAcceptProduct == null || TryAcceptProduct(new ProductSnapshot(p))) { p.Exited = true; exitedProducts++; }
+                    else { p.State = ProductState.WaitingForDownstream; front = p; }
+                }
+                else front = p;
             }
             if (TickNumber >= nextProductTick)
             {
@@ -172,7 +193,7 @@ namespace AssemblyZero.Domain
                 foreach (var port in Ports(a))
                 {
                     Access.QueryCandidates(port, scratch);
-                    foreach (var c in scratch) if (Item(c.Handle.ItemId.Value).Ownership == ItemOwnership.OnBelt && c.Part.Value == a.AllowedPart.Value && (long)c.Distance + (long)SupplySpeed(c.Handle.LaneId.Value) * (a.PickingTicks + 1) <= port.EndDistance) queries[i].Add(c);
+                    foreach (var c in scratch) if (Item(c.Handle.ItemId.Value).Ownership == ItemOwnership.OnBelt && c.Part.Value == a.AllowedPart.Value && PredictedPickupDistance(c,a) <= port.EndDistance) queries[i].Add(c);
                 }
                 queries[i].Sort((x, y) => x.Handle.ItemId.Value.CompareTo(y.Handle.ItemId.Value));
                 if (queries[i].Count != 0) { a.IntentItem = a.LastIntentItem = queries[i][0].Handle.ItemId.Value; a.LastIntentTick = TickNumber; }
@@ -181,7 +202,7 @@ namespace AssemblyZero.Domain
         private void Reserve() { for (var i = 0; i < Inserters.Length; i++) foreach (var c in queries[i]) if (Reservations.TryReserve(this, Inserters[i], c)) break; }
         private void Reject()
         {
-            if (TickNumber < nextRejectTick) return; BeltAccessCandidate selected = default;
+            if (!Config.RejectEnabled || TickNumber < nextRejectTick) return; BeltAccessCandidate selected = default;
             foreach (var l in topology.Lanes)
             {
                 Access.QueryCandidates(new BeltAccessPort(l.LineId, 1UL << l.Id.Value, l.Length - Config.MinimumSpacing, l.Length, l.Length, ulong.MaxValue), scratch);

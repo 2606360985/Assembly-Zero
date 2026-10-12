@@ -30,8 +30,8 @@ namespace AssemblyZero.Unity
                 var arm = snapshot.Inserters.Single(a => a.Id == author.StableId);
                 var product = topology.Product.Sample(topology.Product.CenterDistance(author.StationPiece), out var tangent);
                 var socket = product + Quaternion.LookRotation(tangent) * Layout.SocketOffset(author.SocketId);
-                var pickup = topology.Supply[Mathf.Clamp(arm.PickupLane,0,1)].Sample(arm.PickupDistance, out _) + Vector3.up * .26f;
-                var query = topology.Supply[0].Sample(author.PickupDistances[0], out _) + Vector3.up * .26f;
+                var pickup = topology.Supply[Mathf.Clamp(arm.PickupLane,0,topology.Supply.Length-1)].Sample(arm.PickupDistance, out _) + Vector3.up * .26f;
+                var query = topology.Supply[Layout.PickupLanes(author)[0]].Sample(author.PickupDistances[Layout.PickupLanes(author)[0]], out _) + Vector3.up * .26f;
                 foreach (var item in snapshot.Items) if (item.ItemId == arm.ReservedItem) { query = topology.Supply[item.Lane].Sample(item.Distance, out _) + Vector3.up * .26f; break; }
                 var t = Mathf.SmoothStep(0, 1, (float)arm.Progress(snapshot.Tick, fraction)); var rest = author.RestPosition;
                 var target = arm.State == InserterState.WaitingForTarget && arm.HeldItem != 0 ? socket + Vector3.up * .32f : Motion(arm.State, t, rest, arm.State == InserterState.Picking ? query : pickup, socket);

@@ -12,6 +12,8 @@ namespace AssemblyZero.Domain
         public int Seed = 2006, BeltSpeed = 32, MinimumSpacing = 768, SourceInterval = 24, RejectInterval = 60;
         public int ScanTicks = 90, ShowcaseTicks = 180, MaxGenerated;
         public bool SourceEnabled = true, FullRobotManifest = true;
+        public bool RejectEnabled = true;
+        public bool ExternalSupply;
         public int[] SupplySpeeds = { 32, 24 };
         public int ProductSpeed = 16, ProductInterval = 240, ProductSpacing = 2048, ProductLength;
         public int[] SegmentEnds = Array.Empty<int>();
@@ -29,6 +31,7 @@ namespace AssemblyZero.Domain
         }
         public void Validate(BeltTopology topology)
         {
+            if (ExternalSupply && SourceEnabled) throw new ArgumentException("External assembly supply cannot also generate parts.");
             if (topology == null || topology.Lanes.Length == 0 || SupplySpeeds.Length != topology.Lanes.Length || SupplySpeeds.Any(s => s < 0)) throw new ArgumentException("Supply lines require a nonnegative speed for each lane.");
             if (MinimumSpacing < 1 || SourceInterval < 1 || RejectInterval < 1 || ScanTicks < 1 || ShowcaseTicks < 1 || ProductSpeed < 1 || ProductInterval < 1 || ProductSpacing < 1 || ProductLength < ProductSpacing) throw new ArgumentException("Invalid production timing or spacing.");
             if (SegmentEnds.Length == 0 || SegmentEnds.Last() != ProductLength || SegmentEnds[0] < ProductSpacing) throw new ArgumentException("Product segments must cover the route.");
