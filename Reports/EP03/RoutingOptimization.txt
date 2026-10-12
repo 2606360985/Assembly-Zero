@@ -1,0 +1,3 @@
+Full: 83 routes, 789 segments, max slope 33.69014, max deck 3.5, validation passed.
+Minimal: 38 routes, 318 segments, max slope 33.69014, max deck 1.9, validation passed.
+Saved both scenes; seconds 129.6667958

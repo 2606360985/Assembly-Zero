@@ -1,6 +1,6 @@
 Editor CPU snapshot observation at 20,000 ticks
 Routes: 83
-Transport items: 944
-Isolated route snapshot refresh mean ms (120 repetitions): 0.2760
-Last assembly snapshot publish ms: 0.0793
+Transport items: 653
+Isolated route snapshot refresh mean ms (120 repetitions): 0.0935
+Last assembly snapshot publish ms: 0.0247
 The isolated refresh is an extra measurement, not additional production ticks.

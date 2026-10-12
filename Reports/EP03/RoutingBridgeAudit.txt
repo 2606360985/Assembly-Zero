@@ -1,0 +1,3 @@
+Adjacent ground-belt crossing pairs checked: 188
+Dips between neighboring crossed lanes: 0
+[]

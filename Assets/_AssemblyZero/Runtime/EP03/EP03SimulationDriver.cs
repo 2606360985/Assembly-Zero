@@ -86,7 +86,7 @@ namespace AssemblyZero.Unity
             foreach(var route in Simulation.Routes)foreach(var item in route.Snapshot.Items)
             {
                 live.Add(item.ItemId.Value);if(!cargo.TryGetValue(item.ItemId.Value,out var g)){g=GameObject.CreatePrimitive(PrimitiveType.Cube);Release(g.GetComponent<Collider>());g.transform.SetParent(CargoRoot,false);g.transform.localScale=new Vector3(.3f,.22f,.3f);g.GetComponent<Renderer>().sharedMaterial=MaterialPalette[item.PartType.Value];cargo.Add(item.ItemId.Value,g);}
-                g.transform.position=routes[route.Definition.Id].Sample(item.Distance,out var tangent)+Vector3.up*.14f;g.transform.rotation=Quaternion.LookRotation(Mathf.Abs(tangent.y)>.9f?Vector3.forward:tangent);
+                var position=routes[route.Definition.Id].Sample(item.Distance,out var tangent);g.transform.rotation=Quaternion.LookRotation(Mathf.Abs(tangent.y)>.9f?Vector3.forward:tangent);g.transform.position=position+g.transform.up*.12f;
             }
             foreach(var id in cargo.Keys.Where(id=>!live.Contains(id)).ToArray()){Release(cargo[id]);cargo.Remove(id);}
             foreach(var state in Simulation.Modules)

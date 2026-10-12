@@ -61,7 +61,7 @@ namespace AssemblyZero.Unity
             {
                 var a=Modules[i];var b=Modules[j];if(new RectInt(a.Grid,a.OccupiedSize).Overlaps(new RectInt(b.Grid,b.OccupiedSize)))throw new InvalidOperationException("Overlapping modules: "+a.Module.Id+" / "+b.Module.Id);
             }
-            foreach(var r in Routes)if(r.Points.Length<2||r.Points.Any(p=>float.IsNaN(p.x)||float.IsNaN(p.y)||float.IsNaN(p.z))||r.Length<1)throw new InvalidOperationException("Invalid route: "+r.Connection.Id);
+            foreach(var r in Routes)if(r.Points.Length<2||r.Points.Any(p=>float.IsNaN(p.x)||float.IsNaN(p.y)||float.IsNaN(p.z)||float.IsInfinity(p.x)||float.IsInfinity(p.y)||float.IsInfinity(p.z))||r.Length<1)throw new InvalidOperationException("Invalid route: "+r.Connection.Id);
             Vector3 Endpoint(string id,bool output,int material)
             {
                 var placement=Modules.Single(m=>m.Module.Id==id);var view=placement.Prefab.GetComponent<FactoryModuleAuthoring>();var port=view.Ports.Single(p=>p.Output==output&&p.Material==material);
@@ -72,6 +72,9 @@ namespace AssemblyZero.Unity
             {
                 if(Vector3.Distance(r.Points[0],Endpoint(r.Connection.From,true,r.Connection.Material))>.01f||Vector3.Distance(r.Points.Last(),Endpoint(r.Connection.To,false,r.Connection.Material))>.01f)throw new InvalidOperationException("Route endpoints no longer match module ports: "+r.Connection.Id);
             }
+            foreach(var route in Routes)for(var i=1;i<route.Points.Length;i++)
+                if(FactoryRouteGeometry.SlopeDegrees(route.Points[i-1],route.Points[i])>FactoryRouteGeometry.MaxSlopeDegrees+.01f)
+                    throw new InvalidOperationException("Conveyor slope exceeds 40 degrees: "+route.Connection.Id+" segment "+i);
             for(var i=0;i<Routes.Length;i++)for(var j=i+1;j<Routes.Length;j++)
             {
                 var a=Routes[i];var b=Routes[j];
@@ -80,10 +83,13 @@ namespace AssemblyZero.Unity
                 for(var p=1;p<a.Points.Length;p++)for(var q=1;q<b.Points.Length;q++)
                 {
                     var x=a.Points[p-1];var y=a.Points[p];var u=b.Points[q-1];var v=b.Points[q];
-                    if(Mathf.Abs(x.y-y.y)>.01f||Mathf.Abs(u.y-v.y)>.01f)continue;
-                    if(PlanarCrosses(x,y,u,v)&&Mathf.Abs(x.y-u.y)<.75f)throw new InvalidOperationException("Bridge clearance below 0.75m: "+a.Connection.Id+" / "+b.Connection.Id);
+                    if(FactoryRouteGeometry.PlanarSeparation(x,y,u,v,out var ta,out var tb)<.53f&&Mathf.Abs(Mathf.Lerp(x.y,y.y,ta)-Mathf.Lerp(u.y,v.y,tb))<.75f)
+                        throw new InvalidOperationException("Bridge clearance below 0.75m: "+a.Connection.Id+" / "+b.Connection.Id);
                 }
             }
+            foreach(var route in Routes)for(var i=1;i<route.Points.Length;i++)for(var j=i+2;j<route.Points.Length;j++)
+                if(FactoryRouteGeometry.PlanarSeparation(route.Points[i-1],route.Points[i],route.Points[j-1],route.Points[j],out var a,out var b)<.001f&&Mathf.Abs(Mathf.Lerp(route.Points[i-1].y,route.Points[i].y,a)-Mathf.Lerp(route.Points[j-1].y,route.Points[j].y,b))<.75f)
+                    throw new InvalidOperationException("Conveyor doubles back through itself: "+route.Connection.Id);
         }
         public static bool PlanarCrosses(Vector3 a,Vector3 b,Vector3 c,Vector3 d)
         {

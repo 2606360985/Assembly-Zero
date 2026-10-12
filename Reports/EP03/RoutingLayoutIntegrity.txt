@@ -1,0 +1,3 @@
+All 45 module definitions, grid positions, footprints, rotations and offsets unchanged.
+Recipes, regions and assembly origin unchanged.
+All 83 logistics connection identities, endpoints, materials, speeds and spacing unchanged; route lengths rebaked.

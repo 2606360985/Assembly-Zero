@@ -104,7 +104,7 @@ namespace AssemblyZero.Unity.Editor
             if(asset.Routes.Length==0)CreateConnections(asset,views);
             asset.Validate();
             var conveyorRoot=new GameObject("EP03 Transport / Explicit Routes");
-            foreach(var route in asset.Routes)BuildRoute(route,conveyorRoot.transform);
+            foreach(var route in asset.Routes)BuildRoute(route,conveyorRoot.transform,asset.Routes);
             var floor=Box("Factory Ground",null,new Vector3(55,-.4f,38.4f),new Vector3(112,.6f,79),Mat("Floor",new Color(.045f,.065f,.08f)));
             var markings=new GameObject("Regions and Maintenance Grid");
             for(var x=0;x<=92;x+=4)Box("Grid",markings.transform,new Vector3(x*1.2f,-.08f,38.4f),new Vector3(.025f,.01f,76.8f),Mat("Grid",new Color(.15f,.2f,.23f)));
@@ -304,23 +304,79 @@ namespace AssemblyZero.Unity.Editor
             assembly.DisplayRoot.position=new Vector3(33.6f,0,0);
         }
         public static void BuildAll(){RebakeRoutes();BuildScene();BuildMinimal();}
+        [MenuItem("Tools/Assembly Zero/Optimize EP03 Conveyor Bridges")]
+        public static void OptimizeConveyorBridges()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play Mode before optimizing routes.");
+            for(var i=0;i<SceneManager.sceneCount;i++)if(SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Save open scene changes first.");
+            var candidates=new List<(FactoryLayoutAsset asset,FactoryLayoutAsset copy)>();
+            try
+            {
+                foreach(var name in new[]{"FactoryFull","FactoryMinimal"})
+                {
+                    var asset=AssetDatabase.LoadAssetAtPath<FactoryLayoutAsset>(Root+"/Configs/"+name+".asset");
+                    if(asset==null)continue;
+                    var copy=UnityEngine.Object.Instantiate(asset);candidates.Add((asset,copy));
+                    EP03GroundRouter.Refine(copy);copy.Validate();
+                }
+                foreach(var candidate in candidates)
+                {
+                    candidate.asset.Routes=candidate.copy.Routes;candidate.asset.Version="Candidate";candidate.asset.FrozenInterfaceSignature="";EditorUtility.SetDirty(candidate.asset);
+                }
+                AssetDatabase.SaveAssets();
+                RefreshConveyorVisuals();
+            }
+            finally{foreach(var candidate in candidates)UnityEngine.Object.DestroyImmediate(candidate.copy);}
+        }
+        public static void RefreshConveyorVisuals()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play Mode before rebuilding conveyor visuals.");
+            for(var i=0;i<SceneManager.sceneCount;i++)if(SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Save open scene changes first.");
+            foreach(var path in new[]{ScenePath,"Assets/_AssemblyZero/Scenes/EP03_Minimal.unity"})
+            {
+                var scene=EditorSceneManager.OpenScene(path);
+                var driver=UnityEngine.Object.FindFirstObjectByType<EP03SimulationDriver>();
+                var root=scene.GetRootGameObjects().Single(g=>g.name=="EP03 Transport / Explicit Routes");
+                foreach(Transform child in root.transform.Cast<Transform>().ToArray())UnityEngine.Object.DestroyImmediate(child.gameObject);
+                foreach(var route in driver.Layout.Routes)BuildRoute(route,root.transform,driver.Layout.Routes);
+                ValidateScene();EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
+            }
+            EditorSceneManager.OpenScene(ScenePath);
+        }
         internal static bool Crosses(Vector3 a,Vector3 b,Vector3 c,Vector3 d)
         {
             return FactoryLayoutAsset.PlanarCrosses(a,b,c,d);
         }
-        private static void BuildRoute(FactoryRoutePlacement route,Transform parent)
+        private static void BuildRoute(FactoryRoutePlacement route,Transform parent,FactoryRoutePlacement[] routes)
         {
             var root=new GameObject(route.Connection.Id);root.transform.SetParent(parent,false);
             var bed=Mat("Conveyor Bed",new Color(.12f,.15f,.17f));var rail=Mat("Conveyor Rail",new Color(.38f,.42f,.44f));
             for(var i=1;i<route.Points.Length;i++)
             {
                 var a=route.Points[i-1];var b=route.Points[i];var delta=b-a;if(delta.sqrMagnitude<.001f)continue;
-                var segment=new GameObject("Conveyor Segment").transform;segment.SetParent(root.transform,false);segment.position=(a+b)*.5f-Vector3.up*.15f;segment.rotation=Quaternion.LookRotation(delta);
+                var segment=new GameObject("Conveyor Segment").transform;segment.SetParent(root.transform,false);segment.rotation=Quaternion.LookRotation(delta);segment.position=(a+b)*.5f-segment.up*.08f;
                 Box("Belt",segment,Vector3.zero,new Vector3(.46f,.16f,delta.magnitude),bed);
                 foreach(var side in new[]{-1,1})Box("Rail",segment,new Vector3(side*.25f,.1f,0),new Vector3(.04f,.12f,delta.magnitude),rail);
-                if(delta.magnitude>1.1f)for(var d=.5f;d<delta.magnitude;d+=2.4f)
+                var horizontal=FactoryRouteGeometry.Flat(delta).magnitude;
+                if(horizontal>.5f)for(var d=.3f;d<horizontal;d+=2.4f)
                 {
-                    var point=a+delta.normalized*d;Box("Support",root.transform,new Vector3(point.x,(point.y-.25f)*.5f,point.z),new Vector3(.16f,Mathf.Max(.1f,point.y-.25f),.16f),rail);
+                    var point=Vector3.Lerp(a,b,d/horizontal)-segment.up*.16f;
+                    // A bridge pier must never stand in the lower belt or its cargo envelope.
+                    var blocked=false;
+                    foreach(var other in routes)
+                    {
+                        for(var j=1;j<other.Points.Length;j++)
+                        {
+                            if(other==route&&j==i)continue;
+                            var x=other.Points[j-1];var y=other.Points[j];var flat=FactoryRouteGeometry.Flat(y-x);
+                            if(flat.sqrMagnitude<.000001f)continue;
+                            var t=Mathf.Clamp01(Vector2.Dot(FactoryRouteGeometry.Flat(point-x),flat)/flat.sqrMagnitude);
+                            if(Vector2.Distance(FactoryRouteGeometry.Flat(point),FactoryRouteGeometry.Flat(x)+flat*t)<.4f&&Mathf.Lerp(x.y,y.y,t)<point.y-.1f){blocked=true;break;}
+                        }
+                        if(blocked)break;
+                    }
+                    if(blocked)continue;
+                    Box("Support",root.transform,new Vector3(point.x,(point.y-.1f)*.5f,point.z),new Vector3(.16f,Mathf.Max(.1f,point.y+.1f),.16f),rail);
                 }
             }
         }
