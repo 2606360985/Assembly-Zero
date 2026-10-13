@@ -133,6 +133,7 @@ namespace AssemblyZero.Unity.Editor
                 Label("P"+(i+1),bays,center+new Vector3(0,.06f,-1.2f),.1f);
             }
             driver.Hud=BuildHud();
+            EP03PresentationBuilder.Install(driver);
             assembly.BakeAndValidate();localScenario.Create(assembly,assembly.BakeAndValidate());cameras.Select(0);
             EditorUtility.SetDirty(asset);AssetDatabase.SaveAssets();EditorSceneManager.SaveScene(scene,scenePath);
             if(!EditorBuildSettings.scenes.Any(s=>s.path==scenePath))EditorBuildSettings.scenes=EditorBuildSettings.scenes.Concat(new[]{new EditorBuildSettingsScene(scenePath,true)}).ToArray();
@@ -289,6 +290,7 @@ namespace AssemblyZero.Unity.Editor
             for(var i=0;i<6;i++)
             {
                 var arm=assembly.Inserters[i];arm.transform.position=new Vector3(i*4.8f,0,-2);arm.transform.rotation=Quaternion.identity;arm.StationPiece=i+1;arm.RestOffset=new Vector3(0,2.4f,.55f);
+                ConfigureAssemblyTiming(arm);
                 PrefabUtility.RecordPrefabInstancePropertyModifications(arm);PrefabUtility.RecordPrefabInstancePropertyModifications(arm.transform);
                 Label((i+1)+"  "+EP03SimulationDriver.MaterialName(arm.PartTypeId),root,new Vector3(i*4.8f,.1f,3),.16f);
             }
@@ -302,6 +304,22 @@ namespace AssemblyZero.Unity.Editor
                 var number=Label((i+1).ToString(),gantry,new Vector3(i*4.8f,4.35f,1.77f),.3f);number.transform.localRotation=Quaternion.identity;number.color=new Color(1,.68f,.15f);
             }
             assembly.DisplayRoot.position=new Vector3(33.6f,0,0);
+        }
+        public static void ConfigureAssemblyTiming(InserterAuthoring arm)
+        {
+            // At 60 Hz: different handling/alignment operations have different real
+            // durations. Start times still come from each station's target and supply.
+            var ticks = arm.PartTypeId switch
+            {
+                3 => (10, 36, 48, 30), // Body: locate on pallet fixture.
+                6 => (12, 56, 72, 40), // First leg: align and fasten.
+                7 => (11, 48, 66, 36),
+                4 => (14, 72, 108, 52), // Arms: longer alignment operation.
+                5 => (13, 64, 96, 46),
+                2 => (9, 32, 30, 28), // Head: short final placement.
+                _ => throw new InvalidOperationException("Unknown assembly part: " + arm.PartTypeId)
+            };
+            (arm.PickingTicks, arm.CarryingTicks, arm.PlacingTicks, arm.ReturningTicks) = ticks;
         }
         public static void BuildAll(){RebakeRoutes();BuildScene();BuildMinimal();}
         [MenuItem("Tools/Assembly Zero/Replace EP03 Folded Ramps with Elevators")]

@@ -1,4 +1,10 @@
-最新提升机更新（2026-10-13）：受限连续转向坡道改成显式垂直传输，增加水平托盘及井道对接空位，两份场景均已保存。见 [提升机说明](Elevators.md)、[实际生产检查](ElevatorAcceptance.txt) 和 [更新后全景](Elevator-Overview.png)。原 View-0 至 View-6 保留上一轮圆弧模型的历史截图。
+最新自由相机：右上角按钮或 `G` 切换；按住右键环视并用 WASD/QE 飞行，Shift 加速、右键+滚轮调速、Esc 退出。生产暂停时仍可移动；三种相机互斥。见 [操作说明与验证](FreeCamera.md)、[界面效果](FreeCamera-Controls.png)。
+
+相机与交互（2026-10-13）：新增从物料加工到六工位装配、成品出库的导演镜头；右上角可切换完整／最小场景，面板已缩为 50%；`H` 隐藏／恢复全部屏幕 UI。见 [操作与验证记录](FilmCamera.md)、[控件效果](Film-Controls-Demo.png)、[导演近景](Film-Demo-Robot.png)。
+
+总装修复（2026-10-13）：修正零件从抓手移交到托盘时残留的旋转，并为六个工位设置不同的实际作业时长。见 [修复与验证记录](AssemblyPresentation.md)、[托盘机器人近景](Assembly-Product.png)、[各工位作业阶段](Assembly-Stations.png)。左侧输送框架及路线配置未改动。
+
+提升机更新（2026-10-13）：受限连续转向坡道改成显式垂直传输，增加水平托盘及井道对接空位，两份场景均已保存。见 [提升机说明](Elevators.md)、[实际生产检查](ElevatorAcceptance.txt) 和 [更新后全景](Elevator-Overview.png)。原 View-0 至 View-6 保留上一轮圆弧模型的历史截图。
 
 最新模型细化（2026-10-13）：常规圆弧转角、紧凑直角转接台、连续带床/护栏与坡道接缝均已更新，完整与最小场景分别保存网格。见 [当前项目实现情况](ImplementationStatus.md)、[本轮记录](RoundedConveyors.txt)、[转角细节](RoundedCorner.png)。View-0 至 View-6 已更新为本轮实际渲染。下文保留此前布局与性能记录。
 

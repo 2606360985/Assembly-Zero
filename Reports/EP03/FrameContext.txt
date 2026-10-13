@@ -1,10 +1,10 @@
 Connected interactive Editor PlayMode, not a standalone player benchmark
 Unity: 6000.4.0f1
-CPU: Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz
-GPU: NVIDIA Quadro RTX 5000
-Render size: 3840x2160
-Sampling seconds: 10.006
-Samples: 517
+CPU: Intel(R) Core(TM) i7-10700K CPU @ 3.80GHz
+GPU: NVIDIA GeForce RTX 2060
+Render size: 1920x1080
+Sampling seconds: 10.008
+Samples: 1046
 Simulation field: accumulated fixed-tick CPU time per frame; zero when no tick.
 Audit field: conservation audit time in that frame; zero when no audit.
 GC recorder includes the test runner and CSV sampling overhead.

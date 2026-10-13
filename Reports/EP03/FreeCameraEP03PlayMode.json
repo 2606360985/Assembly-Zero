@@ -1,0 +1,74 @@
+{
+  "scope": "EP03",
+  "summary": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0
+  },
+  "results": [
+    {
+      "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.ButtonsAndHiddenUiShortcutSelectOneCameraInBothScenes",
+      "Status": "Passed",
+      "Duration": 1.4674397,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.RightClickOnUiDoesNotCaptureMouseAndFocusLossReleasesIt",
+      "Status": "Passed",
+      "Duration": 0.2855494,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.RightMouseFlightLookSpeedAndEscapeWorkWhileTimeIsPaused",
+      "Status": "Passed",
+      "Duration": 0.2757417,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.ElevatorCarriersStayLevelPauseAndClearOnRestart",
+      "Status": "Passed",
+      "Duration": 0.9247495,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership",
+      "Status": "Passed",
+      "Duration": 17.8194825,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates",
+      "Status": "Passed",
+      "Duration": 7.0464913,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.FilmButtonPausesAndReturnsToManualCamera",
+      "Status": "Passed",
+      "Duration": 0.3344552,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.HKeyHidesAllUiAndRestoresItWhileFilmKeepsItsState",
+      "Status": "Passed",
+      "Duration": 0.2488631,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.TopRightButtonsRaycastAndSwitchBothWaysWithoutDuplicateCamerasOrEvents",
+      "Status": "Passed",
+      "Duration": 1.3188481,
+      "Message": null,
+      "StackTrace": null
+    }
+  ],
+  "other_suite_note": "EP01 and EP02 smoke tests could not load because those scenes are disabled in the current build scene list. Existing scene enablement was preserved."
+}

@@ -1,0 +1,12 @@
+Ticks: 13858
+Delivered: 10
+Stations observed in independent overlapping work: 6/6
+Material ledger conserved; repeated presentation did not change state.
+Robot captured on the production pallet with all six original parts.
+Station capture tick: 9192
+I-0: WaitingForTarget, progress=1.000, entered=9156, duration=1
+I-1: Returning, progress=0.525, entered=9171, duration=40
+I-2: WaitingForItem, progress=0.000, entered=9192, duration=1
+I-3: Placing, progress=0.694, entered=9117, duration=108
+I-4: Placing, progress=0.875, entered=9108, duration=96
+I-5: WaitingForTarget, progress=1.000, entered=9115, duration=1

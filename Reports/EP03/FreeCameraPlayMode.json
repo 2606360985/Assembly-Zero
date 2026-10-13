@@ -1,0 +1,110 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {
+      "caller": "plugin",
+      "skill": "unity-cli",
+      "format": "json"
+    },
+    "result": {
+      "status": "completed",
+      "duration": 29.82,
+      "summary": {
+        "total": 11,
+        "passed": 9,
+        "failed": 2,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.DemoSmokeTests.DemoSceneLoadsWithSingleSimulationDriver",
+          "Status": "Failed",
+          "Duration": 0.0148426,
+          "Message": "Unhandled log message: '[Error] Scene 'EP01_Demo' couldn't be loaded because it has not been added to the active build profile or shared scene list or the AssetBundle has not been loaded.\nTo add a scene to the active build profile or shared scene list use the menu File->Build Profiles'. Use UnityEngine.TestTools.LogAssert.Expect",
+          "StackTrace": "UnityEngine.SceneManagement.SceneManager:LoadSceneAsync (string,UnityEngine.SceneManagement.LoadSceneMode)\r\nAssemblyZero.Tests.DemoSmokeTests/<DemoSceneLoadsWithSingleSimulationDriver>d__0:MoveNext () (at Assets/_AssemblyZero/Tests/PlayMode/DemoSmokeTests.cs:16)\r\nUnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)\r\n\r\n"
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02SmokeTests.ProductionPresentationAndRestartDoNotOwnLogistics",
+          "Status": "Failed",
+          "Duration": 0.0043111,
+          "Message": "Unhandled log message: '[Error] Scene 'EP02_Demo' couldn't be loaded because it has not been added to the active build profile or shared scene list or the AssetBundle has not been loaded.\nTo add a scene to the active build profile or shared scene list use the menu File->Build Profiles'. Use UnityEngine.TestTools.LogAssert.Expect",
+          "StackTrace": "UnityEngine.SceneManagement.SceneManager:LoadSceneAsync (string,UnityEngine.SceneManagement.LoadSceneMode)\r\nAssemblyZero.Tests.EP02SmokeTests/<ProductionPresentationAndRestartDoNotOwnLogistics>d__0:MoveNext () (at Assets/_AssemblyZero/Tests/PlayMode/EP02SmokeTests.cs:15)\r\nUnityEngine.SetupCoroutine:InvokeMoveNext (System.Collections.IEnumerator,intptr)\r\n\r\n"
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.ButtonsAndHiddenUiShortcutSelectOneCameraInBothScenes",
+          "Status": "Passed",
+          "Duration": 1.4674397,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.RightClickOnUiDoesNotCaptureMouseAndFocusLossReleasesIt",
+          "Status": "Passed",
+          "Duration": 0.2855494,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FreeCameraTests.RightMouseFlightLookSpeedAndEscapeWorkWhileTimeIsPaused",
+          "Status": "Passed",
+          "Duration": 0.2757417,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.ElevatorCarriersStayLevelPauseAndClearOnRestart",
+          "Status": "Passed",
+          "Duration": 0.9247495,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership",
+          "Status": "Passed",
+          "Duration": 17.8194825,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates",
+          "Status": "Passed",
+          "Duration": 7.0464913,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.FilmButtonPausesAndReturnsToManualCamera",
+          "Status": "Passed",
+          "Duration": 0.3344552,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.HKeyHidesAllUiAndRestoresItWhileFilmKeepsItsState",
+          "Status": "Passed",
+          "Duration": 0.2488631,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.TopRightButtonsRaycastAndSwitchBothWaysWithoutDuplicateCamerasOrEvents",
+          "Status": "Passed",
+          "Duration": 1.3188481,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

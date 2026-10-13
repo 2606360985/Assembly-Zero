@@ -1,0 +1,89 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {
+      "caller": "plugin",
+      "skill": "unity-cli",
+      "format": "json"
+    },
+    "result": {
+      "status": "completed",
+      "duration": 30.95,
+      "summary": {
+        "total": 8,
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.DemoSmokeTests.DemoSceneLoadsWithSingleSimulationDriver",
+          "Status": "Passed",
+          "Duration": 0.6025797,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02SmokeTests.ProductionPresentationAndRestartDoNotOwnLogistics",
+          "Status": "Passed",
+          "Duration": 1.9727121,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.ElevatorCarriersStayLevelPauseAndClearOnRestart",
+          "Status": "Passed",
+          "Duration": 1.1987273,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership",
+          "Status": "Passed",
+          "Duration": 17.9461462,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates",
+          "Status": "Passed",
+          "Duration": 7.1535983,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.FilmButtonPausesAndReturnsToManualCamera",
+          "Status": "Passed",
+          "Duration": 0.4026438,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.HKeyHidesAllUiAndRestoresItWhileFilmKeepsItsState",
+          "Status": "Passed",
+          "Duration": 0.2700158,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03ViewControlsTests.TopRightButtonsRaycastAndSwitchBothWaysWithoutDuplicateCamerasOrEvents",
+          "Status": "Passed",
+          "Duration": 1.2894142,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -1,0 +1,635 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {
+      "caller": "plugin",
+      "skill": "unity-cli",
+      "format": "json"
+    },
+    "result": {
+      "status": "completed",
+      "duration": 45.18,
+      "summary": {
+        "total": 86,
+        "passed": 86,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyDeterminismTests.RenderCadenceAndConfigurationMutationCannotChangeSimulation",
+          "Status": "Passed",
+          "Duration": 0.1842955,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyDeterminismTests.ReservationsAndPendingCommandsAreInHash",
+          "Status": "Passed",
+          "Duration": 0.0026563,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyDeterminismTests.TwoBackendsAndIndependentRunsMatchForTenThousandTicks",
+          "Status": "Passed",
+          "Duration": 7.8670196,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.AStoppedStationDoesNotStopOtherSegments",
+          "Status": "Passed",
+          "Duration": 0.0014312,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.BeltGripAndProductSocketPreserveItemAndProductIdentity",
+          "Status": "Passed",
+          "Duration": 0.0032335,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.CompetingArmsBindOneProductAndReserveOnePart",
+          "Status": "Passed",
+          "Duration": 0.0006055,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.DisableHeldPartRejectsAndCanResumeTheSameProduct",
+          "Status": "Passed",
+          "Duration": 0.0017434,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.DisableReleasesBothReservations",
+          "Status": "Passed",
+          "Duration": 0.0008265,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.LockedProductStopsItsSegmentWithoutTakingMaterial",
+          "Status": "Passed",
+          "Duration": 0.0008044,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.LockWhileHoldingKeepsTargetProductUntilUnlocked",
+          "Status": "Passed",
+          "Duration": 0.0041032,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.MissingPartStopsProductAndPropagatesQueue",
+          "Status": "Passed",
+          "Duration": 0.0155249,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.OccupiedProductCannotConsumeAnotherPart",
+          "Status": "Passed",
+          "Duration": 0.0009718,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.ShortPortFailsBeforeStarting",
+          "Status": "Passed",
+          "Duration": 0.0013313,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.SixStationsCompleteOnceAndExitWithoutShowcaseDelay",
+          "Status": "Passed",
+          "Duration": 0.0045549,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.SuppliesHaveIndependentDrives(Naive)",
+          "Status": "Passed",
+          "Duration": 0.0013354,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.AssemblyOwnershipTests.SuppliesHaveIndependentDrives(Gap)",
+          "Status": "Passed",
+          "Duration": 0.0001252,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.BeltAccessCanQueryRemoveAndInsert(False)",
+          "Status": "Passed",
+          "Duration": 0.0017992,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.BeltAccessCanQueryRemoveAndInsert(True)",
+          "Status": "Passed",
+          "Duration": 0.0001029,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.DeterministicForTenThousandTicks",
+          "Status": "Passed",
+          "Duration": 0.0014669,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.GateCompressionAndRecoveryMatch",
+          "Status": "Passed",
+          "Duration": 0.0049517,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.ItemsKeepOrderAndMinimumSpacing(False)",
+          "Status": "Passed",
+          "Duration": 0.001255,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.ItemsKeepOrderAndMinimumSpacing(True)",
+          "Status": "Passed",
+          "Duration": 0.0004057,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.OpenGapTouchesLessThanNaive",
+          "Status": "Passed",
+          "Duration": 0.0006906,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.SingleLaneCanAlternateCargoTypes(False)",
+          "Status": "Passed",
+          "Duration": 0.0004503,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.SingleLaneCanAlternateCargoTypes(True)",
+          "Status": "Passed",
+          "Duration": 6.98E-05,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.StageSixTimingCreatesAndReleasesVisibleBackpressure",
+          "Status": "Passed",
+          "Duration": 0.0571735,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.DomainSimulationTests.TwentyThousandItemPerformanceRecord",
+          "Status": "Passed",
+          "Duration": 0.092235,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.ContinuousProductionCompletesAndExitsWithDefaultSettings",
+          "Status": "Passed",
+          "Duration": 1.7909627,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.MissingJointFailsBeforeSimulation",
+          "Status": "Passed",
+          "Duration": 0.0702137,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.MotionKeepsJointRotationsContinuousAndWristSolvesOrientation",
+          "Status": "Passed",
+          "Duration": 0.1262132,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.OriginalSixPartsAndAssemblyRegistrationArePreserved",
+          "Status": "Passed",
+          "Duration": 0.0613013,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.SixAxesHaveFixedLinksAndReachBothSuppliesAndProduct",
+          "Status": "Passed",
+          "Duration": 0.0828741,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP02ConfigurationTests.ThreeRoutesAreContinuousAndEveryCornerUsesArcShader",
+          "Status": "Passed",
+          "Duration": 0.1410226,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03AssemblyPresentationTests.AllSixTransferredPartsMatchTheOriginalRobotInPalletCoordinates",
+          "Status": "Passed",
+          "Duration": 1.7048532,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03AssemblyPresentationTests.StationsHaveDistinctRealProcessDurations(\"Demo\")",
+          "Status": "Passed",
+          "Duration": 1.9998444,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03AssemblyPresentationTests.StationsHaveDistinctRealProcessDurations(\"Minimal\")",
+          "Status": "Passed",
+          "Duration": 1.921452,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03CinematicTests.DocumentaryFollowsConversionsAllSixStationsAndActualDispatch(\"Demo\")",
+          "Status": "Passed",
+          "Duration": 2.007661,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03CinematicTests.DocumentaryFollowsConversionsAllSixStationsAndActualDispatch(\"Minimal\")",
+          "Status": "Passed",
+          "Duration": 1.7096213,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03CinematicTests.PauseResetAndManualCameraHandoffDoNotChangeProduction",
+          "Status": "Passed",
+          "Duration": 0.2402796,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03CinematicTests.StartingMidProductionStillRecordsEveryAssemblyStation",
+          "Status": "Passed",
+          "Duration": 4.1711792,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.FinishedQueueBlocksAndResumesWithoutLosingProducts",
+          "Status": "Passed",
+          "Duration": 5.1125678,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.FullAndMinimalChainsDeliverAndEveryMachineWorks(False)",
+          "Status": "Passed",
+          "Duration": 1.8386114,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.FullAndMinimalChainsDeliverAndEveryMachineWorks(True)",
+          "Status": "Passed",
+          "Duration": 5.0914733,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.IdentityTransfersAreAtomicAndResetInvalidatesHandles(Naive)",
+          "Status": "Passed",
+          "Duration": 0.0017904,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.IdentityTransfersAreAtomicAndResetInvalidatesHandles(Gap)",
+          "Status": "Passed",
+          "Duration": 0.0001309,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.LayoutLoadsAndVisualReplacementPreservesInterfacesAndProduction",
+          "Status": "Passed",
+          "Duration": 3.1297699,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.LayoutRejectsCrossingBridgesWithoutClearance",
+          "Status": "Passed",
+          "Duration": 0.2198622,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.MissingSecondIngredientNeverPartiallyConsumesTheFirst",
+          "Status": "Passed",
+          "Duration": 0.0204414,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.MultiInputIsCommittedOnceAndOutputBackpressureRecovers",
+          "Status": "Passed",
+          "Duration": 0.8428906,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.NaiveGapAndFreshResetAreDeterministic",
+          "Status": "Passed",
+          "Duration": 2.4029396,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.ReferenceLayoutHasCardinalRoutesAndKeepsExpansionClear",
+          "Status": "Passed",
+          "Duration": 0.0023429,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03FactoryTests.SupplyConversionAndProductReceiptsReconcileActualIdentities",
+          "Status": "Passed",
+          "Duration": 1.0056217,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(\"Full\")",
+          "Status": "Passed",
+          "Duration": 0.1866139,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(\"Minimal\")",
+          "Status": "Passed",
+          "Duration": 0.0288563,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsNoLongerTurnDuringAContinuousClimb(\"Full\")",
+          "Status": "Passed",
+          "Duration": 0.0008717,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsNoLongerTurnDuringAContinuousClimb(\"Minimal\")",
+          "Status": "Passed",
+          "Duration": 7.28E-05,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ClearanceIncludesSlopingSegments",
+          "Status": "Passed",
+          "Duration": 0.0003317,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ElevatorClearanceChecksTheEntireShaftInsteadOfOnlyItsBottom",
+          "Status": "Passed",
+          "Duration": 0.0001991,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ElevatorDocksTrimAcrossShortStraightSegments",
+          "Status": "Passed",
+          "Duration": 0.0016406,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ElevatorLandingBeltsLeaveTheCargoShaftOpen(\"Full\",\"EP03_Demo\")",
+          "Status": "Passed",
+          "Duration": 0.0131692,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ElevatorLandingBeltsLeaveTheCargoShaftOpen(\"Minimal\",\"EP03_Minimal\")",
+          "Status": "Passed",
+          "Duration": 0.0037,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ElevatorSamplesMoveVerticallyWithLevelCargoAndContinuousPorts",
+          "Status": "Passed",
+          "Duration": 0.0009157,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.EveryBakedConveyorSectionRetainsUsableWidth(\"EP03_Demo\")",
+          "Status": "Passed",
+          "Duration": 0.0476196,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.EveryBakedConveyorSectionRetainsUsableWidth(\"EP03_Minimal\")",
+          "Status": "Passed",
+          "Duration": 0.0137811,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.HigherBridgeDoesNotPreventDescendingBelowIt",
+          "Status": "Passed",
+          "Duration": 0.0006207,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.LayoutRejectsSteeperThanFortyDegreeRamp",
+          "Status": "Passed",
+          "Duration": 0.00178,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(2)",
+          "Status": "Passed",
+          "Duration": 0.0002939,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(4)",
+          "Status": "Passed",
+          "Duration": 3.48E-05,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.OpposingRampsUseIndependentFullWidthSections",
+          "Status": "Passed",
+          "Duration": 0.0011266,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RampsPreserveHeightAndShortNeighbouringCornersStayOrdered",
+          "Status": "Passed",
+          "Duration": 0.0003451,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RegularArcKeepsContinuousSections",
+          "Status": "Passed",
+          "Duration": 0.0002845,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(1)",
+          "Status": "Passed",
+          "Duration": 0.0007724,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(-1)",
+          "Status": "Passed",
+          "Duration": 0.0001062,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ShortPortCannotBeConsumedByNinetyDegreeMiter",
+          "Status": "Passed",
+          "Duration": 0.0001671,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.TightPortCornerUsesTransferDeckWithoutInvertingInnerGuard",
+          "Status": "Passed",
+          "Duration": 0.0001835,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.InserterStateTests.ProductDoesNotDepartBeforeArmReturns",
+          "Status": "Passed",
+          "Duration": 0.0012516,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.InserterStateTests.StateChangesOnlyAtConfiguredTicks",
+          "Status": "Passed",
+          "Duration": 0.0007055,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TopologyAndClockTests.CornerWorldSamplingIsContinuous",
+          "Status": "Passed",
+          "Duration": 0.0119024,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TopologyAndClockTests.InvalidConnectionProducesDiagnostic",
+          "Status": "Passed",
+          "Duration": 0.0007682,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TopologyAndClockTests.RenderFrameCadenceCannotChangeManualTickResult",
+          "Status": "Passed",
+          "Duration": 0.0140609,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TopologyAndClockTests.StraightAndCornerLogicalDistanceIsContinuous",
+          "Status": "Passed",
+          "Duration": 0.0006557,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(0)",
+          "Status": "Passed",
+          "Duration": 0.0032228,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(1)",
+          "Status": "Passed",
+          "Duration": 0.0026979,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(2)",
+          "Status": "Passed",
+          "Duration": 0.0006036,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TransactionalBeltAccessTests.LaneTypeFilteringNearestOrderingAndStaleHandles(False)",
+          "Status": "Passed",
+          "Duration": 0.0007176,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.TransactionalBeltAccessTests.LaneTypeFilteringNearestOrderingAndStaleHandles(True)",
+          "Status": "Passed",
+          "Duration": 6.74E-05,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    },
+    "success": true
+  },
+  "errors": [],
+  "warnings": []
+}

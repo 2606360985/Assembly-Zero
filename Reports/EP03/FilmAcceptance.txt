@@ -1,0 +1,4 @@
+EP03 film camera and controls acceptance
+Demo: ticks=9816, product=1, conversions=2, stationMask=63, dispatched=1, completed=True
+Minimal: ticks=11112, product=1, conversions=2, stationMask=63, dispatched=1, completed=True
+Production conserved. Camera motion freezes without simulation ticks; cinematic and manual camera handoff passed.

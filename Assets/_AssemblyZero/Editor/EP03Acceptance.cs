@@ -12,6 +12,52 @@ namespace AssemblyZero.Unity.Editor
 {
     public static class EP03Acceptance
     {
+        public static void CaptureAssemblyPresentation()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play Mode before assembly inspection.");
+            for(var i=0;i<SceneManager.sceneCount;i++)if(SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Save scene changes before inspection.");
+            var original=SceneManager.GetActiveScene().path;
+            try
+            {
+                EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);
+                var d=UnityEngine.Object.FindFirstObjectByType<EP03SimulationDriver>();d.Paused=true;d.Restart();
+                if(d.StartupError!=null)throw new InvalidOperationException(d.StartupError);
+                var independent=new System.Collections.Generic.HashSet<int>();var best=0;var robotCaptured=false;
+                var stationStates="";
+                while(d.Simulation.TickNumber<40000&&(d.Simulation.Dispatched<10||independent.Count<6||!robotCaptured))
+                {
+                    d.Simulation.Tick();if(d.Simulation.TickNumber%8!=0)continue;
+                    var snapshot=d.Simulation.Assembly.Snapshot;
+                    var active=snapshot.Inserters.Where(a=>a.State==InserterState.Picking||a.State==InserterState.Carrying||a.State==InserterState.Placing).ToArray();
+                    if(active.Length>1&&active.Select(a=>(a.State,a.StateEnterTick,a.Duration)).Distinct().Count()>1)
+                        foreach(var arm in active)independent.Add(arm.Id);
+                    var score=snapshot.Inserters.Select(a=>a.State).Distinct().Count()*100+active.Length;
+                    if(score>best&&active.Length>1)
+                    {
+                        best=score;d.Present();d.Cameras.Camera.orthographic=false;d.Cameras.Select(4);
+                        Capture(d.Cameras.Camera,"Reports/EP03/Assembly-Stations.png");
+                        stationStates="Station capture tick: "+snapshot.Tick+"\n"+string.Join("\n",snapshot.Inserters.Select(a=>"I-"+a.Id+": "+a.State+", progress="+a.Progress(snapshot.Tick).ToString("F3")+", entered="+a.StateEnterTick+", duration="+a.Duration));
+                    }
+                    var product=snapshot.Products.FirstOrDefault(p=>p.Completed||p.State==ProductState.Scanning);
+                    if(!robotCaptured&&product!=null)
+                    {
+                        d.Present();var position=d.AssemblyTopology.Product.Sample(product.Distance,out var tangent);
+                        var center=position+Vector3.up*1.4f;var camera=d.Cameras.Camera;
+                        camera.orthographic=true;camera.orthographicSize=2.05f;
+                        camera.transform.position=center+Quaternion.LookRotation(tangent)*new Vector3(4,1.8f,6);
+                        camera.transform.rotation=Quaternion.LookRotation(center-camera.transform.position);
+                        Capture(camera,"Reports/EP03/Assembly-Product.png");robotCaptured=true;
+                    }
+                }
+                d.Simulation.AssertConserved();
+                if(d.Simulation.Dispatched<10||independent.Count!=6||!robotCaptured)throw new InvalidOperationException("Assembly inspection did not reach production and independent station work.");
+                var hash=d.Simulation.CalculateStateHash();d.Present();d.Present();
+                if(hash!=d.Simulation.CalculateStateHash())throw new InvalidOperationException("Presentation changed production state.");
+                File.WriteAllText("Reports/EP03/AssemblyAcceptance.txt","Ticks: "+d.Simulation.TickNumber+"\nDelivered: "+d.Simulation.Dispatched+"\nStations observed in independent overlapping work: "+independent.Count+"/6\nMaterial ledger conserved; repeated presentation did not change state.\nRobot captured on the production pallet with all six original parts.\n"+stationStates+"\n");
+            }
+            catch(Exception e){File.WriteAllText("Reports/EP03/AssemblyAcceptance.txt",e.ToString());throw;}
+            finally{EditorSceneManager.OpenScene(string.IsNullOrEmpty(original)?EP03SceneBuilder.ScenePath:original);}
+        }
         public static void CaptureElevators()
         {
             var original=SceneManager.GetActiveScene().path;EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);

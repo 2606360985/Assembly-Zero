@@ -1,0 +1,5 @@
+EP03 presentation changes: layout integrity audit
+EP03_Demo: all 4102 existing 3D transforms retain position, rotation, scale and parent; no original scene objects removed.
+EP03_Minimal: all 1924 existing 3D transforms retain position, rotation, scale and parent; no original scene objects removed.
+FactoryFull: layout, modules, recipes, route geometry and connections unchanged.
+FactoryMinimal: layout, modules, recipes, route geometry and connections unchanged.

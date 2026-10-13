@@ -44,17 +44,17 @@ namespace AssemblyZero.Unity
                 if (item.Ownership == ItemOwnership.OnBelt || item.Ownership == ItemOwnership.ReservedOnBelt)
                 {
                     v.Root.transform.position = topology.Supply[item.Lane].Sample(item.Distance, out var tangent); v.Root.transform.rotation = Quaternion.LookRotation(tangent);
-                    anchor.PayloadRoot.SetParent(v.Root.transform, false); def.BeltPose.Apply(anchor.SourceRoot); anchor.Carrier.SetActive(true);
+                    anchor.AttachPayload(v.Root.transform); def.BeltPose.Apply(anchor.SourceRoot); anchor.Carrier.SetActive(true);
                 }
                 else
                 {
                     anchor.Carrier.SetActive(false);
                     if (item.Ownership == ItemOwnership.HeldByInserter)
                     {
-                        var grip = Layout.Arm(item.OwnerId).Grip; anchor.PayloadRoot.SetParent(grip, false); def.GripPose.Apply(anchor.SourceRoot);
+                        var grip = Layout.Arm(item.OwnerId).Grip; anchor.AttachPayload(grip); def.GripPose.Apply(anchor.SourceRoot);
                         anchor.PayloadRoot.localRotation = Quaternion.Inverse(grip.rotation) * products[item.ProductId].transform.rotation;
                     }
-                    else { anchor.PayloadRoot.SetParent(ProductSocket(item.ProductId, item.OwnerId), false); def.AssemblyPose.Apply(anchor.SourceRoot); }
+                    else { anchor.AttachPayload(ProductSocket(item.ProductId, item.OwnerId)); def.AssemblyPose.Apply(anchor.SourceRoot); }
                 }
             }
             foreach (var id in visuals.Keys.Where(id => !live.Contains(id)).ToArray()) { var v = visuals[id]; if (v.Anchor.PayloadRoot.parent != v.Root.transform) Release(v.Anchor.PayloadRoot.gameObject); Release(v.Root); visuals.Remove(id); }

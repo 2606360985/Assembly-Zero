@@ -17,6 +17,8 @@ namespace AssemblyZero.Unity
         public PartVisualPresenter Parts;
         public AssemblyCellPresenter Cell;
         public EP02CameraDirector Cameras;
+        public EP03CinematicCamera Cinematic;
+        public EP03FreeCamera FreeCamera;
         public FactoryModuleAuthoring[] Modules;
         public UnityEngine.UI.Text Hud;
         public Transform CargoRoot,FinishedRoot;
@@ -63,7 +65,7 @@ namespace AssemblyZero.Unity
             if(k!=null)
             {
                 if(k.rKey.wasPressedThisFrame)Restart();if(k.spaceKey.wasPressedThisFrame)Paused=!Paused;
-                if(k.nKey.wasPressedThisFrame&&Paused)StepTicks(1);if(k.cKey.wasPressedThisFrame)Cameras.Next();
+                if(k.nKey.wasPressedThisFrame&&Paused)StepTicks(1);if(k.cKey.wasPressedThisFrame){if(Cinematic!=null)Cinematic.Stop();if(FreeCamera!=null)FreeCamera.Stop();Cameras.Next();}
                 if(Simulation!=null){if(k.fKey.wasPressedThisFrame)Simulation.SupplyEnabled=!Simulation.SupplyEnabled;if(k.oKey.wasPressedThisFrame)Simulation.DispatchEnabled=!Simulation.DispatchEnabled;if(k.lKey.wasPressedThisFrame)ToggleHead();}
             }
             if(Simulation==null)return;
@@ -125,7 +127,7 @@ namespace AssemblyZero.Unity
             {
                 var phase=surface.Product?s.SegmentPhases[surface.Segment]:s.SupplyPhases[surface.Line];block.Clear();block.SetFloat("_UseSimulationPhase",1);block.SetFloat("_FlowPhase",(float)(phase/EP02Route.UnitsPerMeter%1024)*4);block.SetFloat("_FlowOffset",surface.StartMeters*4);block.SetFloat("_FlowCoordScale",surface.LengthMeters*4);surface.Renderer.SetPropertyBlock(block);
             }
-            Hud.text="零号装配厂 · EP03 / "+Layout.Version+"\nTick "+Simulation.TickNumber+"   "+(Paused?"暂停":"运行")+"   镜头 "+Cameras.Presets[Cameras.Selected].Name+"\n设备 "+Simulation.Modules.Count(m=>m.Recipe!=null)+"   加工中 "+Simulation.Modules.Count(m=>m.Batch!=null)+"   运输物料 "+live.Count+"\n完成 "+s.Statistics.CompletedRobots+"   待入库 "+Simulation.Finished.Count+"/"+Layout.FinishedCapacity+"   已入库 "+Simulation.Dispatched+"\n原料补货 "+(Simulation.SupplyEnabled?"开":"关")+"   成品入库 "+(Simulation.DispatchEnabled?"开":"关")+"\n账本 "+Simulation.Ledger.Count+"   配方批次 "+Simulation.Batches.Count+"\n模拟 "+SimulationMs.ToString("F2")+" ms   表现 "+PresentationMs.ToString("F2")+" ms   核账 "+AuditMs.ToString("F2")+" ms\nSpace 暂停 · N 单步 · R 重置 · C 镜头\nF 停供/恢复 · O 出库开关 · L 头部锁定\n检测沿用 EP02；返修与第二产品区域预留";
+            Hud.text="零号装配厂 · EP03 / "+Layout.Version+"\nTick "+Simulation.TickNumber+"   "+(Paused?"暂停":"运行")+"   镜头 "+(FreeCamera != null && FreeCamera.IsActive ? "自由飞行" : Cinematic != null && Cinematic.IsPlaying ? "导演镜头" : Cameras.Presets[Cameras.Selected].Name)+"\n设备 "+Simulation.Modules.Count(m=>m.Recipe!=null)+"   加工中 "+Simulation.Modules.Count(m=>m.Batch!=null)+"   运输物料 "+live.Count+"\n完成 "+s.Statistics.CompletedRobots+"   待入库 "+Simulation.Finished.Count+"/"+Layout.FinishedCapacity+"   已入库 "+Simulation.Dispatched+"\n原料补货 "+(Simulation.SupplyEnabled?"开":"关")+"   成品入库 "+(Simulation.DispatchEnabled?"开":"关")+"\n账本 "+Simulation.Ledger.Count+"   配方批次 "+Simulation.Batches.Count+"\n模拟 "+SimulationMs.ToString("F2")+" ms   表现 "+PresentationMs.ToString("F2")+" ms   核账 "+AuditMs.ToString("F2")+" ms\nSpace 暂停 · N 单步 · R 重置 · C 镜头\nF 停供/恢复 · O 出库开关 · L 头部锁定\nG 自由相机 · H 隐藏/显示全部 UI\n检测沿用 EP02；返修与第二产品区域预留";
             watch.Stop();PresentationMs=watch.Elapsed.TotalMilliseconds;
         }
         public static string StatusName(FactoryMachineState s)=>s==FactoryMachineState.MissingInput?"缺料":s==FactoryMachineState.OutputBlocked?"堵塞":s==FactoryMachineState.Processing?"加工":"等待";

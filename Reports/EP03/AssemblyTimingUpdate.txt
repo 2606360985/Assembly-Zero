@@ -1,0 +1,3 @@
+EP03 local assembly timing update
+Assets/_AssemblyZero/Scenes/EP03_Demo.unity: saved six station timings; conveyor geometry unchanged.
+Assets/_AssemblyZero/Scenes/EP03_Minimal.unity: saved six station timings; conveyor geometry unchanged.

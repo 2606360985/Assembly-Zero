@@ -1,0 +1,2 @@
+Both scenes contain the free flight camera and half-scale UI button.
+Free camera capture at tick 8000; production state hash unchanged; material ledger conserved.
