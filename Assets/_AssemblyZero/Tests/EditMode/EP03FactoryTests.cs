@@ -39,7 +39,12 @@ namespace AssemblyZero.Tests
             try
             {
                 layout.Validate();
-                var pair=(from a in layout.Routes from b in layout.Routes where a!=b&&a.Connection.From!=b.Connection.From&&a.Connection.To!=b.Connection.To from i in Enumerable.Range(1,a.Points.Length-1) from j in Enumerable.Range(1,b.Points.Length-1) where Mathf.Abs(a.Points[i].y-a.Points[i-1].y)<.01f&&Mathf.Abs(b.Points[j].y-b.Points[j-1].y)<.01f&&FactoryLayoutAsset.PlanarCrosses(a.Points[i-1],a.Points[i],b.Points[j-1],b.Points[j]) select new[]{a,b}).First();
+                var pair=(from a in layout.Routes from b in layout.Routes
+                    where a!=b&&b.ElevatorSegments.Length==0&&a.Connection.From!=b.Connection.From&&a.Connection.To!=b.Connection.To
+                    from i in Enumerable.Range(1,a.Points.Length-1) from j in Enumerable.Range(1,b.Points.Length-1)
+                    where Mathf.Abs(a.Points[i].y-.7f)<.01f&&Mathf.Abs(a.Points[i-1].y-.7f)<.01f&&b.Points[j].y>1.45f&&Mathf.Abs(b.Points[j].y-b.Points[j-1].y)<.01f
+                    where FactoryRouteGeometry.PlanarSeparation(a.Points[i-1],a.Points[i],b.Points[j-1],b.Points[j],out _,out _)<.001f
+                    select new[]{a,b}).First();
                 for(var i=1;i<pair[1].Points.Length-1;i++){var point=pair[1].Points[i];point.y=.7f;pair[1].Points[i]=point;}
                 StringAssert.Contains("Bridge clearance",Assert.Throws<InvalidOperationException>(()=>layout.Validate()).Message);
             }

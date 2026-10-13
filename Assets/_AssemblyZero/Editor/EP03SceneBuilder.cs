@@ -304,6 +304,25 @@ namespace AssemblyZero.Unity.Editor
             assembly.DisplayRoot.position=new Vector3(33.6f,0,0);
         }
         public static void BuildAll(){RebakeRoutes();BuildScene();BuildMinimal();}
+        [MenuItem("Tools/Assembly Zero/Replace EP03 Folded Ramps with Elevators")]
+        public static void InstallConveyorElevators()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play Mode before installing elevators.");
+            for(var i=0;i<SceneManager.sceneCount;i++)if(SceneManager.GetSceneAt(i).isDirty)throw new InvalidOperationException("Save open scene changes first.");
+            var candidates=new List<(FactoryLayoutAsset asset,FactoryLayoutAsset copy)>();
+            try
+            {
+                foreach(var name in new[]{"FactoryFull","FactoryMinimal"})
+                {
+                    var asset=AssetDatabase.LoadAssetAtPath<FactoryLayoutAsset>(Root+"/Configs/"+name+".asset");
+                    var copy=UnityEngine.Object.Instantiate(asset);candidates.Add((asset,copy));
+                    EP03ElevatorPlanner.Bake(copy);copy.Validate();
+                }
+                foreach(var candidate in candidates){candidate.asset.Routes=candidate.copy.Routes;candidate.asset.Version="Candidate";candidate.asset.FrozenInterfaceSignature="";EditorUtility.SetDirty(candidate.asset);}
+                AssetDatabase.SaveAssets();RefreshConveyorVisuals();
+            }
+            finally{foreach(var candidate in candidates)UnityEngine.Object.DestroyImmediate(candidate.copy);}
+        }
         [MenuItem("Tools/Assembly Zero/Optimize EP03 Conveyor Bridges")]
         public static void OptimizeConveyorBridges()
         {
@@ -328,6 +347,7 @@ namespace AssemblyZero.Unity.Editor
             }
             finally{foreach(var candidate in candidates)UnityEngine.Object.DestroyImmediate(candidate.copy);}
         }
+        [MenuItem("Tools/Assembly Zero/Refresh EP03 Rounded Conveyor Visuals")]
         public static void RefreshConveyorVisuals()
         {
             if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Stop Play Mode before rebuilding conveyor visuals.");
@@ -341,6 +361,7 @@ namespace AssemblyZero.Unity.Editor
                 foreach(var route in driver.Layout.Routes)BuildRoute(route,root.transform,driver.Layout.Routes);
                 ValidateScene();EditorSceneManager.MarkSceneDirty(scene);EditorSceneManager.SaveScene(scene);
             }
+            AssetDatabase.SaveAssets();
             EditorSceneManager.OpenScene(ScenePath);
         }
         internal static bool Crosses(Vector3 a,Vector3 b,Vector3 c,Vector3 d)
@@ -351,12 +372,29 @@ namespace AssemblyZero.Unity.Editor
         {
             var root=new GameObject(route.Connection.Id);root.transform.SetParent(parent,false);
             var bed=Mat("Conveyor Bed",new Color(.12f,.15f,.17f));var rail=Mat("Conveyor Rail",new Color(.38f,.42f,.44f));
+            var path=FactoryRouteGeometry.RoundedPath(route.Points);
+            Sweep("Continuous Belt / Corner90 Modules",root.transform,path,-.23f,.23f,-.16f,0,bed,route.Connection.Id+"-bed");
+            Sweep("Continuous Left Guard",root.transform,path,-.27f,-.23f,-.04f,.08f,rail,route.Connection.Id+"-left");
+            Sweep("Continuous Right Guard",root.transform,path,.23f,.27f,-.04f,.08f,rail,route.Connection.Id+"-right");
+            foreach(var index in route.ElevatorSegments)BuildElevator(route,index,root.transform);
+            for(var i=1;i<route.Points.Length-1;i++)
+            {
+                var incoming=route.Points[i]-route.Points[i-1];var outgoing=route.Points[i+1]-route.Points[i];
+                if(Mathf.Abs(incoming.normalized.y)>.001f||Mathf.Abs(outgoing.normalized.y)>.001f||Mathf.Abs(Vector3.Dot(incoming.normalized,outgoing.normalized))>.001f)continue;
+                var compact=Mathf.Min(.48f,incoming.magnitude*.45f,outgoing.magnitude*.45f)<.30f;
+                var module=new GameObject(compact?"Compact Corner90 Transfer Module":"Arc Corner90 Module").transform;
+                module.SetParent(root.transform,false);module.position=route.Points[i];
+                if(!compact)continue;
+                var deck=GameObject.CreatePrimitive(PrimitiveType.Cylinder);deck.name="Transfer Turntable";deck.transform.SetParent(module,false);
+                deck.transform.localPosition=Vector3.up*.006f;deck.transform.localScale=new Vector3(.42f,.006f,.42f);
+                UnityEngine.Object.DestroyImmediate(deck.GetComponent<Collider>());deck.GetComponent<Renderer>().sharedMaterial=rail;
+            }
             for(var i=1;i<route.Points.Length;i++)
             {
                 var a=route.Points[i-1];var b=route.Points[i];var delta=b-a;if(delta.sqrMagnitude<.001f)continue;
+                if(route.ElevatorSegments.Contains(i))continue;
                 var segment=new GameObject("Conveyor Segment").transform;segment.SetParent(root.transform,false);segment.rotation=Quaternion.LookRotation(delta);segment.position=(a+b)*.5f-segment.up*.08f;
-                Box("Belt",segment,Vector3.zero,new Vector3(.46f,.16f,delta.magnitude),bed);
-                foreach(var side in new[]{-1,1})Box("Rail",segment,new Vector3(side*.25f,.1f,0),new Vector3(.04f,.12f,delta.magnitude),rail);
+
                 var horizontal=FactoryRouteGeometry.Flat(delta).magnitude;
                 if(horizontal>.5f)for(var d=.3f;d<horizontal;d+=2.4f)
                 {
@@ -369,6 +407,7 @@ namespace AssemblyZero.Unity.Editor
                         {
                             if(other==route&&j==i)continue;
                             var x=other.Points[j-1];var y=other.Points[j];var flat=FactoryRouteGeometry.Flat(y-x);
+                            if(FactoryRouteGeometry.IsVerticalTransfer(x,y)&&Vector2.Distance(FactoryRouteGeometry.Flat(point),FactoryRouteGeometry.Flat(x))<.4f&&Mathf.Max(x.y,y.y)>0&&Mathf.Min(x.y,y.y)<point.y){blocked=true;break;}
                             if(flat.sqrMagnitude<.000001f)continue;
                             var t=Mathf.Clamp01(Vector2.Dot(FactoryRouteGeometry.Flat(point-x),flat)/flat.sqrMagnitude);
                             if(Vector2.Distance(FactoryRouteGeometry.Flat(point),FactoryRouteGeometry.Flat(x)+flat*t)<.4f&&Mathf.Lerp(x.y,y.y,t)<point.y-.1f){blocked=true;break;}
@@ -379,6 +418,80 @@ namespace AssemblyZero.Unity.Editor
                     Box("Support",root.transform,new Vector3(point.x,(point.y-.1f)*.5f,point.z),new Vector3(.16f,Mathf.Max(.1f,point.y+.1f),.16f),rail);
                 }
             }
+        }
+        private static void BuildElevator(FactoryRoutePlacement route,int segment,Transform parent)
+        {
+            var entry=route.Points[segment-1];var exit=route.Points[segment];
+            var shared=parent.parent.GetComponentsInChildren<FactoryElevatorAuthoring>().FirstOrDefault(e=>Vector3.Distance(e.Entry,entry)<.001f&&Vector3.Distance(e.Exit,exit)<.001f);
+            if(shared!=null){shared.SharedRoutes=shared.SharedRoutes.Append(route.Connection.Id).Distinct().ToArray();return;}
+            var root=new GameObject("Continuous Elevator "+segment,typeof(FactoryElevatorAuthoring)).transform;root.SetParent(parent,false);
+            root.position=new Vector3(entry.x,Mathf.Min(entry.y,exit.y),entry.z);
+            var authoring=root.GetComponent<FactoryElevatorAuthoring>();authoring.RouteId=route.Connection.Id;authoring.SharedRoutes=new[]{route.Connection.Id};authoring.Segment=segment;authoring.Entry=entry;authoring.Exit=exit;
+            var visual=new GameObject("Visual").transform;visual.SetParent(root,false);authoring.Visual=visual;
+            var frame=Mat("Elevator Frame",new Color(.12f,.20f,.24f));var trim=Mat("Elevator Safety",new Color(.95f,.57f,.09f));
+            authoring.CarrierMaterial=Mat("Elevator Carrier",new Color(.42f,.46f,.48f));
+            var height=Mathf.Abs(exit.y-entry.y);
+            foreach(var x in new[]{-.265f,.265f})foreach(var z in new[]{-.265f,.265f})
+                Box("Guide Column",visual,new Vector3(x,height*.5f+.16f,z),new Vector3(.045f,height+.64f,.045f),frame);
+            foreach(var y in new[]{-.13f,height+.46f})
+            {
+                Box("Side Crossmember",visual,new Vector3(-.265f,y,0),new Vector3(.065f,.07f,.58f),trim);
+                Box("Side Crossmember",visual,new Vector3(.265f,y,0),new Vector3(.065f,.07f,.58f),trim);
+                Box("End Crossmember",visual,new Vector3(0,y,-.265f),new Vector3(.58f,.07f,.065f),trim);
+                Box("End Crossmember",visual,new Vector3(0,y,.265f),new Vector3(.58f,.07f,.065f),trim);
+            }
+            Label(exit.y>entry.y?"LIFT ↑":"LIFT ↓",visual,new Vector3(0,height+.52f,0),.07f);
+        }
+        // Shared cross sections form watertight joints at straight, curved and ramp boundaries.
+        private static void Sweep(string name,Transform parent,Vector3[] path,float left,float right,float bottom,float top,Material material,string id)
+        {
+            var vertices=new List<Vector3>();var triangles=new List<int>();
+            var start=0;
+            for(var boundary=1;boundary<path.Length;boundary++)
+            {
+                if(FactoryRouteGeometry.IsVerticalTransfer(path[boundary-1],path[boundary])){start=boundary;continue;}
+                if(boundary<path.Length-1&&!FactoryRouteGeometry.IsVerticalTransfer(path[boundary],path[boundary+1])&&FactoryRouteGeometry.CanShareConveyorSection(path,boundary))continue;
+                // Unsafe joints get separate full-width end sections, like the original
+                // straight modules. Never average opposing directions into a zero frame.
+                var section=FactoryRouteGeometry.TrimDockedSection(path.Skip(start).Take(boundary-start+1).ToArray(),
+                    start>0&&FactoryRouteGeometry.IsVerticalTransfer(path[start-1],path[start])?FactoryRouteGeometry.ElevatorDockClearance:0,
+                    boundary<path.Length-1&&FactoryRouteGeometry.IsVerticalTransfer(path[boundary],path[boundary+1])?FactoryRouteGeometry.ElevatorDockClearance:0);
+                if(section.Length<2){start=boundary;continue;}
+                var offset=vertices.Count;
+                for(var i=0;i<section.Length;i++)
+                {
+                    var before=(section[i]-section[Mathf.Max(0,i-1)]).normalized;
+                    var after=(section[Mathf.Min(section.Length-1,i+1)]-section[i]).normalized;
+                    if(i==0)before=after;if(i==section.Length-1)after=before;
+                    var tangent=(before+after).normalized;
+                    var side=Vector3.Cross(Vector3.up,tangent).normalized;
+                    var up=Vector3.Cross(tangent,side).normalized;
+                    var sideScale=1/Mathf.Max(.5f,Vector3.Dot(side,Vector3.Cross(Vector3.up,after).normalized));
+                    var upScale=1/Mathf.Max(.5f,Vector3.Dot(up,Vector3.Cross(after,side).normalized));
+                    vertices.Add(section[i]+side*(left*sideScale)+up*(bottom*upScale));
+                    vertices.Add(section[i]+side*(left*sideScale)+up*(top*upScale));
+                    vertices.Add(section[i]+side*(right*sideScale)+up*(top*upScale));
+                    vertices.Add(section[i]+side*(right*sideScale)+up*(bottom*upScale));
+                    if(i==0)continue;
+                    var previous=vertices.Count-8;var current=vertices.Count-4;
+                    for(var j=0;j<4;j++)
+                    {
+                        var a=previous+j;var b=previous+(j+1)%4;var c=current+(j+1)%4;var d=current+j;
+                        triangles.AddRange(new[]{a,b,c,a,c,d});
+                    }
+                }
+                triangles.AddRange(new[]{offset,offset+2,offset+1,offset,offset+3,offset+2});
+                var end=vertices.Count-4;triangles.AddRange(new[]{end,end+1,end+2,end,end+2,end+3});
+                start=boundary;
+            }
+            for(var i=0;i<triangles.Count;i+=3){var swap=triangles[i+1];triangles[i+1]=triangles[i+2];triangles[i+2]=swap;}
+            var mesh=new Mesh{name=id};mesh.vertices=vertices.ToArray();mesh.triangles=triangles.ToArray();mesh.RecalculateNormals();mesh.RecalculateBounds();
+            var folder=Root+"/Meshes";if(!AssetDatabase.IsValidFolder(folder))AssetDatabase.CreateFolder(Root,"Meshes");
+            var assetPath=folder+"/"+SceneManager.GetActiveScene().name+"-"+id+".asset";var existing=AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
+            if(existing==null)AssetDatabase.CreateAsset(mesh,assetPath);
+            else{EditorUtility.CopySerialized(mesh,existing);UnityEngine.Object.DestroyImmediate(mesh);mesh=existing;EditorUtility.SetDirty(mesh);}
+            var go=new GameObject(name,typeof(MeshFilter),typeof(MeshRenderer));go.transform.SetParent(parent,false);
+            go.GetComponent<MeshFilter>().sharedMesh=mesh;go.GetComponent<MeshRenderer>().sharedMaterial=material;
         }
         private static void CreateMinimal(FactoryLayoutAsset full)
         {

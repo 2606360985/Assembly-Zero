@@ -26,7 +26,7 @@ namespace AssemblyZero.Unity.Editor
             for(var attempt=0;attempt<100;attempt++)
             {
                 if(!seen.Add(string.Join("|",order.Select(r=>r.Connection.Id))))throw new InvalidOperationException("Unresolved EP03 port access ordering.");
-                try{BakeOrdered(asset,order);return;}
+                try{BakeOrdered(asset,order);EP03ElevatorPlanner.Bake(asset);return;}
                 catch(AccessException e)
                 {
                     var route=order.Single(r=>r.Connection.Id==e.Route);var blocker=order.FindIndex(r=>r.Connection.Id==e.Blocker);

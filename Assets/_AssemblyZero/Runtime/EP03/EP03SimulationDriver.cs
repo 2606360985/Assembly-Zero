@@ -32,6 +32,8 @@ namespace AssemblyZero.Unity
         private int sequence;
         private readonly Stopwatch watch=new Stopwatch();
         private readonly Dictionary<int,GameObject> cargo=new Dictionary<int,GameObject>();
+        private readonly Dictionary<int,GameObject> elevatorCarriers=new Dictionary<int,GameObject>();
+        private Material elevatorCarrierMaterial;
         private readonly Dictionary<int,GameObject> finished=new Dictionary<int,GameObject>();
         private Dictionary<string,FactoryRoutePlacement> routes;
         private Dictionary<string,FactoryModuleAuthoring> moduleViews;
@@ -45,9 +47,11 @@ namespace AssemblyZero.Unity
             {
                 block ??= new MaterialPropertyBlock();
                 Simulation=null;Parts.Clear();Cell.Clear();foreach(var g in cargo.Values)Release(g);foreach(var g in finished.Values)Release(g);cargo.Clear();finished.Clear();
+                elevatorCarriers.Clear();elevatorCarrierMaterial=UnityEngine.Object.FindFirstObjectByType<FactoryElevatorAuthoring>()?.CarrierMaterial;
                 Layout.Validate();foreach(var m in Modules)m.Validate();AssemblyTopology=AssemblyLayout.BakeAndValidate();
                 var config=AssemblyScenario.Create(AssemblyLayout,AssemblyTopology);config.SourceEnabled=false;config.RejectEnabled=false;config.ExternalSupply=true;
                 Simulation=new FactorySimulation(Layout.CreateDefinition(),new EP02Simulation(config,AssemblyTopology.SupplyTopology,AssemblyScenario.Backend),AssemblyScenario.Backend);
+                foreach(var route in Layout.Routes)route.PrepareVisualPath();
                 routes=Layout.Routes.ToDictionary(r=>r.Connection.Id);moduleViews=Modules.ToDictionary(m=>m.InstanceId);accumulator=0;sequence=0;StartupError=null;Cameras.Select(0);Present();
             }
             catch(Exception e){Simulation=null;StartupError=e.ToString();UnityEngine.Debug.LogError("EP03 startup: "+StartupError,this);if(Hud!=null)Hud.text=StartupError;}
@@ -86,9 +90,16 @@ namespace AssemblyZero.Unity
             foreach(var route in Simulation.Routes)foreach(var item in route.Snapshot.Items)
             {
                 live.Add(item.ItemId.Value);if(!cargo.TryGetValue(item.ItemId.Value,out var g)){g=GameObject.CreatePrimitive(PrimitiveType.Cube);Release(g.GetComponent<Collider>());g.transform.SetParent(CargoRoot,false);g.transform.localScale=new Vector3(.3f,.22f,.3f);g.GetComponent<Renderer>().sharedMaterial=MaterialPalette[item.PartType.Value];cargo.Add(item.ItemId.Value,g);}
-                var position=routes[route.Definition.Id].Sample(item.Distance,out var tangent);g.transform.rotation=Quaternion.LookRotation(Mathf.Abs(tangent.y)>.9f?Vector3.forward:tangent);g.transform.position=position+g.transform.up*.12f;
+                var position=routes[route.Definition.Id].Sample(item.Distance,out var tangent,out var inElevator);g.transform.rotation=Quaternion.LookRotation(Mathf.Abs(tangent.y)>.9f?Vector3.forward:tangent);g.transform.position=position+g.transform.up*.12f;
+                if(inElevator&&!elevatorCarriers.ContainsKey(item.ItemId.Value))
+                {
+                    var tray=GameObject.CreatePrimitive(PrimitiveType.Cube);tray.name="Elevator Carrier";Release(tray.GetComponent<Collider>());tray.transform.SetParent(g.transform,false);
+                    tray.transform.localScale=new Vector3(1.4f,.04f/.22f,1.4f);tray.transform.localPosition=new Vector3(0,-.135f/.22f,0);tray.GetComponent<Renderer>().sharedMaterial=elevatorCarrierMaterial;
+                    elevatorCarriers.Add(item.ItemId.Value,tray);
+                }
+                if(elevatorCarriers.TryGetValue(item.ItemId.Value,out var carrier))carrier.SetActive(inElevator);
             }
-            foreach(var id in cargo.Keys.Where(id=>!live.Contains(id)).ToArray()){Release(cargo[id]);cargo.Remove(id);}
+            foreach(var id in cargo.Keys.Where(id=>!live.Contains(id)).ToArray()){Release(cargo[id]);cargo.Remove(id);elevatorCarriers.Remove(id);}
             foreach(var state in Simulation.Modules)
             {
                 var view=moduleViews[state.Definition.Id];var color=state.Recipe==null?Color.cyan:state.State==FactoryMachineState.OutputBlocked?Color.red:state.State==FactoryMachineState.MissingInput?Color.yellow:Color.green;

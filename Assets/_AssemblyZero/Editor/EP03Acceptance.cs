@@ -6,11 +6,88 @@ using AssemblyZero.Domain;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace AssemblyZero.Unity.Editor
 {
     public static class EP03Acceptance
     {
+        public static void CaptureElevators()
+        {
+            var original=SceneManager.GetActiveScene().path;EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);
+            try
+            {
+                var d=UnityEngine.Object.FindFirstObjectByType<EP03SimulationDriver>();d.Paused=true;d.Restart();
+                if(d.StartupError!=null)throw new InvalidOperationException(d.StartupError);
+                var lifts=UnityEngine.Object.FindObjectsByType<FactoryElevatorAuthoring>(FindObjectsSortMode.None);
+                var targets=new[]{"motor-1--hub-15","hub-15--arm-b-0"}.ToDictionary(id=>id,id=>lifts.Where(l=>l.SharedRoutes.Contains(id)).OrderByDescending(l=>Mathf.Abs(l.Exit.y-l.Entry.y)).First());
+                var captured=new System.Collections.Generic.HashSet<string>();
+                while(d.Simulation.TickNumber<60000&&(captured.Count<targets.Count||d.Simulation.Dispatched<10))
+                {
+                    d.StepTicks(50);
+                    var trays=d.CargoRoot.GetComponentsInChildren<Transform>().Where(t=>t.name=="Elevator Carrier").ToArray();
+                    foreach(var target in targets)
+                    {
+                        if(captured.Contains(target.Key))continue;var lift=target.Value;
+                        var tray=trays.FirstOrDefault(t=>Vector2.Distance(FactoryRouteGeometry.Flat(t.position),FactoryRouteGeometry.Flat(lift.Entry))<.05f&&t.position.y>Mathf.Min(lift.Entry.y,lift.Exit.y)+.25f&&t.position.y<Mathf.Max(lift.Entry.y,lift.Exit.y)-.25f);
+                        if(tray==null)continue;
+                        if(Vector3.Dot(tray.up,Vector3.up)<.999f)throw new InvalidOperationException("Tilted elevator carrier: "+target.Key);
+                        var center=(lift.Entry+lift.Exit)*.5f;var camera=d.Cameras.Camera;camera.orthographic=true;camera.orthographicSize=1.9f;
+                        camera.transform.position=center+new Vector3(3,1.8f,3);camera.transform.rotation=Quaternion.LookRotation(center-camera.transform.position);
+                        Capture(camera,"Reports/EP03/Elevator-"+target.Key+".png");captured.Add(target.Key);
+                    }
+                }
+                d.Simulation.AssertConserved();if(captured.Count!=2||d.Simulation.Dispatched<10)throw new InvalidOperationException("Elevator capture/production acceptance did not complete.");
+                var hash=d.Simulation.CalculateStateHash();d.Present();if(hash!=d.Simulation.CalculateStateHash())throw new InvalidOperationException("Elevator presentation changed simulation.");
+                d.Cameras.Camera.orthographic=false;d.Cameras.Select(0);Capture(d.Cameras.Camera,"Reports/EP03/Elevator-Overview.png");
+                File.WriteAllText("Reports/EP03/ElevatorAcceptance.txt","Unity: "+Application.unityVersion+"\nTicks: "+d.Simulation.TickNumber+"\nDelivered: "+d.Simulation.Dispatched+"\nPhysical elevator towers: "+lifts.Length+"\nDeclared lift transfers: "+d.Layout.Routes.Sum(r=>r.ElevatorSegments.Length)+"\nBoth reported routes captured with a level loaded carrier mid-shaft.\nMaterial ledger audit passed. Presentation left state hash unchanged.\n");
+            }
+            finally{EditorSceneManager.OpenScene(string.IsNullOrEmpty(original)?EP03SceneBuilder.ScenePath:original);}
+        }
+        public static void RefreshRoundedConveyors()
+        {
+            EP03SceneBuilder.RefreshConveyorVisuals();
+            CaptureViews();
+            CaptureRoundedCorner();
+            File.WriteAllText("Reports/EP03/RoundedConveyors.txt","Both scenes refreshed and validated.\nShared 16-step circular Corner90 geometry and cargo path; tight ports use compact transfer decks.\nContinuous bed and guard cross sections, including ramps.\nProduction connections, logical lengths and layout assets unchanged.\nSimulation ledger audit passed during captures.\n");
+        }
+        public static void CaptureRoundedCorner()
+        {
+            EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);
+            var d=UnityEngine.Object.FindFirstObjectByType<EP03SimulationDriver>();
+            var corner=d.Layout.Routes.SelectMany(r=>r.Points.Select((p,i)=>(r,p,i)))
+                .First(x=>x.i>0&&x.i<x.r.Points.Length-1&&
+                    Vector3.Distance(x.p,x.r.Points[x.i-1])>1.1f&&Vector3.Distance(x.p,x.r.Points[x.i+1])>1.1f&&
+                    Mathf.Abs((x.p-x.r.Points[x.i-1]).normalized.y)<.001f&&
+                    Mathf.Abs((x.r.Points[x.i+1]-x.p).normalized.y)<.001f&&
+                    Mathf.Abs(Vector3.Dot((x.p-x.r.Points[x.i-1]).normalized,(x.r.Points[x.i+1]-x.p).normalized))<.001f);
+            // Isolate the actual generated route for a readable model detail view.
+            // This inspection scene is never saved; the overview captures show the full factory.
+            var root=SceneManager.GetActiveScene().GetRootGameObjects().Single(g=>g.name=="EP03 Transport / Explicit Routes");
+            foreach(Transform child in root.transform)child.gameObject.SetActive(child.name==corner.r.Connection.Id);
+            var camera=d.Cameras.Camera;camera.transform.position=corner.p+Vector3.up*5;
+            camera.transform.rotation=Quaternion.Euler(90,0,0);camera.orthographic=true;camera.orthographicSize=1.1f;
+            Capture(camera,"Reports/EP03/RoundedCorner.png");
+            EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);
+        }
+        public static void CaptureConveyorJointFix()
+        {
+            var original=SceneManager.GetActiveScene().path;
+            EditorSceneManager.OpenScene(EP03SceneBuilder.ScenePath);
+            var d=UnityEngine.Object.FindFirstObjectByType<EP03SimulationDriver>();
+            var route=d.Layout.Routes.Single(r=>r.Connection.Id=="hub-14--leg-b-0");
+            var root=SceneManager.GetActiveScene().GetRootGameObjects().Single(g=>g.name=="EP03 Transport / Explicit Routes");
+            foreach(Transform child in root.transform)child.gameObject.SetActive(child.name==route.Connection.Id);
+            var camera=d.Cameras.Camera;camera.orthographic=true;camera.orthographicSize=.85f;
+            var end=route.Points[route.Points.Length-1];
+            camera.transform.position=end+Vector3.up*5;camera.transform.rotation=Quaternion.Euler(90,0,0);
+            Capture(camera,"Reports/EP03/JointFix-Port.png");
+            camera.orthographicSize=1.8f;var bend=route.Points[8];
+            camera.transform.position=bend+new Vector3(3,2.4f,3);
+            camera.transform.rotation=Quaternion.LookRotation(bend-camera.transform.position);
+            Capture(camera,"Reports/EP03/JointFix-Ramps.png");
+            EditorSceneManager.OpenScene(string.IsNullOrEmpty(original)?EP03SceneBuilder.ScenePath:original);
+        }
         [MenuItem("Tools/Assembly Zero/Run EP03 Acceptance and Capture")]
         public static void Run()
         {

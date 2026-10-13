@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="67" result="Passed" total="67" passed="67" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:03:30Z" duration="56.8242676">
+  <test-suite type="TestSuite" id="1000" name="Assembly Zero" fullname="Assembly Zero" runstate="Runnable" testcasecount="67" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:03:30Z" duration="56.824268" total="67" passed="67" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1088" name="AssemblyZero.Tests.dll" fullname="E:/HP_E/GITHUB_SKY/Assembly-Zero/Library/ScriptAssemblies/AssemblyZero.Tests.dll" runstate="Runnable" testcasecount="67" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:03:30Z" duration="56.804558" total="67" passed="67" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="26488" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1089" name="AssemblyZero" fullname="AssemblyZero" runstate="Runnable" testcasecount="67" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:03:30Z" duration="56.802130" total="67" passed="67" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1090" name="Tests" fullname="AssemblyZero.Tests" runstate="Runnable" testcasecount="67" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:03:30Z" duration="56.800245" total="67" passed="67" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="AssemblyDeterminismTests" fullname="AssemblyZero.Tests.AssemblyDeterminismTests" classname="AssemblyZero.Tests.AssemblyDeterminismTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:02:47Z" duration="13.958817" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1003" name="RenderCadenceAndConfigurationMutationCannotChangeSimulation" fullname="AssemblyZero.Tests.AssemblyDeterminismTests.RenderCadenceAndConfigurationMutationCannotChangeSimulation" methodname="RenderCadenceAndConfigurationMutationCannotChangeSimulation" classname="AssemblyZero.Tests.AssemblyDeterminismTests" runstate="Runnable" seed="701195345" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:02:33Z" duration="0.453996" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1004" name="ReservationsAndPendingCommandsAreInHash" fullname="AssemblyZero.Tests.AssemblyDeterminismTests.ReservationsAndPendingCommandsAreInHash" methodname="ReservationsAndPendingCommandsAreInHash" classname="AssemblyZero.Tests.AssemblyDeterminismTests" runstate="Runnable" seed="1870849667" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:02:33Z" duration="0.007245" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1002" name="TwoBackendsAndIndependentRunsMatchForTenThousandTicks" fullname="AssemblyZero.Tests.AssemblyDeterminismTests.TwoBackendsAndIndependentRunsMatchForTenThousandTicks" methodname="TwoBackendsAndIndependentRunsMatchForTenThousandTicks" classname="AssemblyZero.Tests.AssemblyDeterminismTests" runstate="Runnable" seed="2147477691" result="Passed" start-time="2026-10-13 01:02:33Z" end-time="2026-10-13 01:02:47Z" duration="13.461726" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1005" name="AssemblyOwnershipTests" fullname="AssemblyZero.Tests.AssemblyOwnershipTests" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" testcasecount="13" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.086207" total="13" passed="13" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1019" name="AStoppedStationDoesNotStopOtherSegments" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.AStoppedStationDoesNotStopOtherSegments" methodname="AStoppedStationDoesNotStopOtherSegments" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="473448550" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.003613" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1008" name="BeltGripAndProductSocketPreserveItemAndProductIdentity" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.BeltGripAndProductSocketPreserveItemAndProductIdentity" methodname="BeltGripAndProductSocketPreserveItemAndProductIdentity" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="942217406" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.007612" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1006" name="CompetingArmsBindOneProductAndReserveOnePart" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.CompetingArmsBindOneProductAndReserveOnePart" methodname="CompetingArmsBindOneProductAndReserveOnePart" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="1093241861" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001971" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1011" name="DisableHeldPartRejectsAndCanResumeTheSameProduct" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.DisableHeldPartRejectsAndCanResumeTheSameProduct" methodname="DisableHeldPartRejectsAndCanResumeTheSameProduct" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="96605789" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.004635" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1010" name="DisableReleasesBothReservations" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.DisableReleasesBothReservations" methodname="DisableReleasesBothReservations" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="262380234" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001604" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1007" name="LockedProductStopsItsSegmentWithoutTakingMaterial" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.LockedProductStopsItsSegmentWithoutTakingMaterial" methodname="LockedProductStopsItsSegmentWithoutTakingMaterial" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="1985913368" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001844" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1014" name="LockWhileHoldingKeepsTargetProductUntilUnlocked" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.LockWhileHoldingKeepsTargetProductUntilUnlocked" methodname="LockWhileHoldingKeepsTargetProductUntilUnlocked" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="1290577675" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.002527" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1013" name="MissingPartStopsProductAndPropagatesQueue" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.MissingPartStopsProductAndPropagatesQueue" methodname="MissingPartStopsProductAndPropagatesQueue" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="2072994719" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.015142" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1009" name="OccupiedProductCannotConsumeAnotherPart" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.OccupiedProductCannotConsumeAnotherPart" methodname="OccupiedProductCannotConsumeAnotherPart" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="1713870508" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.002229" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1015" name="ShortPortFailsBeforeStarting" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.ShortPortFailsBeforeStarting" methodname="ShortPortFailsBeforeStarting" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="171810046" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001994" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1012" name="SixStationsCompleteOnceAndExitWithoutShowcaseDelay" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.SixStationsCompleteOnceAndExitWithoutShowcaseDelay" methodname="SixStationsCompleteOnceAndExitWithoutShowcaseDelay" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="1146584435" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.013290" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1018" name="SuppliesHaveIndependentDrives" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.SuppliesHaveIndependentDrives" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.004350" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1016" name="SuppliesHaveIndependentDrives(Naive)" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.SuppliesHaveIndependentDrives(Naive)" methodname="SuppliesHaveIndependentDrives" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="678268716" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.002730" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1017" name="SuppliesHaveIndependentDrives(Gap)" fullname="AssemblyZero.Tests.AssemblyOwnershipTests.SuppliesHaveIndependentDrives(Gap)" methodname="SuppliesHaveIndependentDrives" classname="AssemblyZero.Tests.AssemblyOwnershipTests" runstate="Runnable" seed="2008481248" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.000359" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+          </test-suite>
+          <test-suite type="TestFixture" id="1020" name="DomainSimulationTests" fullname="AssemblyZero.Tests.DomainSimulationTests" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.372263" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1030" name="BeltAccessCanQueryRemoveAndInsert" fullname="AssemblyZero.Tests.DomainSimulationTests.BeltAccessCanQueryRemoveAndInsert" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.004376" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1028" name="BeltAccessCanQueryRemoveAndInsert(False)" fullname="AssemblyZero.Tests.DomainSimulationTests.BeltAccessCanQueryRemoveAndInsert(False)" methodname="BeltAccessCanQueryRemoveAndInsert" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="219988620" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.003301" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="BeltAccessCanQueryRemoveAndInsert(True)" fullname="AssemblyZero.Tests.DomainSimulationTests.BeltAccessCanQueryRemoveAndInsert(True)" methodname="BeltAccessCanQueryRemoveAndInsert" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="940789131" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.000223" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1025" name="DeterministicForTenThousandTicks" fullname="AssemblyZero.Tests.DomainSimulationTests.DeterministicForTenThousandTicks" methodname="DeterministicForTenThousandTicks" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="923997959" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.003121" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1024" name="GateCompressionAndRecoveryMatch" fullname="AssemblyZero.Tests.DomainSimulationTests.GateCompressionAndRecoveryMatch" methodname="GateCompressionAndRecoveryMatch" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="421929985" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.011274" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1023" name="ItemsKeepOrderAndMinimumSpacing" fullname="AssemblyZero.Tests.DomainSimulationTests.ItemsKeepOrderAndMinimumSpacing" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.006407" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1021" name="ItemsKeepOrderAndMinimumSpacing(False)" fullname="AssemblyZero.Tests.DomainSimulationTests.ItemsKeepOrderAndMinimumSpacing(False)" methodname="ItemsKeepOrderAndMinimumSpacing" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="691474386" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.004088" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="ItemsKeepOrderAndMinimumSpacing(True)" fullname="AssemblyZero.Tests.DomainSimulationTests.ItemsKeepOrderAndMinimumSpacing(True)" methodname="ItemsKeepOrderAndMinimumSpacing" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="1941378390" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001170" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1026" name="OpenGapTouchesLessThanNaive" fullname="AssemblyZero.Tests.DomainSimulationTests.OpenGapTouchesLessThanNaive" methodname="OpenGapTouchesLessThanNaive" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="421188510" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001634" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1033" name="SingleLaneCanAlternateCargoTypes" fullname="AssemblyZero.Tests.DomainSimulationTests.SingleLaneCanAlternateCargoTypes" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.001779" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="SingleLaneCanAlternateCargoTypes(False)" fullname="AssemblyZero.Tests.DomainSimulationTests.SingleLaneCanAlternateCargoTypes(False)" methodname="SingleLaneCanAlternateCargoTypes" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="538818472" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.000729" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="SingleLaneCanAlternateCargoTypes(True)" fullname="AssemblyZero.Tests.DomainSimulationTests.SingleLaneCanAlternateCargoTypes(True)" methodname="SingleLaneCanAlternateCargoTypes" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="1654563467" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.000218" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1034" name="StageSixTimingCreatesAndReleasesVisibleBackpressure" fullname="AssemblyZero.Tests.DomainSimulationTests.StageSixTimingCreatesAndReleasesVisibleBackpressure" methodname="StageSixTimingCreatesAndReleasesVisibleBackpressure" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="1460596078" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.147569" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1027" name="TwentyThousandItemPerformanceRecord" fullname="AssemblyZero.Tests.DomainSimulationTests.TwentyThousandItemPerformanceRecord" methodname="TwentyThousandItemPerformanceRecord" classname="AssemblyZero.Tests.DomainSimulationTests" runstate="Runnable" seed="1281070520" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:47Z" duration="0.193080" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Naive: 0.6106 ms/tick, touched=20000, items=20000
+Gap: 0.0002 ms/tick, touched=2, items=20000
+]]></output>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1035" name="EP02ConfigurationTests" fullname="AssemblyZero.Tests.EP02ConfigurationTests" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:52Z" duration="4.870429" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1041" name="ContinuousProductionCompletesAndExitsWithDefaultSettings" fullname="AssemblyZero.Tests.EP02ConfigurationTests.ContinuousProductionCompletesAndExitsWithDefaultSettings" methodname="ContinuousProductionCompletesAndExitsWithDefaultSettings" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="139522627" result="Passed" start-time="2026-10-13 01:02:47Z" end-time="2026-10-13 01:02:51Z" duration="3.921198" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1039" name="MissingJointFailsBeforeSimulation" fullname="AssemblyZero.Tests.EP02ConfigurationTests.MissingJointFailsBeforeSimulation" methodname="MissingJointFailsBeforeSimulation" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="820790863" result="Passed" start-time="2026-10-13 01:02:51Z" end-time="2026-10-13 01:02:51Z" duration="0.121694" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1040" name="MotionKeepsJointRotationsContinuousAndWristSolvesOrientation" fullname="AssemblyZero.Tests.EP02ConfigurationTests.MotionKeepsJointRotationsContinuousAndWristSolvesOrientation" methodname="MotionKeepsJointRotationsContinuousAndWristSolvesOrientation" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="1901135807" result="Passed" start-time="2026-10-13 01:02:51Z" end-time="2026-10-13 01:02:51Z" duration="0.248335" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1036" name="OriginalSixPartsAndAssemblyRegistrationArePreserved" fullname="AssemblyZero.Tests.EP02ConfigurationTests.OriginalSixPartsAndAssemblyRegistrationArePreserved" methodname="OriginalSixPartsAndAssemblyRegistrationArePreserved" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="1205181104" result="Passed" start-time="2026-10-13 01:02:51Z" end-time="2026-10-13 01:02:52Z" duration="0.122036" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1038" name="SixAxesHaveFixedLinksAndReachBothSuppliesAndProduct" fullname="AssemblyZero.Tests.EP02ConfigurationTests.SixAxesHaveFixedLinksAndReachBothSuppliesAndProduct" methodname="SixAxesHaveFixedLinksAndReachBothSuppliesAndProduct" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="2146303353" result="Passed" start-time="2026-10-13 01:02:52Z" end-time="2026-10-13 01:02:52Z" duration="0.166595" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1037" name="ThreeRoutesAreContinuousAndEveryCornerUsesArcShader" fullname="AssemblyZero.Tests.EP02ConfigurationTests.ThreeRoutesAreContinuousAndEveryCornerUsesArcShader" methodname="ThreeRoutesAreContinuousAndEveryCornerUsesArcShader" classname="AssemblyZero.Tests.EP02ConfigurationTests" runstate="Runnable" seed="476393153" result="Passed" start-time="2026-10-13 01:02:52Z" end-time="2026-10-13 01:02:52Z" duration="0.286207" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1042" name="EP03FactoryTests" fullname="AssemblyZero.Tests.EP03FactoryTests" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" testcasecount="12" result="Passed" start-time="2026-10-13 01:02:52Z" end-time="2026-10-13 01:03:29Z" duration="37.100477" total="12" passed="12" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1054" name="FinishedQueueBlocksAndResumesWithoutLosingProducts" fullname="AssemblyZero.Tests.EP03FactoryTests.FinishedQueueBlocksAndResumesWithoutLosingProducts" methodname="FinishedQueueBlocksAndResumesWithoutLosingProducts" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="717706748" result="Passed" start-time="2026-10-13 01:02:52Z" end-time="2026-10-13 01:03:01Z" duration="8.856716" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1051" name="FullAndMinimalChainsDeliverAndEveryMachineWorks" fullname="AssemblyZero.Tests.EP03FactoryTests.FullAndMinimalChainsDeliverAndEveryMachineWorks" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:01Z" end-time="2026-10-13 01:03:14Z" duration="13.358687" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1049" name="FullAndMinimalChainsDeliverAndEveryMachineWorks(False)" fullname="AssemblyZero.Tests.EP03FactoryTests.FullAndMinimalChainsDeliverAndEveryMachineWorks(False)" methodname="FullAndMinimalChainsDeliverAndEveryMachineWorks" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="1290313399" result="Passed" start-time="2026-10-13 01:03:01Z" end-time="2026-10-13 01:03:04Z" duration="3.300420" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1050" name="FullAndMinimalChainsDeliverAndEveryMachineWorks(True)" fullname="AssemblyZero.Tests.EP03FactoryTests.FullAndMinimalChainsDeliverAndEveryMachineWorks(True)" methodname="FullAndMinimalChainsDeliverAndEveryMachineWorks" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="571240318" result="Passed" start-time="2026-10-13 01:03:04Z" end-time="2026-10-13 01:03:14Z" duration="10.051798" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1048" name="IdentityTransfersAreAtomicAndResetInvalidatesHandles" fullname="AssemblyZero.Tests.EP03FactoryTests.IdentityTransfersAreAtomicAndResetInvalidatesHandles" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:14Z" end-time="2026-10-13 01:03:14Z" duration="0.019589" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1046" name="IdentityTransfersAreAtomicAndResetInvalidatesHandles(Naive)" fullname="AssemblyZero.Tests.EP03FactoryTests.IdentityTransfersAreAtomicAndResetInvalidatesHandles(Naive)" methodname="IdentityTransfersAreAtomicAndResetInvalidatesHandles" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="1523484122" result="Passed" start-time="2026-10-13 01:03:14Z" end-time="2026-10-13 01:03:14Z" duration="0.002440" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1047" name="IdentityTransfersAreAtomicAndResetInvalidatesHandles(Gap)" fullname="AssemblyZero.Tests.EP03FactoryTests.IdentityTransfersAreAtomicAndResetInvalidatesHandles(Gap)" methodname="IdentityTransfersAreAtomicAndResetInvalidatesHandles" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="495703823" result="Passed" start-time="2026-10-13 01:03:14Z" end-time="2026-10-13 01:03:14Z" duration="0.000273" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1056" name="LayoutLoadsAndVisualReplacementPreservesInterfacesAndProduction" fullname="AssemblyZero.Tests.EP03FactoryTests.LayoutLoadsAndVisualReplacementPreservesInterfacesAndProduction" methodname="LayoutLoadsAndVisualReplacementPreservesInterfacesAndProduction" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="483969105" result="Passed" start-time="2026-10-13 01:03:14Z" end-time="2026-10-13 01:03:20Z" duration="5.769800" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1044" name="LayoutRejectsCrossingBridgesWithoutClearance" fullname="AssemblyZero.Tests.EP03FactoryTests.LayoutRejectsCrossingBridgesWithoutClearance" methodname="LayoutRejectsCrossingBridgesWithoutClearance" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="107781042" result="Passed" start-time="2026-10-13 01:03:20Z" end-time="2026-10-13 01:03:20Z" duration="0.250606" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1053" name="MissingSecondIngredientNeverPartiallyConsumesTheFirst" fullname="AssemblyZero.Tests.EP03FactoryTests.MissingSecondIngredientNeverPartiallyConsumesTheFirst" methodname="MissingSecondIngredientNeverPartiallyConsumesTheFirst" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="1679593814" result="Passed" start-time="2026-10-13 01:03:20Z" end-time="2026-10-13 01:03:20Z" duration="0.052459" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1052" name="MultiInputIsCommittedOnceAndOutputBackpressureRecovers" fullname="AssemblyZero.Tests.EP03FactoryTests.MultiInputIsCommittedOnceAndOutputBackpressureRecovers" methodname="MultiInputIsCommittedOnceAndOutputBackpressureRecovers" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="906467353" result="Passed" start-time="2026-10-13 01:03:20Z" end-time="2026-10-13 01:03:22Z" duration="1.632695" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1055" name="NaiveGapAndFreshResetAreDeterministic" fullname="AssemblyZero.Tests.EP03FactoryTests.NaiveGapAndFreshResetAreDeterministic" methodname="NaiveGapAndFreshResetAreDeterministic" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="1067793006" result="Passed" start-time="2026-10-13 01:03:22Z" end-time="2026-10-13 01:03:27Z" duration="5.169058" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1045" name="ReferenceLayoutHasCardinalRoutesAndKeepsExpansionClear" fullname="AssemblyZero.Tests.EP03FactoryTests.ReferenceLayoutHasCardinalRoutesAndKeepsExpansionClear" methodname="ReferenceLayoutHasCardinalRoutesAndKeepsExpansionClear" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="1208054694" result="Passed" start-time="2026-10-13 01:03:27Z" end-time="2026-10-13 01:03:27Z" duration="0.010249" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1043" name="SupplyConversionAndProductReceiptsReconcileActualIdentities" fullname="AssemblyZero.Tests.EP03FactoryTests.SupplyConversionAndProductReceiptsReconcileActualIdentities" methodname="SupplyConversionAndProductReceiptsReconcileActualIdentities" classname="AssemblyZero.Tests.EP03FactoryTests" runstate="Runnable" seed="413223027" result="Passed" start-time="2026-10-13 01:03:27Z" end-time="2026-10-13 01:03:29Z" duration="1.951067" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1057" name="EP03RouteGeometryTests" fullname="AssemblyZero.Tests.EP03RouteGeometryTests" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" testcasecount="11" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.330102" total="11" passed="11" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1071" name="BakedLayoutsKeepEverySlopeBelowFortyDegrees" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.273023" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1069" name="BakedLayoutsKeepEverySlopeBelowFortyDegrees(&quot;Full&quot;)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(&quot;Full&quot;)" methodname="BakedLayoutsKeepEverySlopeBelowFortyDegrees" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1180192311" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.234371" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1070" name="BakedLayoutsKeepEverySlopeBelowFortyDegrees(&quot;Minimal&quot;)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(&quot;Minimal&quot;)" methodname="BakedLayoutsKeepEverySlopeBelowFortyDegrees" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="75421926" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.037652" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1068" name="ClearanceIncludesSlopingSegments" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.ClearanceIncludesSlopingSegments" methodname="ClearanceIncludesSlopingSegments" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1764167320" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001018" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1066" name="HigherBridgeDoesNotPreventDescendingBelowIt" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.HigherBridgeDoesNotPreventDescendingBelowIt" methodname="HigherBridgeDoesNotPreventDescendingBelowIt" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1726975185" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.000867" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1067" name="LayoutRejectsSteeperThanFortyDegreeRamp" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.LayoutRejectsSteeperThanFortyDegreeRamp" methodname="LayoutRejectsSteeperThanFortyDegreeRamp" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="877568564" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.003314" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1065" name="NeighboringLowerCrossingsPreventDescentBetweenLanes" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.030092" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1063" name="NeighboringLowerCrossingsPreventDescentBetweenLanes(2)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(2)" methodname="NeighboringLowerCrossingsPreventDescentBetweenLanes" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1625833386" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.000856" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1064" name="NeighboringLowerCrossingsPreventDescentBetweenLanes(4)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(4)" methodname="NeighboringLowerCrossingsPreventDescentBetweenLanes" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="334893849" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.000233" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1061" name="RampsPreserveHeightAndShortNeighbouringCornersStayOrdered" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.RampsPreserveHeightAndShortNeighbouringCornersStayOrdered" methodname="RampsPreserveHeightAndShortNeighbouringCornersStayOrdered" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1771696301" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.003503" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-suite type="ParameterizedMethod" id="1060" name="RoundedCornerHasConstantRadiusAndPreservesPorts" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.005228" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1058" name="RoundedCornerHasConstantRadiusAndPreservesPorts(1)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(1)" methodname="RoundedCornerHasConstantRadiusAndPreservesPorts" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="586688512" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.002092" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1059" name="RoundedCornerHasConstantRadiusAndPreservesPorts(-1)" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(-1)" methodname="RoundedCornerHasConstantRadiusAndPreservesPorts" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="636136730" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.000250" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-case id="1062" name="TightPortCornerUsesTransferDeckWithoutInvertingInnerGuard" fullname="AssemblyZero.Tests.EP03RouteGeometryTests.TightPortCornerUsesTransferDeckWithoutInvertingInnerGuard" methodname="TightPortCornerUsesTransferDeckWithoutInvertingInnerGuard" classname="AssemblyZero.Tests.EP03RouteGeometryTests" runstate="Runnable" seed="1975272503" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.000406" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1072" name="InserterStateTests" fullname="AssemblyZero.Tests.InserterStateTests" classname="AssemblyZero.Tests.InserterStateTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.004347" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1074" name="ProductDoesNotDepartBeforeArmReturns" fullname="AssemblyZero.Tests.InserterStateTests.ProductDoesNotDepartBeforeArmReturns" methodname="ProductDoesNotDepartBeforeArmReturns" classname="AssemblyZero.Tests.InserterStateTests" runstate="Runnable" seed="1801198560" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001881" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1073" name="StateChangesOnlyAtConfiguredTicks" fullname="AssemblyZero.Tests.InserterStateTests.StateChangesOnlyAtConfiguredTicks" methodname="StateChangesOnlyAtConfiguredTicks" classname="AssemblyZero.Tests.InserterStateTests" runstate="Runnable" seed="343428488" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001307" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1075" name="TopologyAndClockTests" fullname="AssemblyZero.Tests.TopologyAndClockTests" classname="AssemblyZero.Tests.TopologyAndClockTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.061328" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1077" name="CornerWorldSamplingIsContinuous" fullname="AssemblyZero.Tests.TopologyAndClockTests.CornerWorldSamplingIsContinuous" methodname="CornerWorldSamplingIsContinuous" classname="AssemblyZero.Tests.TopologyAndClockTests" runstate="Runnable" seed="1494927979" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.022082" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1078" name="InvalidConnectionProducesDiagnostic" fullname="AssemblyZero.Tests.TopologyAndClockTests.InvalidConnectionProducesDiagnostic" methodname="InvalidConnectionProducesDiagnostic" classname="AssemblyZero.Tests.TopologyAndClockTests" runstate="Runnable" seed="2075373651" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001515" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1079" name="RenderFrameCadenceCannotChangeManualTickResult" fullname="AssemblyZero.Tests.TopologyAndClockTests.RenderFrameCadenceCannotChangeManualTickResult" methodname="RenderFrameCadenceCannotChangeManualTickResult" classname="AssemblyZero.Tests.TopologyAndClockTests" runstate="Runnable" seed="732178915" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.034297" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1076" name="StraightAndCornerLogicalDistanceIsContinuous" fullname="AssemblyZero.Tests.TopologyAndClockTests.StraightAndCornerLogicalDistanceIsContinuous" methodname="StraightAndCornerLogicalDistanceIsContinuous" classname="AssemblyZero.Tests.TopologyAndClockTests" runstate="Runnable" seed="1256264895" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001388" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1080" name="TransactionalBeltAccessTests" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:30Z" duration="0.010056" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="ParameterizedMethod" id="1087" name="GapHeadMiddleTailRemovalPreservesOtherPositions" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.006279" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1084" name="GapHeadMiddleTailRemovalPreservesOtherPositions(0)" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(0)" methodname="GapHeadMiddleTailRemovalPreservesOtherPositions" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" seed="431564956" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.002411" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1085" name="GapHeadMiddleTailRemovalPreservesOtherPositions(1)" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(1)" methodname="GapHeadMiddleTailRemovalPreservesOtherPositions" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" seed="1435103401" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001306" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1086" name="GapHeadMiddleTailRemovalPreservesOtherPositions(2)" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.GapHeadMiddleTailRemovalPreservesOtherPositions(2)" methodname="GapHeadMiddleTailRemovalPreservesOtherPositions" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" seed="1385064552" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:29Z" duration="0.001284" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="ParameterizedMethod" id="1083" name="LaneTypeFilteringNearestOrderingAndStaleHandles" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.LaneTypeFilteringNearestOrderingAndStaleHandles" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:30Z" duration="0.002246" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1081" name="LaneTypeFilteringNearestOrderingAndStaleHandles(False)" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.LaneTypeFilteringNearestOrderingAndStaleHandles(False)" methodname="LaneTypeFilteringNearestOrderingAndStaleHandles" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" seed="589622119" result="Passed" start-time="2026-10-13 01:03:29Z" end-time="2026-10-13 01:03:30Z" duration="0.001321" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1082" name="LaneTypeFilteringNearestOrderingAndStaleHandles(True)" fullname="AssemblyZero.Tests.TransactionalBeltAccessTests.LaneTypeFilteringNearestOrderingAndStaleHandles(True)" methodname="LaneTypeFilteringNearestOrderingAndStaleHandles" classname="AssemblyZero.Tests.TransactionalBeltAccessTests" runstate="Runnable" seed="1425570423" result="Passed" start-time="2026-10-13 01:03:30Z" end-time="2026-10-13 01:03:30Z" duration="0.000185" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/ESI186/AppData/LocalLow/DefaultCompany/Assembly Zero\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

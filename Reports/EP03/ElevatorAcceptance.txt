@@ -1,0 +1,7 @@
+Unity: 6000.4.0f1
+Ticks: 13050
+Delivered: 10
+Physical elevator towers: 33
+Declared lift transfers: 40
+Both reported routes captured with a level loaded carrier mid-shaft.
+Material ledger audit passed. Presentation left state hash unchanged.

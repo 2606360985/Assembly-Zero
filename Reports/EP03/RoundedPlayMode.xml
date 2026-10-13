@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="4" result="Passed" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:05:24Z" duration="41.9567754">
+  <test-suite type="TestSuite" id="1014" name="Assembly Zero" fullname="Assembly Zero" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:05:24Z" duration="41.956775" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1008" name="AssemblyZero.PlayModeTests.dll" fullname="E:/HP_E/GITHUB_SKY/Assembly-Zero/Library/ScriptAssemblies/AssemblyZero.PlayModeTests.dll" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:05:24Z" duration="41.940386" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="16804" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1009" name="AssemblyZero" fullname="AssemblyZero" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:05:24Z" duration="41.939022" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1010" name="Tests" fullname="AssemblyZero.Tests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:05:24Z" duration="41.938155" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1001" name="DemoSmokeTests" fullname="AssemblyZero.Tests.DemoSmokeTests" classname="AssemblyZero.Tests.DemoSmokeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:04:43Z" duration="1.546011" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1002" name="DemoSceneLoadsWithSingleSimulationDriver" fullname="AssemblyZero.Tests.DemoSmokeTests.DemoSceneLoadsWithSingleSimulationDriver" methodname="DemoSceneLoadsWithSingleSimulationDriver" classname="AssemblyZero.Tests.DemoSmokeTests" runstate="Runnable" seed="1368239030" result="Passed" start-time="2026-10-13 01:04:42Z" end-time="2026-10-13 01:04:43Z" duration="1.520879" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1003" name="EP02SmokeTests" fullname="AssemblyZero.Tests.EP02SmokeTests" classname="AssemblyZero.Tests.EP02SmokeTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-10-13 01:04:43Z" end-time="2026-10-13 01:04:47Z" duration="3.709326" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1004" name="ProductionPresentationAndRestartDoNotOwnLogistics" fullname="AssemblyZero.Tests.EP02SmokeTests.ProductionPresentationAndRestartDoNotOwnLogistics" methodname="ProductionPresentationAndRestartDoNotOwnLogistics" classname="AssemblyZero.Tests.EP02SmokeTests" runstate="Runnable" seed="1072867385" result="Passed" start-time="2026-10-13 01:04:43Z" end-time="2026-10-13 01:04:47Z" duration="3.706917" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+          </test-suite>
+          <test-suite type="TestFixture" id="1005" name="EP03SmokeTests" fullname="AssemblyZero.Tests.EP03SmokeTests" classname="AssemblyZero.Tests.EP03SmokeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-10-13 01:04:47Z" end-time="2026-10-13 01:05:24Z" duration="36.680032" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1007" name="FactoryProducesPausesAndRestartsWithoutResidualOwnership" fullname="AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership" methodname="FactoryProducesPausesAndRestartsWithoutResidualOwnership" classname="AssemblyZero.Tests.EP03SmokeTests" runstate="Runnable" seed="417693779" result="Passed" start-time="2026-10-13 01:04:47Z" end-time="2026-10-13 01:05:11Z" duration="23.720829" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1006" name="ResetClearsProcessingReservedHeldScanningAndBlockedStates" fullname="AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates" methodname="ResetClearsProcessingReservedHeldScanningAndBlockedStates" classname="AssemblyZero.Tests.EP03SmokeTests" runstate="Runnable" seed="1398034164" result="Passed" start-time="2026-10-13 01:05:11Z" end-time="2026-10-13 01:05:24Z" duration="12.956245" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: C:/Users/ESI186/AppData/LocalLow/DefaultCompany/Assembly Zero\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

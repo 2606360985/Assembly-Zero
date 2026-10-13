@@ -1,0 +1,125 @@
+{
+  "status": "completed",
+  "duration": 1.0,
+  "summary": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(\"Full\")",
+      "Status": "Passed",
+      "Duration": 0.3237049,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.BakedLayoutsKeepEverySlopeBelowFortyDegrees(\"Minimal\")",
+      "Status": "Passed",
+      "Duration": 0.0393928,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ClearanceIncludesSlopingSegments",
+      "Status": "Passed",
+      "Duration": 0.0140773,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.EveryBakedConveyorSectionRetainsUsableWidth(\"EP03_Demo\")",
+      "Status": "Passed",
+      "Duration": 0.1830834,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.EveryBakedConveyorSectionRetainsUsableWidth(\"EP03_Minimal\")",
+      "Status": "Passed",
+      "Duration": 0.0728889,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.HigherBridgeDoesNotPreventDescendingBelowIt",
+      "Status": "Passed",
+      "Duration": 0.0015568,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.LayoutRejectsSteeperThanFortyDegreeRamp",
+      "Status": "Passed",
+      "Duration": 0.0074845,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(2)",
+      "Status": "Passed",
+      "Duration": 0.0010133,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.NeighboringLowerCrossingsPreventDescentBetweenLanes(4)",
+      "Status": "Passed",
+      "Duration": 0.0001741,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.OpposingRampsUseIndependentFullWidthSections",
+      "Status": "Passed",
+      "Duration": 0.0021451,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RampsPreserveHeightAndShortNeighbouringCornersStayOrdered",
+      "Status": "Passed",
+      "Duration": 0.0069186,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RegularArcKeepsContinuousSections",
+      "Status": "Passed",
+      "Duration": 0.0007223,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(1)",
+      "Status": "Passed",
+      "Duration": 0.0021901,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.RoundedCornerHasConstantRadiusAndPreservesPorts(-1)",
+      "Status": "Passed",
+      "Duration": 0.0002519,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.ShortPortCannotBeConsumedByNinetyDegreeMiter",
+      "Status": "Passed",
+      "Duration": 0.0004111,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03RouteGeometryTests.TightPortCornerUsesTransferDeckWithoutInvertingInnerGuard",
+      "Status": "Passed",
+      "Duration": 0.0004342,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}

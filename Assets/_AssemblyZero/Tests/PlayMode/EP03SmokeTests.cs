@@ -15,6 +15,23 @@ namespace AssemblyZero.Tests
 {
     public sealed class EP03SmokeTests
     {
+        [UnityTest] public IEnumerator ElevatorCarriersStayLevelPauseAndClearOnRestart()
+        {
+            yield return SceneManager.LoadSceneAsync("EP03_Demo",LoadSceneMode.Single);yield return null;
+            var d=Object.FindFirstObjectByType<EP03SimulationDriver>();d.Paused=true;Assert.IsNull(d.StartupError);
+            Assert.Greater(Object.FindObjectsByType<FactoryElevatorAuthoring>(FindObjectsSortMode.None).Length,0);
+            Transform[] trays=null;
+            for(var i=0;i<600;i++)
+            {
+                d.StepTicks(50);trays=d.CargoRoot.GetComponentsInChildren<Transform>().Where(t=>t.name=="Elevator Carrier").ToArray();
+                if(trays.Length>0)break;
+            }
+            Assert.IsNotEmpty(trays);d.Simulation.AssertConserved();var hash=d.Simulation.CalculateStateHash();var positions=trays.Select(t=>t.position).ToArray();
+            for(var i=0;i<trays.Length;i++)Assert.Greater(Vector3.Dot(trays[i].up,Vector3.up),.999f);
+            d.Present();yield return null;d.Present();Assert.AreEqual(hash,d.Simulation.CalculateStateHash());
+            for(var i=0;i<trays.Length;i++)Assert.AreEqual(positions[i],trays[i].position);
+            d.Restart();yield return null;Assert.AreEqual(0,d.CargoRoot.childCount);Assert.IsNull(d.StartupError);d.Simulation.AssertConserved();
+        }
         [UnityTest] public IEnumerator ResetClearsProcessingReservedHeldScanningAndBlockedStates()
         {
             yield return SceneManager.LoadSceneAsync("EP03_Demo",LoadSceneMode.Single);yield return null;

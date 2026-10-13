@@ -812,6 +812,7 @@ MonoBehaviour:
     - {x: 65.100006, y: 0.7, z: 49.500004}
     - {x: 66, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: leg-a-0--assembly-in-6
       From: leg-a-0
@@ -828,6 +829,7 @@ MonoBehaviour:
     - {x: 59.7, y: 0.7, z: 49.500004}
     - {x: 61.2, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: arm-b-0--assembly-in-5
       From: arm-b-0
@@ -846,12 +848,13 @@ MonoBehaviour:
     - {x: 74.700005, y: 0.7, z: 49.500004}
     - {x: 75.6, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: arm-a-0--assembly-in-4
       From: arm-a-0
       To: assembly-in-4
       Material: 4
-      Length: 31204
+      Length: 32242
       Speed: 32
       Spacing: 512
     Points:
@@ -861,10 +864,11 @@ MonoBehaviour:
     - {x: 51.9, y: 1.9, z: 44.100002}
     - {x: 51.9, y: 1.9, z: 48.300003}
     - {x: 69.3, y: 1.9, z: 48.300003}
-    - {x: 69.9, y: 1.5, z: 48.300003}
-    - {x: 69.9, y: 0.7, z: 49.500004}
+    - {x: 69.3, y: 0.18, z: 48.300003}
+    - {x: 70.8, y: 0.18, z: 48.300003}
     - {x: 70.8, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 06000000
   - Connection:
       Id: body-0--assembly-in-3
       From: body-0
@@ -882,12 +886,13 @@ MonoBehaviour:
     - {x: 55.500004, y: 0.7, z: 49.500004}
     - {x: 56.4, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: head-0--assembly-in-2
       From: head-0
       To: assembly-in-2
       Material: 2
-      Length: 57828
+      Length: 58542
       Speed: 32
       Spacing: 512
     Points:
@@ -899,13 +904,15 @@ MonoBehaviour:
     - {x: 54.9, y: 1.9, z: 32.7}
     - {x: 54.9, y: 1.9, z: 45.9}
     - {x: 75.3, y: 1.9, z: 45.9}
-    - {x: 75.9, y: 1.5, z: 45.9}
+    - {x: 75.3, y: 0.7, z: 45.9}
+    - {x: 75.9, y: 0.7, z: 45.9}
     - {x: 75.9, y: 0.7, z: 47.100002}
     - {x: 75.9, y: 0.7, z: 48.300003}
     - {x: 79.5, y: 0.7, z: 48.300003}
     - {x: 79.5, y: 0.7, z: 49.500004}
     - {x: 80.4, y: 0.18, z: 49.5}
     BridgeLevel: 0
+    ElevatorSegments: 08000000
   - Connection:
       Id: warehouse-8--plate-0
       From: warehouse-8
@@ -922,6 +929,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 36}
     - {x: 2.4, y: 0.7, z: 36}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--plate-1
       From: warehouse-8
@@ -938,6 +946,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 42}
     - {x: 2.4, y: 0.7, z: 42}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--plate-2
       From: warehouse-8
@@ -954,6 +963,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 48}
     - {x: 2.4, y: 0.7, z: 48}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--plate-3
       From: warehouse-8
@@ -970,6 +980,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 54.000004}
     - {x: 2.4, y: 0.7, z: 54.000004}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--rod-0
       From: warehouse-8
@@ -986,6 +997,7 @@ MonoBehaviour:
     - {x: 12.900001, y: 0.7, z: 36}
     - {x: 13.200001, y: 0.7, z: 36}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--rod-1
       From: warehouse-8
@@ -1002,6 +1014,7 @@ MonoBehaviour:
     - {x: 12.900001, y: 0.7, z: 42}
     - {x: 13.200001, y: 0.7, z: 42}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--rod-2
       From: warehouse-8
@@ -1018,6 +1031,7 @@ MonoBehaviour:
     - {x: 12.900001, y: 0.7, z: 48}
     - {x: 13.200001, y: 0.7, z: 48}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-8--rod-3
       From: warehouse-8
@@ -1034,6 +1048,7 @@ MonoBehaviour:
     - {x: 12.900001, y: 0.7, z: 54.000004}
     - {x: 13.200001, y: 0.7, z: 54.000004}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: circuit-1--hub-16
       From: circuit-1
@@ -1052,6 +1067,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 60.000004}
     - {x: 36.000004, y: 0.7, z: 60.000004}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--circuit-0
       From: warehouse-9
@@ -1070,6 +1086,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 23.6}
     - {x: 2.3999999, y: 0.7, z: 23.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--circuit-1
       From: warehouse-9
@@ -1092,12 +1109,13 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 23.6}
     - {x: 10.8, y: 0.7, z: 23.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--circuit-2
       From: warehouse-9
       To: circuit-2
       Material: 9
-      Length: 40386
+      Length: 41100
       Speed: 32
       Spacing: 512
     Points:
@@ -1106,12 +1124,14 @@ MonoBehaviour:
     - {x: 20.7, y: 0.7, z: 35.100002}
     - {x: 20.7, y: 1.9, z: 33.300003}
     - {x: 20.7, y: 1.9, z: 26.1}
-    - {x: 20.7, y: 1.5, z: 25.500002}
+    - {x: 20.7, y: 0.7, z: 26.1}
+    - {x: 19.5, y: 0.7, z: 26.1}
     - {x: 19.5, y: 0.7, z: 25.500002}
     - {x: 18.900002, y: 0.7, z: 25.500002}
     - {x: 18.900002, y: 0.7, z: 23.6}
     - {x: 19.2, y: 0.7, z: 23.6}
     BridgeLevel: 0
+    ElevatorSegments: 05000000
   - Connection:
       Id: warehouse-9--circuit-3
       From: warehouse-9
@@ -1130,6 +1150,7 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 23.6}
     - {x: 27.6, y: 0.7, z: 23.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--shell-0
       From: warehouse-9
@@ -1146,6 +1167,7 @@ MonoBehaviour:
     - {x: 23.7, y: 0.7, z: 36}
     - {x: 24.000002, y: 0.7, z: 36}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--shell-1
       From: warehouse-9
@@ -1162,6 +1184,7 @@ MonoBehaviour:
     - {x: 23.7, y: 0.7, z: 42}
     - {x: 24.000002, y: 0.7, z: 42}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--shell-2
       From: warehouse-9
@@ -1178,6 +1201,7 @@ MonoBehaviour:
     - {x: 23.7, y: 0.7, z: 48}
     - {x: 24.000002, y: 0.7, z: 48}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-9--shell-3
       From: warehouse-9
@@ -1194,6 +1218,7 @@ MonoBehaviour:
     - {x: 23.7, y: 0.7, z: 54.000004}
     - {x: 24.000002, y: 0.7, z: 54.000004}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--circuit-0
       From: warehouse-10
@@ -1212,6 +1237,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 22.000002}
     - {x: 2.3999999, y: 0.7, z: 22.000002}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--circuit-1
       From: warehouse-10
@@ -1230,6 +1256,7 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 22.000002}
     - {x: 10.8, y: 0.7, z: 22.000002}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--circuit-2
       From: warehouse-10
@@ -1248,6 +1275,7 @@ MonoBehaviour:
     - {x: 18.900002, y: 0.7, z: 22.000002}
     - {x: 19.2, y: 0.7, z: 22.000002}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--circuit-3
       From: warehouse-10
@@ -1266,6 +1294,7 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 22.000002}
     - {x: 27.6, y: 0.7, z: 22.000002}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--motor-0
       From: warehouse-10
@@ -1284,6 +1313,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 15.200001}
     - {x: 2.3999999, y: 0.7, z: 15.200001}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--motor-1
       From: warehouse-10
@@ -1302,6 +1332,7 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 15.200001}
     - {x: 10.8, y: 0.7, z: 15.200001}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--motor-2
       From: warehouse-10
@@ -1320,6 +1351,7 @@ MonoBehaviour:
     - {x: 18.900002, y: 0.7, z: 15.200001}
     - {x: 19.2, y: 0.7, z: 15.200001}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: warehouse-10--motor-3
       From: warehouse-10
@@ -1338,6 +1370,7 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 15.200001}
     - {x: 27.6, y: 0.7, z: 15.200001}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: rod-0--hub-12
       From: rod-0
@@ -1359,19 +1392,21 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 16.800001}
     - {x: 36.000004, y: 0.7, z: 16.800001}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: plate-0--hub-11
       From: plate-0
       To: hub-11
       Material: 11
-      Length: 51309
+      Length: 52023
       Speed: 32
       Spacing: 512
     Points:
     - {x: 7.2000003, y: 0.7, z: 36}
     - {x: 7.5000005, y: 0.7, z: 36}
     - {x: 7.5000005, y: 0.7, z: 26.1}
-    - {x: 7.5000005, y: 1.1, z: 25.500002}
+    - {x: 7.5000005, y: 1.9, z: 26.1}
+    - {x: 8.700001, y: 1.9, z: 26.1}
     - {x: 8.700001, y: 1.9, z: 25.500002}
     - {x: 18.300001, y: 1.9, z: 25.500002}
     - {x: 18.300001, y: 1.9, z: 8.700001}
@@ -1381,6 +1416,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 6}
     - {x: 36.000004, y: 0.7, z: 6}
     BridgeLevel: 0
+    ElevatorSegments: 03000000
   - Connection:
       Id: plate-1--hub-11
       From: plate-1
@@ -1405,6 +1441,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 6}
     - {x: 36.000004, y: 0.7, z: 6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: plate-2--hub-11
       From: plate-2
@@ -1427,6 +1464,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 6}
     - {x: 36.000004, y: 0.7, z: 6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: plate-3--hub-11
       From: plate-3
@@ -1449,6 +1487,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 6}
     - {x: 36.000004, y: 0.7, z: 6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-11--body-0
       From: hub-11
@@ -1467,6 +1506,7 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 64.2}
     - {x: 42.000004, y: 0.7, z: 64.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-11--gear-0
       From: hub-11
@@ -1483,6 +1523,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 5.2}
     - {x: 2.3999999, y: 0.7, z: 5.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-11--gear-1
       From: hub-11
@@ -1499,6 +1540,7 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 5.2}
     - {x: 10.8, y: 0.7, z: 5.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-11--gear-2
       From: hub-11
@@ -1515,6 +1557,7 @@ MonoBehaviour:
     - {x: 18.900002, y: 0.7, z: 5.2}
     - {x: 19.2, y: 0.7, z: 5.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-11--gear-3
       From: hub-11
@@ -1531,12 +1574,13 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 5.2}
     - {x: 27.6, y: 0.7, z: 5.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: rod-1--hub-12
       From: rod-1
       To: hub-12
       Material: 12
-      Length: 41177
+      Length: 40867
       Speed: 32
       Spacing: 512
     Points:
@@ -1555,19 +1599,20 @@ MonoBehaviour:
     - {x: 34.5, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 17.7}
-    - {x: 35.100002, y: 1.1, z: 16.5}
+    - {x: 35.100002, y: 1.9, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 16.800001}
     - {x: 36.000004, y: 0.7, z: 16.800001}
     BridgeLevel: 0
+    ElevatorSegments: 10000000
   - Connection:
       Id: rod-2--hub-12
       From: rod-2
       To: hub-12
       Material: 12
-      Length: 46297
+      Length: 45987
       Speed: 32
       Spacing: 512
     Points:
@@ -1586,19 +1631,20 @@ MonoBehaviour:
     - {x: 34.5, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 17.7}
-    - {x: 35.100002, y: 1.1, z: 16.5}
+    - {x: 35.100002, y: 1.9, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 16.800001}
     - {x: 36.000004, y: 0.7, z: 16.800001}
     BridgeLevel: 0
+    ElevatorSegments: 10000000
   - Connection:
       Id: rod-3--hub-12
       From: rod-3
       To: hub-12
       Material: 12
-      Length: 51417
+      Length: 51107
       Speed: 32
       Spacing: 512
     Points:
@@ -1617,13 +1663,14 @@ MonoBehaviour:
     - {x: 34.5, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 25.500002}
     - {x: 35.100002, y: 1.9, z: 17.7}
-    - {x: 35.100002, y: 1.1, z: 16.5}
+    - {x: 35.100002, y: 1.9, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.1}
     - {x: 35.100002, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 17.7}
     - {x: 35.7, y: 0.7, z: 16.800001}
     - {x: 36.000004, y: 0.7, z: 16.800001}
     BridgeLevel: 0
+    ElevatorSegments: 10000000
   - Connection:
       Id: hub-12--gear-0
       From: hub-12
@@ -1640,6 +1687,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 6.8}
     - {x: 2.3999999, y: 0.7, z: 6.8}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--gear-1
       From: hub-12
@@ -1656,6 +1704,7 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 6.8}
     - {x: 10.8, y: 0.7, z: 6.8}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--gear-2
       From: hub-12
@@ -1672,6 +1721,7 @@ MonoBehaviour:
     - {x: 18.900002, y: 0.7, z: 6.8}
     - {x: 19.2, y: 0.7, z: 6.8}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--gear-3
       From: hub-12
@@ -1688,6 +1738,7 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 6.8}
     - {x: 27.6, y: 0.7, z: 6.8}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--leg-a-0
       From: hub-12
@@ -1707,6 +1758,7 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 53.4}
     - {x: 42.000004, y: 0.7, z: 53.4}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--leg-b-0
       From: hub-12
@@ -1726,6 +1778,7 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 42.600002}
     - {x: 42.000004, y: 0.7, z: 42.600002}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--motor-0
       From: hub-12
@@ -1742,6 +1795,7 @@ MonoBehaviour:
     - {x: 2.1000001, y: 0.7, z: 13.6}
     - {x: 2.3999999, y: 0.7, z: 13.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--motor-1
       From: hub-12
@@ -1758,6 +1812,7 @@ MonoBehaviour:
     - {x: 10.5, y: 0.7, z: 13.6}
     - {x: 10.8, y: 0.7, z: 13.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--motor-2
       From: hub-12
@@ -1774,6 +1829,7 @@ MonoBehaviour:
     - {x: 18.900002, y: 0.7, z: 13.6}
     - {x: 19.2, y: 0.7, z: 13.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-12--motor-3
       From: hub-12
@@ -1790,6 +1846,7 @@ MonoBehaviour:
     - {x: 27.300001, y: 0.7, z: 13.6}
     - {x: 27.6, y: 0.7, z: 13.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: shell-0--hub-13
       From: shell-0
@@ -1810,6 +1867,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 27.6}
     - {x: 36.000004, y: 0.7, z: 27.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: shell-1--hub-13
       From: shell-1
@@ -1832,6 +1890,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 27.6}
     - {x: 36.000004, y: 0.7, z: 27.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: shell-2--hub-13
       From: shell-2
@@ -1854,6 +1913,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 27.6}
     - {x: 36.000004, y: 0.7, z: 27.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: shell-3--hub-13
       From: shell-3
@@ -1876,33 +1936,36 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 27.6}
     - {x: 36.000004, y: 0.7, z: 27.6}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-13--arm-a-0
       From: hub-13
       To: arm-a-0
       Material: 13
-      Length: 13529
+      Length: 13313
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 27.6}
     - {x: 37.5, y: 0.7, z: 27.6}
     - {x: 37.5, y: 0.7, z: 27.900002}
-    - {x: 37.5, y: 1.9, z: 29.7}
+    - {x: 37.499996, y: 0.7, z: 29.100004}
+    - {x: 37.499996, y: 3.1, z: 29.100004}
+    - {x: 39.300003, y: 3.1, z: 29.100004}
     - {x: 39.300003, y: 3.1, z: 29.7}
     - {x: 42.300003, y: 3.1, z: 29.7}
-    - {x: 44.100002, y: 1.9, z: 29.7}
     - {x: 42.300003, y: 0.7, z: 29.7}
     - {x: 41.7, y: 0.7, z: 29.7}
     - {x: 41.7, y: 0.7, z: 31.800003}
     - {x: 42.000004, y: 0.7, z: 31.800003}
     BridgeLevel: 0
+    ElevatorSegments: 0400000008000000
   - Connection:
       Id: hub-13--arm-b-0
       From: hub-13
       To: arm-b-0
       Material: 13
-      Length: 19565
+      Length: 20279
       Speed: 32
       Spacing: 512
     Points:
@@ -1913,11 +1976,13 @@ MonoBehaviour:
     - {x: 37.5, y: 1.9, z: 16.5}
     - {x: 42.300003, y: 1.9, z: 16.5}
     - {x: 42.300003, y: 1.9, z: 17.7}
-    - {x: 42.300003, y: 1.1, z: 18.900002}
+    - {x: 42.300003, y: 0.7, z: 17.7}
+    - {x: 41.7, y: 0.7, z: 17.7}
     - {x: 41.7, y: 0.7, z: 18.900002}
     - {x: 41.7, y: 0.7, z: 21.000002}
     - {x: 42.000004, y: 0.7, z: 21.000002}
     BridgeLevel: 0
+    ElevatorSegments: 07000000
   - Connection:
       Id: hub-13--body-0
       From: hub-13
@@ -1942,6 +2007,7 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 66}
     - {x: 42.000004, y: 0.7, z: 66}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-13--head-0
       From: hub-13
@@ -1961,12 +2027,13 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 10.8}
     - {x: 42.000004, y: 0.7, z: 10.8}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: gear-0--hub-14
       From: gear-0
       To: hub-14
       Material: 14
-      Length: 53366
+      Length: 54080
       Speed: 32
       Spacing: 512
     Points:
@@ -1978,7 +2045,9 @@ MonoBehaviour:
     - {x: 16.5, y: 1.9, z: 18.900002}
     - {x: 18.300001, y: 0.7, z: 18.900002}
     - {x: 35.100002, y: 0.7, z: 18.900002}
-    - {x: 35.7, y: 1.1, z: 18.900002}
+    - {x: 35.699997, y: 0.7, z: 18.900002}
+    - {x: 35.699997, y: 0.7, z: 19.500004}
+    - {x: 35.699997, y: 1.9, z: 19.500004}
     - {x: 35.7, y: 1.9, z: 20.1}
     - {x: 35.7, y: 1.9, z: 27.900002}
     - {x: 35.7, y: 2.7, z: 29.1}
@@ -1990,6 +2059,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 38.4}
     - {x: 36.000004, y: 0.7, z: 38.4}
     BridgeLevel: 0
+    ElevatorSegments: 0a000000
   - Connection:
       Id: gear-1--hub-14
       From: gear-1
@@ -2017,12 +2087,13 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 38.4}
     - {x: 36.000004, y: 0.7, z: 38.4}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: gear-2--hub-14
       From: gear-2
       To: hub-14
       Material: 14
-      Length: 52845
+      Length: 52535
       Speed: 32
       Spacing: 512
     Points:
@@ -2040,17 +2111,18 @@ MonoBehaviour:
     - {x: 32.7, y: 1.9, z: 35.100002}
     - {x: 32.7, y: 1.9, z: 38.100002}
     - {x: 35.7, y: 1.9, z: 38.100002}
-    - {x: 35.7, y: 1.1, z: 36.9}
+    - {x: 35.7, y: 1.9, z: 37.5}
     - {x: 35.7, y: 0.7, z: 37.5}
     - {x: 35.7, y: 0.7, z: 38.4}
     - {x: 36.000004, y: 0.7, z: 38.4}
     BridgeLevel: 0
+    ElevatorSegments: 0f000000
   - Connection:
       Id: gear-3--hub-14
       From: gear-3
       To: hub-14
       Material: 14
-      Length: 41069
+      Length: 41473
       Speed: 32
       Spacing: 512
     Points:
@@ -2059,7 +2131,8 @@ MonoBehaviour:
     - {x: 35.100002, y: 0.7, z: 8.1}
     - {x: 38.100002, y: 0.7, z: 8.1}
     - {x: 38.100002, y: 0.7, z: 11.1}
-    - {x: 38.100002, y: 1.5, z: 12.3}
+    - {x: 38.100002, y: 1.9, z: 11.1}
+    - {x: 37.5, y: 1.9, z: 11.1}
     - {x: 37.5, y: 1.9, z: 12.3}
     - {x: 35.7, y: 1.9, z: 12.3}
     - {x: 35.7, y: 1.9, z: 27.900002}
@@ -2068,58 +2141,67 @@ MonoBehaviour:
     - {x: 32.7, y: 1.9, z: 35.100002}
     - {x: 32.7, y: 1.9, z: 38.100002}
     - {x: 35.7, y: 1.9, z: 38.100002}
-    - {x: 35.7, y: 1.1, z: 36.9}
+    - {x: 35.7, y: 1.9, z: 37.5}
     - {x: 35.7, y: 0.7, z: 37.5}
     - {x: 35.7, y: 0.7, z: 38.4}
     - {x: 36.000004, y: 0.7, z: 38.4}
     BridgeLevel: 0
+    ElevatorSegments: 0500000010000000
   - Connection:
       Id: hub-14--arm-a-0
       From: hub-14
       To: arm-a-0
       Material: 14
-      Length: 16601
+      Length: 19457
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 39.9}
-    - {x: 37.5, y: 1.9, z: 41.7}
+    - {x: 37.499996, y: 0.7, z: 40.499996}
+    - {x: 37.499996, y: 3.1, z: 40.499996}
+    - {x: 39.300003, y: 3.1, z: 40.499996}
     - {x: 39.300003, y: 3.1, z: 41.7}
     - {x: 41.7, y: 3.1, z: 41.7}
     - {x: 41.7, y: 3.1, z: 40.5}
     - {x: 42.300003, y: 3.1, z: 40.5}
-    - {x: 42.300003, y: 1.1, z: 37.5}
+    - {x: 42.300003, y: 0.7, z: 40.5}
+    - {x: 41.7, y: 0.7, z: 40.5}
     - {x: 41.7, y: 0.7, z: 37.5}
     - {x: 41.7, y: 0.7, z: 33.600002}
     - {x: 42.000004, y: 0.7, z: 33.600002}
     BridgeLevel: 0
+    ElevatorSegments: 040000000a000000
   - Connection:
       Id: hub-14--arm-b-0
       From: hub-14
       To: arm-b-0
       Material: 14
-      Length: 38213
+      Length: 40355
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 39.9}
-    - {x: 37.5, y: 1.9, z: 41.7}
+    - {x: 37.499996, y: 0.7, z: 40.499996}
+    - {x: 37.499996, y: 3.1, z: 40.499996}
+    - {x: 39.300003, y: 3.1, z: 40.499996}
     - {x: 39.300003, y: 3.1, z: 41.7}
     - {x: 40.5, y: 3.1, z: 41.7}
     - {x: 40.5, y: 3.1, z: 41.100002}
     - {x: 40.5, y: 0.7, z: 37.5}
     - {x: 40.5, y: 0.7, z: 16.5}
-    - {x: 40.5, y: 1.5, z: 15.3}
+    - {x: 40.5, y: 1.9, z: 16.5}
+    - {x: 41.100002, y: 1.9, z: 16.5}
     - {x: 41.100002, y: 1.9, z: 15.3}
     - {x: 41.7, y: 1.9, z: 15.3}
     - {x: 41.7, y: 0.7, z: 17.1}
     - {x: 41.7, y: 0.7, z: 22.800001}
     - {x: 42.000004, y: 0.7, z: 22.800001}
     BridgeLevel: 0
+    ElevatorSegments: 040000000b000000
   - Connection:
       Id: hub-14--leg-a-0
       From: hub-14
@@ -2141,35 +2223,38 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 55.2}
     - {x: 42.000004, y: 0.7, z: 55.2}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: hub-14--leg-b-0
       From: hub-14
       To: leg-b-0
       Material: 14
-      Length: 17113
+      Length: 16897
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 38.4}
     - {x: 37.5, y: 0.7, z: 39.9}
-    - {x: 37.5, y: 1.9, z: 41.7}
+    - {x: 37.499996, y: 0.7, z: 40.499996}
+    - {x: 37.499996, y: 3.1, z: 40.499996}
+    - {x: 39.300003, y: 3.1, z: 40.499996}
     - {x: 39.300003, y: 3.1, z: 41.7}
     - {x: 41.7, y: 3.1, z: 41.7}
     - {x: 41.7, y: 3.1, z: 40.5}
     - {x: 42.300003, y: 3.1, z: 40.5}
-    - {x: 44.100002, y: 1.9, z: 40.5}
     - {x: 42.300003, y: 0.7, z: 40.5}
     - {x: 41.7, y: 0.7, z: 40.5}
     - {x: 41.7, y: 0.7, z: 44.4}
     - {x: 42.000004, y: 0.7, z: 44.4}
     BridgeLevel: 0
+    ElevatorSegments: 040000000a000000
   - Connection:
       Id: motor-0--hub-15
       From: motor-0
       To: hub-15
       Material: 15
-      Length: 53977
+      Length: 54691
       Speed: 32
       Spacing: 512
     Points:
@@ -2177,7 +2262,8 @@ MonoBehaviour:
     - {x: 9.900001, y: 0.7, z: 14.400001}
     - {x: 9.900001, y: 0.7, z: 19.5}
     - {x: 26.1, y: 0.7, z: 19.5}
-    - {x: 27.300001, y: 1.5, z: 19.5}
+    - {x: 26.1, y: 1.9, z: 19.5}
+    - {x: 27.300001, y: 1.9, z: 19.5}
     - {x: 27.300001, y: 1.9, z: 20.1}
     - {x: 27.300001, y: 1.9, z: 33.300003}
     - {x: 30.300001, y: 1.9, z: 33.300003}
@@ -2192,12 +2278,13 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 49.2}
     - {x: 36.000004, y: 0.7, z: 49.2}
     BridgeLevel: 0
+    ElevatorSegments: 04000000
   - Connection:
       Id: motor-1--hub-15
       From: motor-1
       To: hub-15
       Material: 15
-      Length: 55621
+      Length: 54691
       Speed: 32
       Spacing: 512
     Points:
@@ -2205,7 +2292,6 @@ MonoBehaviour:
     - {x: 18.300001, y: 0.7, z: 14.400001}
     - {x: 18.300001, y: 0.7, z: 17.7}
     - {x: 17.7, y: 0.7, z: 17.7}
-    - {x: 15.900001, y: 1.9, z: 17.7}
     - {x: 17.7, y: 3.1, z: 17.7}
     - {x: 18.900002, y: 3.1, z: 17.7}
     - {x: 18.900002, y: 3.1, z: 29.1}
@@ -2213,7 +2299,8 @@ MonoBehaviour:
     - {x: 20.1, y: 1.9, z: 30.900002}
     - {x: 20.1, y: 1.9, z: 38.100002}
     - {x: 21.300001, y: 1.9, z: 38.100002}
-    - {x: 21.900002, y: 1.5, z: 38.100002}
+    - {x: 21.300001, y: 0.7, z: 38.100002}
+    - {x: 21.900002, y: 0.7, z: 38.100002}
     - {x: 21.900002, y: 0.7, z: 39.300003}
     - {x: 21.900002, y: 0.7, z: 41.7}
     - {x: 23.1, y: 0.7, z: 41.7}
@@ -2227,12 +2314,13 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 49.2}
     - {x: 36.000004, y: 0.7, z: 49.2}
     BridgeLevel: 0
+    ElevatorSegments: 040000000b000000
   - Connection:
       Id: motor-2--hub-15
       From: motor-2
       To: hub-15
       Material: 15
-      Length: 42713
+      Length: 43427
       Speed: 32
       Spacing: 512
     Points:
@@ -2240,7 +2328,8 @@ MonoBehaviour:
     - {x: 26.7, y: 0.7, z: 14.400001}
     - {x: 26.7, y: 0.7, z: 17.7}
     - {x: 26.1, y: 0.7, z: 17.7}
-    - {x: 24.900002, y: 1.5, z: 17.7}
+    - {x: 26.1, y: 1.9, z: 17.7}
+    - {x: 24.900002, y: 1.9, z: 17.7}
     - {x: 24.900002, y: 1.9, z: 18.300001}
     - {x: 24.900002, y: 1.9, z: 20.1}
     - {x: 27.300001, y: 1.9, z: 20.1}
@@ -2257,20 +2346,20 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 49.2}
     - {x: 36.000004, y: 0.7, z: 49.2}
     BridgeLevel: 0
+    ElevatorSegments: 04000000
   - Connection:
       Id: motor-3--hub-15
       From: motor-3
       To: hub-15
       Material: 15
-      Length: 47941
+      Length: 49059
       Speed: 32
       Spacing: 512
     Points:
     - {x: 34.8, y: 0.7, z: 14.400001}
     - {x: 35.100002, y: 0.7, z: 14.400001}
     - {x: 35.100002, y: 0.7, z: 15.3}
-    - {x: 35.100002, y: 1.1, z: 15.900001}
-    - {x: 35.100002, y: 1.5, z: 15.3}
+    - {x: 35.100002, y: 3.1, z: 15.3}
     - {x: 35.100002, y: 3.1, z: 17.7}
     - {x: 35.100002, y: 3.1, z: 18.300001}
     - {x: 39.9, y: 3.1, z: 18.300001}
@@ -2278,7 +2367,9 @@ MonoBehaviour:
     - {x: 39.9, y: 0.7, z: 41.7}
     - {x: 39.300003, y: 0.7, z: 41.7}
     - {x: 39.300003, y: 0.7, z: 51.9}
-    - {x: 39.300003, y: 1.5, z: 53.100002}
+    - {x: 39.299995, y: 0.7, z: 52.499996}
+    - {x: 39.299995, y: 1.9, z: 52.499996}
+    - {x: 39.299995, y: 1.9, z: 53.100002}
     - {x: 38.7, y: 1.9, z: 53.100002}
     - {x: 36.300003, y: 1.9, z: 53.100002}
     - {x: 36.300003, y: 0.7, z: 51.300003}
@@ -2287,117 +2378,129 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 49.2}
     - {x: 36.000004, y: 0.7, z: 49.2}
     BridgeLevel: 0
+    ElevatorSegments: 030000000c000000
   - Connection:
       Id: hub-15--arm-a-0
       From: hub-15
       To: arm-a-0
       Material: 15
-      Length: 27353
+      Length: 27137
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 51.300003}
-    - {x: 37.5, y: 1.5, z: 52.500004}
+    - {x: 37.499996, y: 0.7, z: 51.899998}
+    - {x: 37.499996, y: 1.9, z: 51.899998}
+    - {x: 38.100002, y: 1.9, z: 51.899998}
     - {x: 38.100002, y: 1.9, z: 52.500004}
     - {x: 38.7, y: 1.9, z: 52.500004}
     - {x: 38.7, y: 1.9, z: 51.9}
     - {x: 41.100002, y: 1.9, z: 51.9}
     - {x: 41.100002, y: 1.9, z: 40.5}
-    - {x: 41.100002, y: 2.7, z: 39.300003}
+    - {x: 41.100002, y: 3.1, z: 40.5}
+    - {x: 41.100002, y: 3.1, z: 39.300003}
     - {x: 41.7, y: 3.1, z: 39.300003}
     - {x: 42.300003, y: 3.1, z: 39.300003}
-    - {x: 44.100002, y: 1.9, z: 39.300003}
     - {x: 42.300003, y: 0.7, z: 39.300003}
     - {x: 41.7, y: 0.7, z: 39.300003}
     - {x: 41.7, y: 0.7, z: 35.4}
     - {x: 42.000004, y: 0.7, z: 35.4}
     BridgeLevel: 0
+    ElevatorSegments: 040000000b0000000f000000
   - Connection:
       Id: hub-15--arm-b-0
       From: hub-15
       To: arm-b-0
       Material: 15
-      Length: 36569
+      Length: 36353
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 51.300003}
-    - {x: 37.5, y: 1.5, z: 52.500004}
+    - {x: 37.499996, y: 0.7, z: 51.899998}
+    - {x: 37.499996, y: 1.9, z: 51.899998}
+    - {x: 38.100002, y: 1.9, z: 51.899998}
     - {x: 38.100002, y: 1.9, z: 52.500004}
     - {x: 38.7, y: 1.9, z: 52.500004}
     - {x: 38.7, y: 1.9, z: 51.9}
     - {x: 41.100002, y: 1.9, z: 51.9}
     - {x: 41.100002, y: 1.9, z: 29.7}
-    - {x: 41.100002, y: 2.7, z: 28.500002}
+    - {x: 41.1, y: 1.9, z: 29.100004}
+    - {x: 41.1, y: 3.1, z: 29.100004}
+    - {x: 41.7, y: 3.1, z: 29.100004}
     - {x: 41.7, y: 3.1, z: 28.500002}
     - {x: 42.300003, y: 3.1, z: 28.500002}
-    - {x: 44.100002, y: 1.9, z: 28.500002}
     - {x: 42.300003, y: 0.7, z: 28.500002}
     - {x: 41.7, y: 0.7, z: 28.500002}
     - {x: 41.7, y: 0.7, z: 24.6}
     - {x: 42.000004, y: 0.7, z: 24.6}
     BridgeLevel: 0
+    ElevatorSegments: 040000000c00000010000000
   - Connection:
       Id: hub-15--leg-a-0
       From: hub-15
       To: leg-a-0
       Material: 15
-      Length: 11885
+      Length: 12599
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 53.7}
-    - {x: 37.5, y: 1.5, z: 54.9}
+    - {x: 37.5, y: 1.9, z: 53.7}
+    - {x: 38.100002, y: 1.9, z: 53.7}
     - {x: 38.100002, y: 1.9, z: 54.9}
     - {x: 41.7, y: 1.9, z: 54.9}
     - {x: 41.7, y: 0.7, z: 56.7}
     - {x: 41.7, y: 0.7, z: 57}
     - {x: 42.000004, y: 0.7, z: 57}
     BridgeLevel: 0
+    ElevatorSegments: 03000000
   - Connection:
       Id: hub-15--leg-b-0
       From: hub-15
       To: leg-b-0
       Material: 15
-      Length: 16295
+      Length: 18603
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 49.2}
     - {x: 37.5, y: 0.7, z: 51.300003}
-    - {x: 37.5, y: 1.5, z: 52.500004}
+    - {x: 37.499996, y: 0.7, z: 51.899998}
+    - {x: 37.499996, y: 3.5, z: 51.899998}
+    - {x: 40.5, y: 3.5, z: 51.899998}
     - {x: 40.5, y: 3.5, z: 52.500004}
     - {x: 41.7, y: 3.5, z: 52.500004}
     - {x: 41.7, y: 3.5, z: 51.300003}
-    - {x: 42.300003, y: 3.5, z: 51.300003}
-    - {x: 42.9, y: 3.1, z: 51.300003}
-    - {x: 42.9, y: 1.1, z: 48.300003}
+    - {x: 41.7, y: 3.5, z: 50.699993}
+    - {x: 42.299995, y: 3.5, z: 50.699993}
+    - {x: 42.299995, y: 0.7, z: 50.699993}
     - {x: 42.300003, y: 0.7, z: 48.300003}
     - {x: 41.7, y: 0.7, z: 48.300003}
     - {x: 41.7, y: 0.7, z: 46.2}
     - {x: 42.000004, y: 0.7, z: 46.2}
     BridgeLevel: 0
+    ElevatorSegments: 040000000b000000
   - Connection:
       Id: circuit-0--hub-16
       From: circuit-0
       To: hub-16
       Material: 16
-      Length: 58585
+      Length: 57965
       Speed: 32
       Spacing: 512
     Points:
     - {x: 9.6, y: 0.7, z: 22.800001}
     - {x: 9.900001, y: 0.7, z: 22.800001}
     - {x: 9.900001, y: 0.7, z: 23.7}
-    - {x: 9.900001, y: 1.5, z: 24.900002}
-    - {x: 9.900001, y: 2.3, z: 23.7}
+    - {x: 9.900001, y: 3.1, z: 23.7}
     - {x: 9.900001, y: 3.1, z: 24.900002}
     - {x: 9.900001, y: 3.1, z: 26.1}
     - {x: 9.900001, y: 0.7, z: 29.7}
@@ -2408,6 +2511,7 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 60.000004}
     - {x: 36.000004, y: 0.7, z: 60.000004}
     BridgeLevel: 0
+    ElevatorSegments: 03000000
   - Connection:
       Id: circuit-2--hub-16
       From: circuit-2
@@ -2426,12 +2530,13 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 60.000004}
     - {x: 36.000004, y: 0.7, z: 60.000004}
     BridgeLevel: 0
+    ElevatorSegments: 
   - Connection:
       Id: circuit-3--hub-16
       From: circuit-3
       To: hub-16
       Material: 16
-      Length: 38509
+      Length: 38913
       Speed: 32
       Spacing: 512
     Points:
@@ -2439,11 +2544,12 @@ MonoBehaviour:
     - {x: 35.100002, y: 0.7, z: 22.800001}
     - {x: 35.100002, y: 0.7, z: 24.900002}
     - {x: 35.7, y: 0.7, z: 24.900002}
-    - {x: 36.9, y: 1.5, z: 24.900002}
+    - {x: 36.299995, y: 0.7, z: 24.900002}
+    - {x: 36.299995, y: 1.9, z: 24.900003}
+    - {x: 36.9, y: 1.9, z: 24.900003}
     - {x: 36.9, y: 1.9, z: 25.500002}
     - {x: 36.9, y: 1.9, z: 26.1}
-    - {x: 36.300003, y: 1.5, z: 26.1}
-    - {x: 36.9, y: 1.1, z: 26.1}
+    - {x: 36.9, y: 0.7, z: 26.1}
     - {x: 36.300003, y: 0.7, z: 26.1}
     - {x: 35.100002, y: 0.7, z: 26.1}
     - {x: 35.100002, y: 0.7, z: 60.300003}
@@ -2451,19 +2557,21 @@ MonoBehaviour:
     - {x: 35.7, y: 0.7, z: 60.000004}
     - {x: 36.000004, y: 0.7, z: 60.000004}
     BridgeLevel: 0
+    ElevatorSegments: 0500000009000000
   - Connection:
       Id: hub-16--body-0
       From: hub-16
       To: body-0
       Material: 16
-      Length: 14445
+      Length: 15159
       Speed: 32
       Spacing: 512
     Points:
     - {x: 37.2, y: 0.7, z: 60.000004}
     - {x: 37.5, y: 0.7, z: 60.000004}
     - {x: 37.5, y: 0.7, z: 59.7}
-    - {x: 37.5, y: 1.5, z: 58.500004}
+    - {x: 37.5, y: 0.7, z: 58.500004}
+    - {x: 37.5, y: 1.9, z: 58.500004}
     - {x: 38.100002, y: 1.9, z: 58.500004}
     - {x: 39.300003, y: 1.9, z: 58.500004}
     - {x: 39.300003, y: 1.9, z: 59.7}
@@ -2473,12 +2581,13 @@ MonoBehaviour:
     - {x: 41.7, y: 0.7, z: 67.8}
     - {x: 42.000004, y: 0.7, z: 67.8}
     BridgeLevel: 0
+    ElevatorSegments: 04000000
   - Connection:
       Id: hub-16--head-0
       From: hub-16
       To: head-0
       Material: 16
-      Length: 54489
+      Length: 54893
       Speed: 32
       Spacing: 512
     Points:
@@ -2493,11 +2602,12 @@ MonoBehaviour:
     - {x: 33.9, y: 3.1, z: 25.500002}
     - {x: 41.7, y: 3.1, z: 25.500002}
     - {x: 41.7, y: 3.1, z: 14.700001}
-    - {x: 41.7, y: 1.1, z: 11.700001}
+    - {x: 41.7, y: 3.1, z: 12.3}
     - {x: 41.7, y: 0.7, z: 12.3}
     - {x: 41.7, y: 0.7, z: 13.2}
     - {x: 42.000004, y: 0.7, z: 13.2}
     BridgeLevel: 0
+    ElevatorSegments: 0c000000
   Regions:
   - Name: "01 \u539F\u6599\u4ED3\u50A8"
     Bounds:

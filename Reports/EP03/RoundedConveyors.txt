@@ -1,0 +1,12 @@
+Both scenes refreshed and validated.
+Shared 16-step circular Corner90 geometry and cargo path; tight ports use compact transfer decks.
+Continuous bed and guard cross sections, including ramps.
+Production connections, logical lengths and layout assets unchanged.
+Simulation ledger audit passed during captures.
+
+Saved scene geometry: Full = 166 arc corners + 265 compact transfer decks, 249 mesh assets.
+Minimal = 70 arc corners + 98 compact transfer decks, 114 mesh assets.
+Mesh assets are namespaced per scene. Corner detail isolates one generated route; overview captures show the complete factory.
+
+Unity 6000.4.0f1: EditMode 67/67 passed; PlayMode 4/4 passed.
+Player build not attempted in this revision.

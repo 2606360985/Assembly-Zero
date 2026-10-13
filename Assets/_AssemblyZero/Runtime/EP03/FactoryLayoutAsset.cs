@@ -19,12 +19,42 @@ namespace AssemblyZero.Unity
         public FactoryConnection Connection;
         public Vector3[] Points = Array.Empty<Vector3>();
         public int BridgeLevel;
+        // Endpoint indices of explicit vertical transfer segments. Ordinary belts
+        // remain subject to the slope limit; only declared elevators may be vertical.
+        public int[] ElevatorSegments=Array.Empty<int>();
+        [NonSerialized] private Vector3[] visualPoints;
+        [NonSerialized] private float visualLength;
+        public void PrepareVisualPath()
+        {
+            visualPoints=FactoryRouteGeometry.RoundedPath(Points);visualLength=0;
+            for(var i=1;i<visualPoints.Length;i++)visualLength+=Vector3.Distance(visualPoints[i-1],visualPoints[i]);
+        }
         public float Length { get { var length=0f;for(var i=1;i<Points.Length;i++)length+=Vector3.Distance(Points[i-1],Points[i]);return length; } }
         public Vector3 Sample(int distance,out Vector3 tangent)
+            =>Sample(distance,out tangent,out _);
+        public Vector3 Sample(int distance,out Vector3 tangent,out bool inElevator)
         {
-            var remaining=Mathf.Clamp(distance / EP02Route.UnitsPerMeter,0,Length);tangent=Vector3.forward;
-            for(var i=1;i<Points.Length;i++){var delta=Points[i]-Points[i-1];var length=delta.magnitude;if(length<.001f)continue;tangent=delta/length;if(remaining<=length)return Points[i-1]+tangent*remaining;remaining-=length;}
-            return Points.Last();
+            if(visualPoints==null)PrepareVisualPath();
+            var remaining=Mathf.Clamp01(distance / EP02Route.UnitsPerMeter/Mathf.Max(.001f,Length))*visualLength;tangent=Vector3.forward;inElevator=false;
+            for(var i=1;i<visualPoints.Length;i++)
+            {
+                var delta=visualPoints[i]-visualPoints[i-1];var length=delta.magnitude;if(length<.000001f)continue;tangent=delta/length;
+                if(remaining<=length)
+                {
+                    inElevator=FactoryRouteGeometry.IsVerticalTransfer(visualPoints[i-1],visualPoints[i]);
+                    // A continuous carrier lift keeps its cargo and tray level.
+                    if(inElevator){tangent=Vector3.forward;for(var j=i-1;j>0;j--){var heading=visualPoints[j]-visualPoints[j-1];heading.y=0;if(heading.sqrMagnitude<.0001f)continue;tangent=heading.normalized;break;}}
+                    var position=visualPoints[i-1]+delta*(remaining/length);
+                    if(!inElevator)foreach(var lift in ElevatorSegments)
+                    {
+                        var entry=Points[lift-1];var exit=Points[lift];
+                        if((Mathf.Abs(position.y-entry.y)<.001f||Mathf.Abs(position.y-exit.y)<.001f)&&Vector2.Distance(FactoryRouteGeometry.Flat(position),FactoryRouteGeometry.Flat(entry))<=FactoryRouteGeometry.ElevatorDockClearance+.01f){inElevator=true;break;}
+                    }
+                    return position;
+                }
+                remaining-=length;
+            }
+            return visualPoints.Last();
         }
     }
     [Serializable] public sealed class FactoryRegion { public string Name; public RectInt Bounds; public bool Reserved; }
@@ -73,8 +103,11 @@ namespace AssemblyZero.Unity
                 if(Vector3.Distance(r.Points[0],Endpoint(r.Connection.From,true,r.Connection.Material))>.01f||Vector3.Distance(r.Points.Last(),Endpoint(r.Connection.To,false,r.Connection.Material))>.01f)throw new InvalidOperationException("Route endpoints no longer match module ports: "+r.Connection.Id);
             }
             foreach(var route in Routes)for(var i=1;i<route.Points.Length;i++)
-                if(FactoryRouteGeometry.SlopeDegrees(route.Points[i-1],route.Points[i])>FactoryRouteGeometry.MaxSlopeDegrees+.01f)
+                if(!route.ElevatorSegments.Contains(i)&&FactoryRouteGeometry.SlopeDegrees(route.Points[i-1],route.Points[i])>FactoryRouteGeometry.MaxSlopeDegrees+.01f)
                     throw new InvalidOperationException("Conveyor slope exceeds 40 degrees: "+route.Connection.Id+" segment "+i);
+            foreach(var route in Routes)
+                if(route.ElevatorSegments.Distinct().Count()!=route.ElevatorSegments.Length||route.ElevatorSegments.Any(i=>i<1||i>=route.Points.Length||!FactoryRouteGeometry.IsVerticalTransfer(route.Points[i-1],route.Points[i])))
+                    throw new InvalidOperationException("Invalid elevator segment: "+route.Connection.Id);
             for(var i=0;i<Routes.Length;i++)for(var j=i+1;j<Routes.Length;j++)
             {
                 var a=Routes[i];var b=Routes[j];
@@ -83,12 +116,21 @@ namespace AssemblyZero.Unity
                 for(var p=1;p<a.Points.Length;p++)for(var q=1;q<b.Points.Length;q++)
                 {
                     var x=a.Points[p-1];var y=a.Points[p];var u=b.Points[q-1];var v=b.Points[q];
-                    if(FactoryRouteGeometry.PlanarSeparation(x,y,u,v,out var ta,out var tb)<.53f&&Mathf.Abs(Mathf.Lerp(x.y,y.y,ta)-Mathf.Lerp(u.y,v.y,tb))<.75f)
+                    if(FactoryRouteGeometry.TransferSegmentsConflict(x,y,u,v))
                         throw new InvalidOperationException("Bridge clearance below 0.75m: "+a.Connection.Id+" / "+b.Connection.Id);
                 }
             }
+            var visualRoutes=Routes.ToDictionary(r=>r,r=>FactoryRouteGeometry.RoundedPath(r.Points));
+            foreach(var route in Routes)foreach(var lift in route.ElevatorSegments)foreach(var other in Routes)
+            {
+                if(other==route||route.Connection.From==other.Connection.From||route.Connection.To==other.Connection.To)continue;
+                var path=visualRoutes[other];
+                for(var i=1;i<path.Length;i++)if(FactoryRouteGeometry.TransferSegmentsConflict(route.Points[lift-1],route.Points[lift],path[i-1],path[i]))
+                    throw new InvalidOperationException("Elevator shaft intersects rounded conveyor: "+route.Connection.Id+" / "+other.Connection.Id);
+            }
             foreach(var route in Routes)for(var i=1;i<route.Points.Length;i++)for(var j=i+2;j<route.Points.Length;j++)
-                if(FactoryRouteGeometry.PlanarSeparation(route.Points[i-1],route.Points[i],route.Points[j-1],route.Points[j],out var a,out var b)<.001f&&Mathf.Abs(Mathf.Lerp(route.Points[i-1].y,route.Points[i].y,a)-Mathf.Lerp(route.Points[j-1].y,route.Points[j].y,b))<.75f)
+                if((route.ElevatorSegments.Contains(i)||route.ElevatorSegments.Contains(j))?FactoryRouteGeometry.TransferSegmentsConflict(route.Points[i-1],route.Points[i],route.Points[j-1],route.Points[j]):
+                    FactoryRouteGeometry.PlanarSeparation(route.Points[i-1],route.Points[i],route.Points[j-1],route.Points[j],out var a,out var b)<.001f&&Mathf.Abs(Mathf.Lerp(route.Points[i-1].y,route.Points[i].y,a)-Mathf.Lerp(route.Points[j-1].y,route.Points[j].y,b))<.75f)
                     throw new InvalidOperationException("Conveyor doubles back through itself: "+route.Connection.Id);
         }
         public static bool PlanarCrosses(Vector3 a,Vector3 b,Vector3 c,Vector3 d)

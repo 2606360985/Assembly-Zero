@@ -1,0 +1,48 @@
+{
+  "status": "completed",
+  "duration": 49.25,
+  "summary": {
+    "total": 5,
+    "passed": 5,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "AssemblyZero.Tests.DemoSmokeTests.DemoSceneLoadsWithSingleSimulationDriver",
+      "Status": "Passed",
+      "Duration": 2.1380832,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP02SmokeTests.ProductionPresentationAndRestartDoNotOwnLogistics",
+      "Status": "Passed",
+      "Duration": 4.7320622,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.ElevatorCarriersStayLevelPauseAndClearOnRestart",
+      "Status": "Passed",
+      "Duration": 2.6310295,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.FactoryProducesPausesAndRestartsWithoutResidualOwnership",
+      "Status": "Passed",
+      "Duration": 25.5582607,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.EP03SmokeTests.ResetClearsProcessingReservedHeldScanningAndBlockedStates",
+      "Status": "Passed",
+      "Duration": 14.0620027,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}
