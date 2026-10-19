@@ -56,6 +56,35 @@ namespace AssemblyZero.Domain
         public abstract void CreateSnapshot(BeltSnapshotWriter writer);
         public abstract ulong CalculateStateHash();
 
+        // Persistence for external-logistics clients. Canonical absolute distances
+        // reconstruct either backend without persisting implementation offsets.
+        public BeltRuntimeState ExportRuntimeState()
+        {
+            if (!Scenario.ExternalLogistics) throw new InvalidOperationException("External logistics only.");
+            var state = new BeltRuntimeState { Tick = TickNumber, NextId = NextItemId, Spawned = Spawned, Sunk = SinkCount, GateOpen = GateOpen };
+            for (var lane = 0; lane < LaneCount; lane++)
+                for (var i = 0; i < ItemCount(lane); i++)
+                {
+                    var item = ReadItem(lane, i);
+                    state.Items.Add(new PersistedBeltItem { Lane = lane, Id = item.Id, Material = (int)item.Type, Distance = item.Distance });
+                }
+            return state;
+        }
+        public void ImportRuntimeState(ScenarioDefinition scenario, BeltTopology topology, BeltRuntimeState state)
+        {
+            if (state == null || !scenario.ExternalLogistics) throw new ArgumentException("Invalid belt state.");
+            Reset(scenario, topology);
+            var ids = new HashSet<int>();
+            foreach (var item in state.Items)
+            {
+                if (!ids.Add(item.Id) || item.Lane < 0 || item.Lane >= LaneCount ||
+                    !TryInsertExisting(new BeltAccessPort(Topology.Lanes[item.Lane].Id, item.Distance, item.Distance), new ItemId(item.Id), new PartTypeId(item.Material), out _))
+                    throw new ArgumentException("Invalid persisted belt item.");
+            }
+            TickNumber = state.Tick; NextItemId = state.NextId; Spawned = state.Spawned; SinkCount = state.Sunk; GateOpen = state.GateOpen;
+            CalculateStateHash();
+        }
+
 
         private static long nextResetToken;
         protected long resetToken;

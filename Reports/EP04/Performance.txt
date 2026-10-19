@@ -1,0 +1,5 @@
+Synthetic capacity fixture: 2 factories, 60 nodes, 120 routes, 2000 initial in-transit goods.
+This fixture tests simulation/transport load; it does not certify spatial routing or frame rate.
+Fixed tick (includes periodic audit): mean=0.2854ms p95=0.4170ms max=2.0867ms
+All-route snapshot preparation: mean=0.5357ms p95=0.6887ms max=0.8579ms
+Unity 6000.4.0f1 / Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz / NVIDIA Quadro RTX 5000

@@ -1,0 +1,10 @@
+14.1s / cash 645 / First T1 sale
+14.1s / cash 187 / Metal collection team
+56.3s / cash 362 / Discovered 3
+68.8s / cash 412 / Discovered 2
+127.9s / cash 164 / First T2 sale
+420.7s / cash 425 / First T3 sale
+1615.1s / cash 313 / Second plot purchased
+1666.6s / cash 1022 / Second factory produced and sold T1 after physical transfer
+1750.6s / cash 2280 / Save/load continuation matched for 3600 ticks
+PASS. Real wall time 10.25s; no money or unlock injection; all gameplay actions used commands.
