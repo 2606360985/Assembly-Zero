@@ -93,7 +93,10 @@ namespace AssemblyZero.Domain.EP04
         private static bool Matches(Goods g,HardwareOrder o)=>g.Material==o.Material&&g.SpecId==o.Spec&&g.SpecVersion==o.Version;
         private void OfferRecovery(OrderTemplate template)
         {
-            if(template.Repeatable&&!State.Hardware.Orders.Any(o=>o.Template==template.Id&&(o.Phase==HardwareOrderPhase.Available||o.Phase==HardwareOrderPhase.Active||o.Phase==HardwareOrderPhase.Ready)))State.Hardware.Orders.Add(NewOrder(template,State.Hardware.NextOrder++));
+            var orders=State.Hardware.Orders.Where(o=>o.Template==template.Id).ToArray();
+            // Failed introductory contracts may be quoted again so recovery can resume progression.
+            var retry=orders.Any(o=>o.Phase==HardwareOrderPhase.Cancelled||o.Phase==HardwareOrderPhase.Expired)&&!orders.Any(o=>o.Phase==HardwareOrderPhase.Delivered);
+            if((template.Repeatable||retry)&&!orders.Any(o=>o.Phase==HardwareOrderPhase.Available||o.Phase==HardwareOrderPhase.Active||o.Phase==HardwareOrderPhase.Ready))State.Hardware.Orders.Add(NewOrder(template,State.Hardware.NextOrder++));
         }
         private CommandResult Purchase(WorldCommand c)
         {

@@ -1,0 +1,12 @@
+Result: Succeeded
+Errors: 2
+Warnings: 6
+Time: 00:00:31.0921804
+Error: Failed to handle /api/exec request: Main thread operation timed out after 5000ms
+Warning: Assets\_AssemblyZero\Runtime\SimulationDriver.cs(42,59): warning CS0618: 'FindObjectsSortMode' is obsolete: 'FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter.'
+Warning: Assets\_AssemblyZero\Runtime\SimulationDriver.cs(42,26): warning CS0618: 'Object.FindObjectsByType<T>(FindObjectsSortMode)' is obsolete: 'FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03UiVisibility.cs(25,102): warning CS0618: 'FindObjectsSortMode' is obsolete: 'FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03UiVisibility.cs(25,40): warning CS0618: 'Object.FindObjectsByType<T>(FindObjectsInactive, FindObjectsSortMode)' is obsolete: 'FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03SimulationDriver.cs(52,66): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Warning: Assets\_AssemblyZero\Runtime\EP04\EP04Interface.cs(39,16): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Error: Failed to load 'E:/HP_E/GITHUB_SKY/Assembly-Zero/Library/SplashScreenCache/e9/e90129bf8381db191f79c6e7976051ce'. File may be corrupted or was serialized with a newer version of Unity.

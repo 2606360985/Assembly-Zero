@@ -50,6 +50,18 @@ namespace AssemblyZero.Tests
         {
             var w=Ready();Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Run(w,240);Assert.AreEqual(HardwareOrderPhase.Expired,w.State.Hardware.Orders[0].Phase);Assert.AreEqual(0,w.ReservedCount(1));
         }
+        [TestCase(false)] [TestCase(true)] public void Hardware_FailedFirstOrderCanRetryAndUnlockQuiet(bool expire)
+        {
+            var w=Ready();Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});
+            if(expire)Run(w,240);else Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.CancelOrder,Order=1}).Success);
+            var retry=w.State.Hardware.Orders.Single(o=>o.Template==1&&o.Phase==HardwareOrderPhase.Available);
+            Assert.AreNotEqual(1,retry.Id);Assert.AreEqual(0,w.ReservedCount(1));
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=retry.Id}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=retry.Id}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=retry.Id}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=2}).Success);
+            Assert.IsFalse(w.State.Hardware.Orders.Any(o=>o.Template==1&&o.Phase==HardwareOrderPhase.Available));w.AssertConserved();
+        }
         [Test] public void Hardware_QuietOrderRejectsStandardGoods()
         {
             var w=Ready();Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=2});Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=2});Assert.AreEqual(0,w.ReservedCount(2));Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=2}).Success);

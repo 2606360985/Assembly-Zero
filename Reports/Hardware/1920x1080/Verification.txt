@@ -1,0 +1,4 @@
+PASS: command-driven standalone production, delivery, driving domain walkthrough and save continuation.
+Screenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.
+Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz / NVIDIA Quadro RTX 5000 / Direct3D11 / Unity 6000.4.0f1
+No user saves read or written.

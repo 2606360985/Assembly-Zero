@@ -94,7 +94,7 @@ namespace AssemblyZero.Unity.EP04
             else if(material>=HardwareCatalog.AssembledBoard)
             {
                 Cube("PCB",Vector3.zero,new Vector3(.85f,.07f,.45f),green,t);
-                if(material>HardwareCatalog.AssembledBoard){Cube("Heatsink",new Vector3(0,.1f,0),new Vector3(.8f,.16f,.42f),steel,t);for(int i=0;i<2;i++){var fan=GameObject.CreatePrimitive(PrimitiveType.Cylinder);fan.name="Fan";fan.transform.SetParent(t,false);fan.transform.localPosition=new Vector3((i-.5f)*.4f,.21f,0);fan.transform.localScale=new Vector3(.3f,.025f,.3f);fan.GetComponent<Renderer>().sharedMaterial=Paint(dark);Destroy(fan.GetComponent<Collider>());}}
+                if(material>HardwareCatalog.AssembledBoard){Cube("Heatsink",new Vector3(0,.1f,0),new Vector3(.8f,.16f,.42f),steel,t);if(material>=HardwareCatalog.Tested)for(int i=0;i<2;i++){var fan=GameObject.CreatePrimitive(PrimitiveType.Cylinder);fan.name="Fan";fan.transform.SetParent(t,false);fan.transform.localPosition=new Vector3((i-.5f)*.4f,.21f,0);fan.transform.localScale=new Vector3(.3f,.025f,.3f);fan.GetComponent<Renderer>().sharedMaterial=Paint(dark);Destroy(fan.GetComponent<Collider>());}}
             }
             else if(material==HardwareCatalog.Heat||material==HardwareCatalog.QuietHeat){for(int i=0;i<6;i++)Cube("Fin",new Vector3(i*.1f-.25f,0,0),new Vector3(.04f,.35f,.4f),steel,t);}
             else Cube("Material tray",Vector3.zero,new Vector3(.45f,.25f,.4f),material==HardwareCatalog.Aluminum?steel:material==HardwareCatalog.Core?dark:green,t);

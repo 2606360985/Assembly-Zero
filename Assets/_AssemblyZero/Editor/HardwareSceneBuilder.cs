@@ -61,11 +61,15 @@ namespace AssemblyZero.Unity.Editor
             var protectedFiles=new[]{"ProjectSettings/GraphicsSettings.asset","ProjectSettings/QualitySettings.asset","ProjectSettings/ProjectSettings.asset"};var bytes=protectedFiles.Select(File.ReadAllBytes).ToArray();
             var global=GraphicsSettings.GetSettingsForRenderPipeline<UniversalRenderPipeline>();var pipeline=GraphicsSettings.defaultRenderPipeline;var quality=QualitySettings.renderPipeline;
             var apis=PlayerSettings.GetGraphicsAPIs(BuildTarget.StandaloneWindows64);var auto=PlayerSettings.GetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64);
+            var splash=PlayerSettings.SplashScreen.show;
             try
             {
                 var compatible=AssetDatabase.LoadAssetAtPath<RenderPipelineGlobalSettings>("Assets/_AssemblyZero/EP04/EP04RenderSettings.asset");if(compatible==null)compatible=RenderPipelineGlobalSettingsUtils.Create(global.GetType(),Root+"/GlobalRenderSettings.asset");
                 var current=AssetDatabase.LoadAssetAtPath<UniversalRenderPipelineAsset>("Assets/_AssemblyZero/EP04/EP04Pipeline.asset")??(UniversalRenderPipelineAsset)(quality??pipeline);
                 UnityEditor.Rendering.EditorGraphicsSettings.SetRenderPipelineGlobalSettingsAsset<UniversalRenderPipeline>(compatible);GraphicsSettings.defaultRenderPipeline=current;QualitySettings.renderPipeline=current;
+                // The cached splash background crashes in DrawSplashScreenBackground on this machine.
+                // Skip it for this player only; preserve the legacy project's splash setting.
+                PlayerSettings.SplashScreen.show=false;
                 // Conservative graphics baseline for this build only; restore project settings afterwards.
                 PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64,false);PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,new[]{GraphicsDeviceType.Direct3D11});AssetDatabase.SaveAssets();
                 var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath,EP04SceneBuilder.ScenePath},locationPathName="Builds/Hardware/AssemblyZeroHardware.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.Development});
@@ -74,7 +78,17 @@ namespace AssemblyZero.Unity.Editor
             }
             finally
             {
-                PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,apis);PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64,auto);GraphicsSettings.defaultRenderPipeline=pipeline;QualitySettings.renderPipeline=quality;UnityEditor.Rendering.EditorGraphicsSettings.SetRenderPipelineGlobalSettingsAsset<UniversalRenderPipeline>(global);AssetDatabase.SaveAssets();for(int i=0;i<protectedFiles.Length;i++)File.WriteAllBytes(protectedFiles[i],bytes[i]);
+                PlayerSettings.SplashScreen.show=splash;
+                PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,apis);PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64,auto);GraphicsSettings.defaultRenderPipeline=pipeline;QualitySettings.renderPipeline=quality;UnityEditor.Rendering.EditorGraphicsSettings.SetRenderPipelineGlobalSettingsAsset<UniversalRenderPipeline>(global);AssetDatabase.SaveAssets();
+                // Replace the file rather than truncating it while Unity's importer memory-maps it.
+                // Attempt every restore even if one fails; keep its temporary copy for recovery.
+                var failures=new System.Collections.Generic.List<Exception>();
+                for(int i=0;i<protectedFiles.Length;i++)try
+                {
+                    var temporary=protectedFiles[i]+".hardware-restore.tmp";File.WriteAllBytes(temporary,bytes[i]);File.Replace(temporary,protectedFiles[i],null);
+                }
+                catch(Exception error){failures.Add(error);}
+                if(failures.Count>0)throw new AggregateException("Build finished but project settings restoration needs attention",failures);
             }
         }
         public static void Walkthrough(){Directory.CreateDirectory("Reports/Hardware");File.WriteAllText("Reports/Hardware/Walkthrough.txt",HardwareWalkthrough.Run(false)+"\n"+HardwareWalkthrough.Run(true)+"\n"+HardwareWalkthrough.RunMake()+"\n"+HardwareWalkthrough.RunRecovery());}

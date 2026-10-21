@@ -1,0 +1,47 @@
+{
+  "RuntimeAssemblies": [
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Builds\\Hardware\\AssemblyZeroHardware_Data\\Managed\\AssemblyZero.Domain.dll",
+      "MeasuredSHA256": "423A85A9C2A7CCED4E835F15F2253715B43E00056A966B3DB4782CD29EAC114E",
+      "FinalSHA256": "423A85A9C2A7CCED4E835F15F2253715B43E00056A966B3DB4782CD29EAC114E",
+      "Unchanged": true
+    },
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Builds\\Hardware\\AssemblyZeroHardware_Data\\Managed\\AssemblyZero.Unity.dll",
+      "MeasuredSHA256": "8D4884000C72381C479E7338F236EECBCADC892D56AFFCDF137CCBC36AE690A8",
+      "FinalSHA256": "8D4884000C72381C479E7338F236EECBCADC892D56AFFCDF137CCBC36AE690A8",
+      "Unchanged": true
+    }
+  ],
+  "ProtectedFiles": [
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\ProjectSettings\\GraphicsSettings.asset",
+      "Unchanged": true
+    },
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\ProjectSettings\\QualitySettings.asset",
+      "Unchanged": true
+    },
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Assets\\_AssemblyZero\\Scenes\\EP03_Demo.unity",
+      "Unchanged": true
+    },
+    {
+      "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Assets\\_AssemblyZero\\Scenes\\EP03_Minimal.unity",
+      "Unchanged": true
+    }
+  ],
+  "BuildResult": [
+    "Result: Succeeded",
+    "Errors: 0",
+    "Warnings: 0",
+    "Time: 00:00:06.2820701"
+  ],
+  "PlayerVerification": [
+    "PASS: command-driven standalone production, delivery, driving domain walkthrough and save continuation.",
+    "Screenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.",
+    "Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz / NVIDIA Quadro RTX 5000 / Direct3D11 / Unity 6000.4.0f1",
+    "No user saves read or written."
+  ],
+  "Executable": "EA4801DCFF125A88A733FC266F84564A7117944619B2B20D1200399FEFC5358A"
+}

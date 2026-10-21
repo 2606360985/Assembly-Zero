@@ -1,0 +1,63 @@
+
+Microsoft (R) Windows Debugger Version 10.0.22621.755 AMD64
+Copyright (c) Microsoft Corporation. All rights reserved.
+
+
+Loading Dump File [C:\Users\ESI186\AppData\Local\Temp\DefaultCompany\Assembly Zero\Crashes\Crash_2026-10-21_004041137\crash.dmp]
+User Mini Dump File: Only registers, stack and portions of memory are available
+
+Symbol search path is: srv*
+Executable search path is: 
+Windows 10 Version 26200 MP (20 procs) Free x64
+Product: WinNt, suite: SingleUserTS
+Edition build lab: 26100.1.amd64fre.ge_release.240331-1435
+Machine Name:
+Debug session time: Wed Oct 21 08:40:41.000 2026 (UTC + 8:00)
+System Uptime: 7 days 19:16:38.121
+Process Uptime: 0 days 0:00:11.000
+................................................................
+.....................................
+This dump file has an exception of interest stored in it.
+The stored exception information can be accessed via .ecxr.
+(604c.7234): Access violation - code c0000005 (first/second chance not available)
+For analysis of this file, run !analyze -v
+ntdll!NtWaitForMultipleObjects+0x14:
+00007ffa`dd062654 c3              ret
+0:000> cdb: Reading initial command '.ecxr; k; q'
+rax=0000000000000000 rbx=0000000000000000 rcx=0000000000000038
+rdx=0000000000000001 rsi=0000023870e66d50 rdi=0000023870e66d50
+rip=00007ff9ebb21476 rsp=000000ea29b3f520 rbp=000000ea29b3f5e9
+ r8=0000023870e66d50  r9=0000000000000000 r10=0000000022ac2794
+r11=000000ea29b3f658 r12=0000000000000000 r13=000000000000000b
+r14=0000000000000000 r15=0000000000000000
+iopl=0         nv up ei pl nz na pe nc
+cs=0033  ss=002b  ds=002b  es=002b  fs=0053  gs=002b             efl=00010202
+UnityPlayer+0x121476:
+00007ff9`ebb21476 833900          cmp     dword ptr [rcx],0 ds:00000000`00000038=????????
+  *** Stack trace for last set context - .thread/.cxr resets it
+Child-SP          RetAddr               Call Site
+000000ea`29b3f520 00007ff9`ed774477     UnityPlayer+0x121476
+000000ea`29b3f560 00007ff9`edb8962c     UnityPlayer!UnityMain+0x464317
+000000ea`29b3f650 00007ff9`edb8a1c6     UnityPlayer!UnityMain+0x8794cc
+000000ea`29b3f6f0 00007ff9`edb89d86     UnityPlayer!UnityMain+0x87a066
+000000ea`29b3f7e0 00007ff9`ed30adce     UnityPlayer!UnityMain+0x879c26
+000000ea`29b3f910 00007ff9`ed30a10d     UnityPlayer+0x190adce
+000000ea`29b3f940 00007ff9`ed30f2ff     UnityPlayer+0x190a10d
+000000ea`29b3f9b0 00007ff9`ed31016b     UnityPlayer+0x190f2ff
+*** WARNING: Unable to verify checksum for AssemblyZeroHardware.exe
+000000ea`29b4fcd0 00007ff6`b98c11f6     UnityPlayer!UnityMain+0xb
+000000ea`29b4fd00 00007ffa`db83e8d7     AssemblyZeroHardware+0x11f6
+000000ea`29b4fd40 00007ffa`dcf8c3fc     kernel32!BaseThreadInitThunk+0x17
+000000ea`29b4fd70 00000000`00000000     ntdll!RtlUserThreadStart+0x2c
+quit:
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\atlmfc.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\ObjectiveC.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\concurrency.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\cpp_rest.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\stl.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Data.Json.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Devices.Geolocation.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Devices.Sensors.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\Windows.Media.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\windows.natvis'
+NatVis script unloaded from 'C:\Program Files (x86)\Windows Kits\10\Debuggers\x64\Visualizers\winrt.natvis'

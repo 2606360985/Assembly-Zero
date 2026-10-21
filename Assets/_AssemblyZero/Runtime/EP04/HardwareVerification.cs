@@ -17,7 +17,8 @@ namespace AssemblyZero.Unity.EP04
             yield return Capture("Default",folder);
             Drawer="产品";Hud.RebuildDrawer();yield return Capture("Products",folder);
             Drawer="订单";Hud.RebuildDrawer();yield return Capture("Orders",folder);
-            Drawer="设备";SelectedNode=3;Hud.RebuildDrawer();yield return Capture("Shortage",folder);
+            for(int i=0;i<360*60;i++)World.Tick();
+            Drawer="设备";SelectedNode=3;Hud.RebuildDrawer();yield return Capture("Shortage",folder);NewGame();
             Drawer="";Hud.RebuildDrawer();ToggleDriving();yield return Capture("Driving",folder);ToggleDriving();
             string error=null;string walkthrough=null;
             try
@@ -31,6 +32,8 @@ namespace AssemblyZero.Unity.EP04
             catch(Exception e){error=e.ToString();}
             File.WriteAllText(Path.Combine(folder,"Walkthrough.txt"),error??walkthrough);
             Drawer="报表";Hud.RebuildDrawer();View.Rebuild();yield return Capture("Settlement",folder);
+            var zoomButton=Hud.GetComponentsInChildren<UnityEngine.UI.Button>(true).First(b=>b.name.StartsWith("界面缩放"));
+            zoomButton.onClick.Invoke();zoomButton.onClick.Invoke();yield return Capture("LargeUI",folder);zoomButton.onClick.Invoke();
             if(error!=null){File.WriteAllText(Path.Combine(folder,"Verification.txt"),"FAIL\n"+error);Application.Quit(1);yield break;}
             Drawer="";Hud.RebuildDrawer();NewGame();Paused=false;
             if(!Environment.GetCommandLineArgs().Contains("--hardware-short"))
@@ -41,7 +44,7 @@ namespace AssemblyZero.Unity.EP04
             }
             File.WriteAllText(Path.Combine(folder,"Verification.txt"),"PASS: command-driven standalone production, delivery, driving domain walkthrough and save continuation.\nScreenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.\n"+SystemInfo.processorType+" / "+SystemInfo.graphicsDeviceName+" / "+SystemInfo.graphicsDeviceType+" / Unity "+Application.unityVersion+"\nNo user saves read or written.");Application.Quit(0);
         }
-        private IEnumerator Capture(string name,string folder){Hud.Refresh();yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(Path.Combine(folder,name+".png"));for(int i=0;i<4;i++)yield return null;}
+        private IEnumerator Capture(string name,string folder){Hud.Refresh();yield return new WaitForSecondsRealtime(.3f);yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(Path.Combine(folder,name+".png"));for(int i=0;i<4;i++)yield return null;}
         private IEnumerator SampleFrames(string folder,string label)
         {
             var until=Time.realtimeSinceStartup+30;while(Time.realtimeSinceStartup<until)yield return null;
@@ -85,7 +88,9 @@ namespace AssemblyZero.Unity.EP04
             var w=new WorldSimulation(HardwareCatalog.Create());
             foreach(var c in new[]{new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Core,Quantity=16},new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=1},new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Board,Quantity=1,Delivery=2}})Do(w,c);
             Do(w,new WorldCommand{Kind=CommandKind.TakeControl});Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});TravelTo(w,25.5,true);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);
-            if(w.State.Money!=0)throw new InvalidOperationException("Recovery fixture must actually exhaust cash using purchases and production");
+            // Conveyors must deliver the gifted inputs before the first processing fee is charged.
+            for(int i=0;i<120*60&&w.State.Money>0;i++)w.Tick();
+            if(w.State.Money!=0)throw new InvalidOperationException("Recovery fixture must actually exhaust cash using purchases and production; remaining "+w.State.Money);
             Do(w,new WorldCommand{Kind=CommandKind.Interact});RunTicks(w,21*60);Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=-1});TravelTo(w,17.5,false);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);Do(w,new WorldCommand{Kind=CommandKind.Interact});Do(w,new WorldCommand{Kind=CommandKind.ReleaseControl});
             Do(w,new WorldCommand{Kind=CommandKind.SpotSell,Material=HardwareCatalog.Ore,Quantity=20});Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=3});RunTicks(w,500*60);Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=3});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=3});w.AssertConserved();return "Recovery: cash exhausted via over-purchasing; mined/recycled 20 ore and delivered repair order; final cash "+w.State.Money+" cents. No cash injection.";
         }

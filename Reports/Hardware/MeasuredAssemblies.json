@@ -1,0 +1,12 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "423A85A9C2A7CCED4E835F15F2253715B43E00056A966B3DB4782CD29EAC114E",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Builds\\Hardware\\AssemblyZeroHardware_Data\\Managed\\AssemblyZero.Domain.dll"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "8D4884000C72381C479E7338F236EECBCADC892D56AFFCDF137CCBC36AE690A8",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Builds\\Hardware\\AssemblyZeroHardware_Data\\Managed\\AssemblyZero.Unity.dll"
+  }
+]

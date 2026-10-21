@@ -13,7 +13,41 @@ namespace AssemblyZero.Tests
 {
     public sealed class HardwarePlayTests
     {
-        private static IEnumerator Open()
+        private InputSettings originalSettings, testSettings;private HideFlags originalFlags;
+        [SetUp] public void RouteSyntheticInputToGame()
+        {
+            originalSettings=InputSystem.settings;
+            if(originalSettings==null){originalSettings=ScriptableObject.CreateInstance<InputSettings>();InputSystem.settings=originalSettings;}
+            originalFlags=originalSettings.hideFlags;originalSettings.hideFlags|=HideFlags.DontUnloadUnusedAsset;
+            testSettings=Object.Instantiate(originalSettings);
+            testSettings.hideFlags=HideFlags.HideAndDontSave;
+            testSettings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+#if UNITY_EDITOR
+            testSettings.editorInputBehaviorInPlayMode=InputSettings.EditorInputBehaviorInPlayMode.AllDeviceInputAlwaysGoesToGameView;
+#endif
+            InputSystem.settings=testSettings;
+        }
+        [TearDown] public void RestoreInputSettings(){if(originalSettings!=null){InputSystem.settings=originalSettings;originalSettings.hideFlags=originalFlags;}if(testSettings!=null)Object.DestroyImmediate(testSettings);}
+        [UnityTest] public IEnumerator Hardware_PauseModalBlocksUnderlyingOrderButtons()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.SetDrawer("订单");yield return null;
+            var button=game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单");
+            var point=RectTransformUtility.WorldToScreenPoint(null,button.transform.position);game.TogglePause();yield return null;
+            var results=new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
+            UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current){position=point},results);
+            Assert.IsNotEmpty(results);Assert.AreEqual("Modal blocker",results[0].gameObject.name,"Pause must intercept clicks outside the menu as well");
+            var tick=game.World.State.Tick;yield return null;Assert.AreEqual(tick,game.World.State.Tick);
+        }
+        [UnityTest] public IEnumerator Hardware_QuietShortageOpensCorrectPurchasableMaterial()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;game.SelectedNode=3;
+            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=3,Recipe="quiet-gpu"}).Success);
+            game.SetDrawer("设备");yield return null;
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="采购缺料").onClick.Invoke();yield return null;
+            Assert.AreEqual("采购",game.Drawer);
+            Assert.IsTrue(game.Hud.GetComponentsInChildren<TMPro.TMP_Text>().Any(t=>t.text.Contains("低噪散热器 ×")),"A quiet assembly shortage must select its quiet heatsink, not the non-purchasable board or standard heatsink");
+        }
+        private IEnumerator Open()
         {
 #if UNITY_EDITOR
             yield return UnityEditor.SceneManagement.EditorSceneManager.LoadSceneAsyncInPlayMode("Assets/_AssemblyZero/Scenes/Hardware_Business.unity",new LoadSceneParameters(LoadSceneMode.Single));
