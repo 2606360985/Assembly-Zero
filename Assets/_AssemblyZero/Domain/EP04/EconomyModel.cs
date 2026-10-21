@@ -23,13 +23,16 @@ namespace AssemblyZero.Domain.EP04
         public override int GetHashCode() => (X*397 ^ Z)*31 ^ H;
         public static int Distance(GridPoint a, GridPoint b) => Math.Abs(a.X-b.X)+Math.Abs(a.Z-b.Z)+Math.Abs(a.H-b.H);
     }
-    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales }
+    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging }
     public enum VehicleRole { Pickup, Collector, Hauler }
     public enum VehiclePhase { Idle, Travelling, Gathering, Unloading, WaitingFunds, WaitingStock }
-    public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost }
+    public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost,
+        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle }
     [Serializable] public sealed class Goods
     {
         public int Id, Origin, Material;
+        public int ReservedOrder, SpecVersion; public string SpecId=""; public long MaterialCost, ProcessingCost, FreightCost; public bool Gift;
+        public long Cost => MaterialCost+ProcessingCost+FreightCost;
         public Goods() { }
         public Goods(int id,int origin,int material) { Id=id;Origin=origin;Material=material; }
     }
@@ -38,9 +41,12 @@ namespace AssemblyZero.Domain.EP04
         public string Id, Name; public int Output, Seconds, Level=1, Price;
         public BuildingKind Machine;
         public RecipeInput[] Inputs;
+        public int ProcessingFee; public string SpecId=""; public int SpecVersion=1;
     }
     [Serializable] public sealed class EconomySettings
     {
+        public HardwareDefinition Hardware;
+        public bool IsHardware => Hardware!=null && Hardware.Id=="az-gpu";
         public int StartingMoney=800, MachineCost=180, ProcessorCost=140, WarehouseCost=140, SalesCost=100;
         public int Level2Cost=300, Level3Cost=650, CollectorCost=450, HaulerCost=600, StationCost=250, SecondFactoryCost=22000;
         public int TripFee=8, WarehouseCapacity=300, VehicleCapacity=60, GatheringTicks=30, RegenerationTicks=30;
@@ -53,8 +59,8 @@ namespace AssemblyZero.Domain.EP04
             new ProductRule { Id="robot",Name="小型作业机器人",Output=19,Seconds=20,Level=3,Price=220,Machine=BuildingKind.Manufacturer,Inputs=new[]{new RecipeInput(18),new RecipeInput(16),new RecipeInput(13)} }
         };
         public ProductRule Recipe(string id) => Recipes.FirstOrDefault(r=>r.Id==id);
-        public int Cost(BuildingKind kind) => kind==BuildingKind.Processor?ProcessorCost:kind==BuildingKind.Manufacturer?MachineCost:kind==BuildingKind.Warehouse?WarehouseCost:SalesCost;
-        public static string MaterialName(int m) => m==8?"金属":m==9?"塑料":m==10?"电子原料":m==13?"塑料壳":m==16?"电路板":m==17?"工业零件包":m==18?"驱动组件":m==19?"作业机器人":"物料";
+        public int Cost(BuildingKind kind) => IsHardware ? Hardware.Buildings.First(b=>b.Kind==kind).Cost : kind==BuildingKind.Processor?ProcessorCost:kind==BuildingKind.Manufacturer?MachineCost:kind==BuildingKind.Warehouse?WarehouseCost:SalesCost;
+        public static string MaterialName(int m) => m>=32?HardwareCatalog.Name(m):m==8?"金属":m==9?"塑料":m==10?"电子原料":m==13?"塑料壳":m==16?"电路板":m==17?"工业零件包":m==18?"驱动组件":m==19?"作业机器人":"物料";
     }
     [Serializable] public sealed class SupplyPolicy
     {
@@ -66,6 +72,7 @@ namespace AssemblyZero.Domain.EP04
         public BuildingKind Kind; public string RecipeId="", Status="等待", PendingRecipe="";
         public bool PendingRemove;
         public long NextSend; public int WorkRemaining, WorkTotal;
+        public int BatchFee;
         public List<Goods> Input=new List<Goods>(), Output=new List<Goods>(), Batch=new List<Goods>();
         public List<SupplyPolicy> Policies=new List<SupplyPolicy>();
         public GridPoint Center => new GridPoint(X,Z);
@@ -106,6 +113,7 @@ namespace AssemblyZero.Domain.EP04
         public GridPoint Position; public VehicleRole Role;public VehiclePhase Phase;
         public bool Boost, Loop, TransferTask; public string Status="待命";
         public List<GridPoint> Path=new List<GridPoint>();public List<Goods> Cargo=new List<Goods>();
+        public bool Manual; public double DriveX,DriveZ,Heading,Speed,Throttle,Steer; public int RescueTicks;
     }
     [Serializable] public sealed class WorldState
     {
@@ -116,11 +124,13 @@ namespace AssemblyZero.Domain.EP04
         public List<FactorySite> Factories=new List<FactorySite>();public List<ResourceSite> Resources=new List<ResourceSite>();
         public List<WorldVehicle> Vehicles=new List<WorldVehicle>();public List<GridPoint> Explored=new List<GridPoint>();
         public List<string> Events=new List<string>();
+        public HardwareState Hardware;
     }
     public sealed class WorldCommand
     {
         public CommandKind Kind;public int Factory=1,Node,X,Z,Rotation,Vehicle=1,Resource,TargetFactory=1,Material=8,Supplier,Priority,Reserve;
         public BuildingKind Building;public string Recipe="";public bool Flag;
+        public int Order, Quantity, Delivery; public double Throttle,Steer;
     }
     public readonly struct CommandResult
     {

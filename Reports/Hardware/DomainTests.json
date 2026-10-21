@@ -1,0 +1,98 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 14.8,
+      "summary": {
+        "total": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExpiredOrderReleasesGoods",
+          "Status": "Passed",
+          "Duration": 2.8301231,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_FormalStartProducesAndDeliversWithoutDriving",
+          "Status": "Passed",
+          "Duration": 1.9921094,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_MakeHeatIsViableWithoutBuyingHeat",
+          "Status": "Passed",
+          "Duration": 3.2740999,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ManualControlExcludesAutomaticCommandsAndRescueKeepsCargo",
+          "Status": "Passed",
+          "Duration": 0.1617909,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldAndNewSavesCannotCrossLoad",
+          "Status": "Passed",
+          "Duration": 0.0156619,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PurchaseFailureIsAtomicAndFreightIsExact",
+          "Status": "Passed",
+          "Duration": 0.0120416,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_QuietOrderRejectsStandardGoods",
+          "Status": "Passed",
+          "Duration": 2.1398196,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ReservationPreventsCompetingOrdersSpotSaleAndTransfer",
+          "Status": "Passed",
+          "Duration": 2.2762115,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SaveRestoresOrdersCostsAndInTransitPurchases",
+          "Status": "Passed",
+          "Duration": 1.4245744,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_WarehouseCapacityLeavesArrivalInTransit",
+          "Status": "Passed",
+          "Duration": 0.344651,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

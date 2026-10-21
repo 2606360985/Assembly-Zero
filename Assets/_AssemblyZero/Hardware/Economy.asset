@@ -1,0 +1,333 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a13209952dd8ea42918fd46373850d4, type: 3}
+  m_Name: Economy
+  m_EditorClassIdentifier: AssemblyZero.Unity::AssemblyZero.Unity.EP04.EP04Config
+  Economy:
+    Hardware:
+      Id: az-gpu
+      Version: 1
+      RestockSeconds: 120
+      DeliverySeconds: 90
+      ExpressSeconds: 25
+      DeliveryFee: 1200
+      ExpressFee: 4800
+      PickupFee: 300
+      SupplierX: 1
+      SupplierZ: 37
+      SpotCapacity: 20
+      RescueSeconds: 60
+      Materials:
+      - Id: 32
+        Price: 0
+        Stock: 80
+        Name: "\u94DD\u539F\u6599"
+        Finished: 0
+      - Id: 33
+        Price: 1800
+        Stock: 80
+        Name: "\u94DD\u6750"
+        Finished: 0
+      - Id: 34
+        Price: 18000
+        Stock: 80
+        Name: "GPU \u6838\u5FC3"
+        Finished: 0
+      - Id: 35
+        Price: 6000
+        Stock: 80
+        Name: "\u663E\u5B58\u5305"
+        Finished: 0
+      - Id: 36
+        Price: 3000
+        Stock: 80
+        Name: "\u677F\u6750\u7EC4\u4EF6"
+        Finished: 0
+      - Id: 37
+        Price: 1000
+        Stock: 80
+        Name: "\u663E\u5361\u5916\u58F3"
+        Finished: 0
+      - Id: 38
+        Price: 200
+        Stock: 80
+        Name: "\u5305\u88C5\u6750\u6599"
+        Finished: 0
+      - Id: 39
+        Price: 6000
+        Stock: 80
+        Name: "\u6807\u51C6\u6563\u70ED\u5668"
+        Finished: 0
+      - Id: 40
+        Price: 10000
+        Stock: 80
+        Name: "\u4F4E\u566A\u6563\u70ED\u5668"
+        Finished: 0
+      - Id: 41
+        Price: 0
+        Stock: 80
+        Name: "\u5DF2\u88C5\u914D\u677F\u5361"
+        Finished: 0
+      - Id: 42
+        Price: 0
+        Stock: 80
+        Name: "\u5F85\u68C0\u6807\u51C6\u663E\u5361"
+        Finished: 0
+      - Id: 43
+        Price: 0
+        Stock: 80
+        Name: "\u5F85\u68C0\u9759\u97F3\u663E\u5361"
+        Finished: 0
+      - Id: 44
+        Price: 0
+        Stock: 80
+        Name: "\u5408\u683C\u6807\u51C6\u663E\u5361"
+        Finished: 0
+      - Id: 45
+        Price: 0
+        Stock: 80
+        Name: "\u5408\u683C\u9759\u97F3\u663E\u5361"
+        Finished: 0
+      - Id: 46
+        Price: 0
+        Stock: 80
+        Name: "\u661F\u94F8 S1 \u6807\u51C6\u7248"
+        Finished: 1
+      - Id: 47
+        Price: 0
+        Stock: 80
+        Name: "\u661F\u94F8 S1 \u9759\u97F3\u7248"
+        Finished: 1
+      Buildings:
+      - Kind: 0
+        Name: "\u4ED3\u50A8\u88C5\u5378"
+        Recipe: 
+        Cost: 14000
+      - Kind: 1
+        Name: "\u94DD\u6750\u52A0\u5DE5"
+        Recipe: aluminum
+        Cost: 14000
+      - Kind: 2
+        Name: "\u6563\u70ED\u5668\u52A0\u5DE5"
+        Recipe: heat
+        Cost: 18000
+      - Kind: 4
+        Name: "\u677F\u5361\u88C5\u914D"
+        Recipe: board
+        Cost: 20000
+      - Kind: 5
+        Name: "\u663E\u5361\u603B\u88C5"
+        Recipe: gpu
+        Cost: 22000
+      - Kind: 6
+        Name: "\u68C0\u6D4B"
+        Recipe: test
+        Cost: 18000
+      - Kind: 7
+        Name: "\u5305\u88C5"
+        Recipe: pack
+        Cost: 12000
+      - Kind: 3
+        Name: "\u4EA4\u4ED8\u4E0E\u56DE\u6536"
+        Recipe: 
+        Cost: 10000
+      Orders:
+      - Id: 1
+        Material: 46
+        Quantity: 8
+        UnitPrice: 48000
+        Seconds: 1080
+        Name: "\u6668\u6E7E\u5DE5\u4F5C\u5BA4 \xB7 \u9996\u6279\u6807\u51C6\u663E\u5361"
+        Spec: s1-standard
+        Repeatable: 0
+      - Id: 2
+        Material: 47
+        Quantity: 6
+        UnitPrice: 56000
+        Seconds: 900
+        Name: "\u9759\u5EAD\u8BBE\u8BA1 \xB7 \u4F4E\u566A\u5DE5\u4F5C\u7AD9"
+        Spec: s1-quiet
+        Repeatable: 0
+      - Id: 3
+        Material: 46
+        Quantity: 1
+        UnitPrice: 44000
+        Seconds: 900
+        Name: "\u672C\u5730\u7EF4\u4FEE\u793E \xB7 \u5C0F\u989D\u8865\u8D27"
+        Spec: s1-standard
+        Repeatable: 1
+    StartingMoney: 300000
+    MachineCost: 180
+    ProcessorCost: 140
+    WarehouseCost: 140
+    SalesCost: 100
+    Level2Cost: 30000
+    Level3Cost: 65000
+    CollectorCost: 45000
+    HaulerCost: 60000
+    StationCost: 25000
+    SecondFactoryCost: 2200000
+    TripFee: 800
+    WarehouseCapacity: 300
+    VehicleCapacity: 24
+    GatheringTicks: 30
+    RegenerationTicks: 30
+    UpgradePercent: 6400000096000000c8000000
+    Recipes:
+    - Id: aluminum
+      Name: "\u94DD\u6750"
+      Output: 33
+      Seconds: 20
+      Level: 1
+      Price: 0
+      Machine: 1
+      Inputs:
+      - Material: 32
+        Quantity: 2
+      ProcessingFee: 100
+      SpecId: 
+      SpecVersion: 1
+    - Id: heat
+      Name: "\u6807\u51C6\u6563\u70ED\u5668"
+      Output: 39
+      Seconds: 35
+      Level: 1
+      Price: 0
+      Machine: 2
+      Inputs:
+      - Material: 33
+        Quantity: 2
+      ProcessingFee: 200
+      SpecId: 
+      SpecVersion: 1
+    - Id: quiet-heat
+      Name: "\u4F4E\u566A\u6563\u70ED\u5668"
+      Output: 40
+      Seconds: 55
+      Level: 1
+      Price: 0
+      Machine: 2
+      Inputs:
+      - Material: 33
+        Quantity: 3
+      ProcessingFee: 300
+      SpecId: 
+      SpecVersion: 1
+    - Id: board
+      Name: "\u5DF2\u88C5\u914D\u677F\u5361"
+      Output: 41
+      Seconds: 75
+      Level: 1
+      Price: 0
+      Machine: 4
+      Inputs:
+      - Material: 36
+        Quantity: 1
+      - Material: 34
+        Quantity: 1
+      - Material: 35
+        Quantity: 1
+      ProcessingFee: 300
+      SpecId: 
+      SpecVersion: 1
+    - Id: gpu
+      Name: "\u5F85\u68C0\u6807\u51C6\u663E\u5361"
+      Output: 42
+      Seconds: 60
+      Level: 1
+      Price: 0
+      Machine: 5
+      Inputs:
+      - Material: 41
+        Quantity: 1
+      - Material: 39
+        Quantity: 1
+      - Material: 37
+        Quantity: 1
+      ProcessingFee: 200
+      SpecId: s1-standard
+      SpecVersion: 1
+    - Id: quiet-gpu
+      Name: "\u5F85\u68C0\u9759\u97F3\u663E\u5361"
+      Output: 43
+      Seconds: 70
+      Level: 1
+      Price: 0
+      Machine: 5
+      Inputs:
+      - Material: 41
+        Quantity: 1
+      - Material: 40
+        Quantity: 1
+      - Material: 37
+        Quantity: 1
+      ProcessingFee: 250
+      SpecId: s1-quiet
+      SpecVersion: 1
+    - Id: test
+      Name: "\u5408\u683C\u6807\u51C6\u663E\u5361"
+      Output: 44
+      Seconds: 55
+      Level: 1
+      Price: 0
+      Machine: 6
+      Inputs:
+      - Material: 42
+        Quantity: 1
+      ProcessingFee: 100
+      SpecId: s1-standard
+      SpecVersion: 1
+    - Id: quiet-test
+      Name: "\u5408\u683C\u9759\u97F3\u663E\u5361"
+      Output: 45
+      Seconds: 65
+      Level: 1
+      Price: 0
+      Machine: 6
+      Inputs:
+      - Material: 43
+        Quantity: 1
+      ProcessingFee: 150
+      SpecId: s1-quiet
+      SpecVersion: 1
+    - Id: pack
+      Name: "\u661F\u94F8 S1 \u6807\u51C6\u7248"
+      Output: 46
+      Seconds: 30
+      Level: 1
+      Price: 0
+      Machine: 7
+      Inputs:
+      - Material: 44
+        Quantity: 1
+      - Material: 38
+        Quantity: 1
+      ProcessingFee: 50
+      SpecId: s1-standard
+      SpecVersion: 1
+    - Id: quiet-pack
+      Name: "\u661F\u94F8 S1 \u9759\u97F3\u7248"
+      Output: 47
+      Seconds: 30
+      Level: 1
+      Price: 0
+      Machine: 7
+      Inputs:
+      - Material: 45
+        Quantity: 1
+      - Material: 38
+        Quantity: 1
+      ProcessingFee: 50
+      SpecId: s1-quiet
+      SpecVersion: 1
+  Font: {fileID: 12800000, guid: 7603332b5f3e2f04f9f6961d9f57e243, type: 3}
+  BaseMaterial: {fileID: 2100000, guid: 853ba248c4ca2214ba9813f6a2c04268, type: 2}

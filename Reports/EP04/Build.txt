@@ -1,0 +1,6 @@
+Result: Succeeded
+Errors: 1
+Warnings: 6
+Bytes: 189021337
+Time: 00:02:56.1564586
+Uses new settings initialized by the installed URP package. Original EP03 render settings restored after build.

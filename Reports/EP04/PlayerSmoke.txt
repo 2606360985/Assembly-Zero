@@ -1,0 +1,8 @@
+PASS: standalone scene, UI, command building, production, sales, conservation, save continuation.
+Unity: 6000.4.0f1
+Device: NVIDIA Quadro RTX 5000
+Resolution: 1280x720
+Nodes: 3 / Routes: 2 / Sold: 10
+Rendered frame ms (150 samples, starter factory): mean=0.238 p95=0.308 max=0.912
+Not the synthetic 60-node performance fixture. No user save file modified.
+Visual QA note: process ran with a hidden window. Player.png is black; frame timings above are not valid rendered performance measurements. This run confirms standalone simulation only. Visible standalone rendering remains unverified.

@@ -8,6 +8,7 @@ namespace AssemblyZero.Domain.EP04
         private CommandResult VehicleCommand(WorldCommand c)
         {
             var v=State.Vehicles.FirstOrDefault(x=>x.Id==c.Vehicle);
+            if(v!=null&&(v.Manual||v.RescueTicks>0))return Fail("车辆由玩家控制或正在救援");
             if(c.Kind==CommandKind.Station)
             {
                 var resource=State.Resources.FirstOrDefault(r=>r.Id==c.Resource);
@@ -56,7 +57,7 @@ namespace AssemblyZero.Domain.EP04
             }
             return Fail("未知车辆命令");
         }
-        private static bool ValidMaterial(int material)=>new[]{8,9,10,13,16,17,18,19}.Contains(material);
+        private bool ValidMaterial(int material)=>Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material):new[]{8,9,10,13,16,17,18,19}.Contains(material);
         private void SetJourney(WorldVehicle v,System.Collections.Generic.List<GridPoint> path,int journey)
         {
             v.Path=path;v.PathIndex=0;v.SegmentTicks=0;v.Journey=journey;v.Phase=VehiclePhase.Travelling;v.Status=journey==0?"探索中":journey==1?"前往资源点":journey==2?"返厂运输":"前往调拨仓库";
@@ -80,6 +81,7 @@ namespace AssemblyZero.Domain.EP04
         }
         private void TickVehicle(WorldVehicle v)
         {
+            if(Settings.IsHardware&&(v.Manual||v.RescueTicks>0)){TickDrivenVehicle(v);return;}
             Discover(v.Position);
             if(v.Phase==VehiclePhase.WaitingFunds){if(State.Tick%60==0&&State.Money>=Settings.TripFee)StartTrip(v);return;}
             if(v.Phase==VehiclePhase.Idle)return;
@@ -106,10 +108,10 @@ namespace AssemblyZero.Domain.EP04
             if(v.Phase==VehiclePhase.WaitingStock&&State.Tick%30==0)
             {
                 foreach(var n in State.Nodes.Where(n=>n.Factory==v.SourceFactory&&n.Kind==BuildingKind.Warehouse).OrderBy(n=>n.Id))
-                foreach(var item in n.Output.Where(g=>g.Material==v.Material).Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){n.Output.Remove(item);v.Cargo.Add(item);}
+                foreach(var item in n.Output.Where(g=>g.Material==v.Material&&g.ReservedOrder==0).Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){n.Output.Remove(item);v.Cargo.Add(item);}
                 // Manufactured goods may be loaded directly at an output dock.
                 foreach(var n in State.Nodes.Where(n=>n.Factory==v.SourceFactory&&n.Kind!=BuildingKind.Warehouse).OrderBy(n=>n.Id))
-                foreach(var item in n.Output.Where(g=>g.Material==v.Material).Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){n.Output.Remove(item);v.Cargo.Add(item);}
+                foreach(var item in n.Output.Where(g=>g.Material==v.Material&&g.ReservedOrder==0).Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){n.Output.Remove(item);v.Cargo.Add(item);}
                 if(v.Cargo.Count>0)Travel(v,Factory(v.TargetFactory).Dock,2);else v.Status="等待调拨库存";
             }
             if(v.Phase==VehiclePhase.Unloading)

@@ -1,0 +1,8 @@
+?? Assets/_AssemblyZero/EP04/EP04Pipeline.asset
+?? Assets/_AssemblyZero/EP04/EP04Pipeline.asset.meta
+?? Assets/_AssemblyZero/EP04/EP04RenderSettings.asset
+?? Assets/_AssemblyZero/EP04/EP04RenderSettings.asset.meta
+?? Reports/EP04/Build.txt
+?? Reports/EP04/EP01Regression.json
+?? Reports/EP04/Player.png
+?? Reports/EP04/PlayerSmoke.txt

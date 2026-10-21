@@ -20,20 +20,24 @@ namespace AssemblyZero.Domain.EP04
         {
             Settings=settings??throw new ArgumentNullException(nameof(settings));
             State=restored??NewState();
-            if(State.Version!=1)throw new ArgumentException("不支持的存档版本");
+            if(State.Version!=(Settings.IsHardware?2:1))throw new ArgumentException("存档版本与战役不匹配");
+            if(Settings.IsHardware&&(State.Hardware==null||State.Hardware.ContentId!=Settings.Hardware.Id||State.Hardware.ContentVersion!=Settings.Hardware.Version))throw new ArgumentException("显卡配置版本不匹配");
             foreach(var route in State.Routes)route.Initialize();
-            Index();AssertConserved();
+            Index();
+            if(restored==null&&Settings.IsHardware)InitializeHardware();
+            AssertConserved();
         }
         private WorldState NewState()
         {
             var s=new WorldState{Money=Settings.StartingMoney};
+            if(Settings.IsHardware){s.Version=2;s.Hardware=new HardwareState{ContentVersion=Settings.Hardware.Version,SpotRemaining=Settings.Hardware.SpotCapacity};s.Unlocked=3;}
             s.Factories.Add(new FactorySite{Id=1,X=4,Z=4,Owned=true,Discovered=true});
             s.Factories.Add(new FactorySite{Id=2,X=70,Z=48});
             s.Resources.Add(new ResourceSite{Id=1,Material=8,X=10,Z=39,Discovered=true});
             s.Resources.Add(new ResourceSite{Id=2,Material=9,X=32,Z=62});
             s.Resources.Add(new ResourceSite{Id=3,Material=10,X=65,Z=21});
             s.Vehicles.Add(new WorldVehicle{Id=1,Role=VehicleRole.Pickup,Position=s.Factories[0].Dock});
-            foreach(var material in new[]{8,9,10})for(var i=0;i<20;i++){s.Factories[0].Starter.Add(new Goods(s.NextItem++,1,material));s.Created++;}
+            if(!Settings.IsHardware)foreach(var material in new[]{8,9,10})for(var i=0;i<20;i++){s.Factories[0].Starter.Add(new Goods(s.NextItem++,1,material));s.Created++;}
             return s;
         }
         private void Index()
@@ -53,6 +57,7 @@ namespace AssemblyZero.Domain.EP04
         public void Tick()
         {
             FlushCommands();State.Tick++;
+            if(Settings.IsHardware)TickHardware();
             foreach(var resource in State.Resources)if(State.Tick%Settings.RegenerationTicks==0&&resource.Stock<resource.Capacity)resource.Stock++;
             foreach(var n in State.Nodes.ToArray())Process(n);
             foreach(var r in State.Routes)Transport(r);
@@ -65,6 +70,7 @@ namespace AssemblyZero.Domain.EP04
         {
             if(n.Kind==BuildingKind.Sales)
             {
+                if(Settings.IsHardware){n.Status="订单交付 / 有限现货回收";return;}
                 n.Status="等待商品";
                 if(n.Input.Count==0)return;
                 var item=n.Input[0];var price=Settings.Recipes.FirstOrDefault(r=>r.Output==item.Material)?.Price??0;
@@ -84,7 +90,9 @@ namespace AssemblyZero.Domain.EP04
                 n.Status="加工中";
                 if(n.WorkRemaining>0)return;
                 if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";return;}
-                State.Consumed+=n.Batch.Count;n.Batch.Clear();n.Output.Add(Create(n.Factory,recipe.Output));
+                var product=Create(n.Factory,recipe.Output);
+                if(Settings.IsHardware){product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=recipe.SpecId;product.SpecVersion=recipe.SpecVersion;}
+                State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;n.Output.Add(product);
             }
             if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe))
             {
@@ -93,8 +101,10 @@ namespace AssemblyZero.Domain.EP04
             }
             if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";return;}
             foreach(var input in recipe.Inputs)
-                if(n.Input.Count(i=>i.Material==input.Material)<input.Quantity){n.Status="缺少 "+EconomySettings.MaterialName(input.Material);return;}
-            foreach(var input in recipe.Inputs)for(var i=0;i<input.Quantity;i++){var item=n.Input.First(g=>g.Material==input.Material);n.Input.Remove(item);n.Batch.Add(item);}
+                if(n.Input.Count(i=>i.Material==input.Material&&i.ReservedOrder==0)<input.Quantity){n.Status="缺少 "+EconomySettings.MaterialName(input.Material);return;}
+            if(Settings.IsHardware&&!Pay(recipe.ProcessingFee)){n.Status="加工资金不足";return;}
+            n.BatchFee=Settings.IsHardware?recipe.ProcessingFee:0;
+            foreach(var input in recipe.Inputs)for(var i=0;i<input.Quantity;i++){var item=n.Input.First(g=>g.Material==input.Material&&g.ReservedOrder==0);n.Input.Remove(item);n.Batch.Add(item);}
             n.WorkTotal=n.WorkRemaining=Math.Max(1,recipe.Seconds*60*100/Settings.UpgradePercent[n.Level-1]);n.Status="加工中";
         }
         private bool CanReceive(BusinessNode n,int material)
@@ -125,7 +135,7 @@ namespace AssemblyZero.Domain.EP04
             for(var k=0;k<choices.Count;k++)
             {
                 var index=(n.Cursor+k)%choices.Count;var r=choices[index];var target=Node(r.To);if(!CanReceive(target,r.Material))continue;
-                var item=n.Output.FirstOrDefault(g=>g.Material==r.Material);if(item==null)continue;
+                var item=n.Output.FirstOrDefault(g=>g.Material==r.Material&&g.ReservedOrder==0);if(item==null)continue;
                 var score=target.Policy(r.Material)?.Priority??0;
                 if(target.Kind==BuildingKind.Sales)
                 {
@@ -145,8 +155,9 @@ namespace AssemblyZero.Domain.EP04
         public void CaptureState(){FlushCommands();foreach(var r in State.Routes)r.Saved=r.Backend.ExportRuntimeState();AssertConserved();}
         public void AssertConserved()
         {
-            var all=State.Nodes.SelectMany(n=>n.Input.Concat(n.Output).Concat(n.Batch)).Concat(State.Routes.SelectMany(r=>r.Cargo)).Concat(State.Vehicles.SelectMany(v=>v.Cargo)).Concat(State.Factories.SelectMany(f=>f.Starter)).ToList();
+            var all=State.Nodes.SelectMany(n=>n.Input.Concat(n.Output).Concat(n.Batch)).Concat(State.Routes.SelectMany(r=>r.Cargo)).Concat(State.Vehicles.SelectMany(v=>v.Cargo)).Concat(State.Factories.SelectMany(f=>f.Starter)).Concat(State.Hardware==null?Enumerable.Empty<Goods>():State.Hardware.Deliveries.SelectMany(d=>d.Cargo)).ToList();
             if(all.Select(i=>i.Id).Distinct().Count()!=all.Count||State.Created!=all.Count+State.Consumed+State.Sold||State.Money<0)throw new InvalidOperationException("EP04 物料/资金守恒失败");
+            if(Settings.IsHardware)ValidateHardware(all);
             foreach(var r in State.Routes)
             {
                 var items=r.Backend.ExportRuntimeState().Items;
@@ -156,6 +167,6 @@ namespace AssemblyZero.Domain.EP04
         private void Log(string message){State.Events.Add(message);if(State.Events.Count>40)State.Events.RemoveAt(0);}
         private CommandResult Ok(string message,int entity=0)=>new CommandResult(true,message,entity);
         private CommandResult Fail(string message)=>new CommandResult(false,message);
-        private bool Pay(int amount){if(State.Money<amount)return false;State.Money-=amount;State.Expenses+=amount;return true;}
+        private bool Pay(int amount){if(amount<0||State.Money<amount)return false;State.Money-=amount;State.Expenses+=amount;if(Settings.IsHardware&&amount>0)Cash(-amount,"支出");return true;}
     }
 }

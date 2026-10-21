@@ -1,0 +1,22 @@
+[
+  {
+    "Algorithm": "SHA256",
+    "Hash": "DFB62F925E45E2D9D4B4662384E3AC796DBD7DC9C82367DFD25E02E039C5604D",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\ProjectSettings\\GraphicsSettings.asset"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "90A6246B84DF30886FB817936DB3934EDD391241D003785606137C0E27014856",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\ProjectSettings\\QualitySettings.asset"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "97C20C351FA11B68FB9F23AD040E57A722D84F89F6BB792590D3939275B2DE7D",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Assets\\_AssemblyZero\\Scenes\\EP03_Demo.unity"
+  },
+  {
+    "Algorithm": "SHA256",
+    "Hash": "F1B5DF7657FF31F13221B2092ED19FBB49FCC68B47422849990C9EBB5084A816",
+    "Path": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Assets\\_AssemblyZero\\Scenes\\EP03_Minimal.unity"
+  }
+]
