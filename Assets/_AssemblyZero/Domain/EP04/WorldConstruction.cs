@@ -15,7 +15,7 @@ namespace AssemblyZero.Domain.EP04
                 var f=Factory(c.Factory);if(f==null||f.Owned||!f.Discovered||State.Unlocked<4)return Fail("请先发现厂址并售出 T3 商品");
                 if(!Pay(Settings.SecondFactoryCost))return Fail("购买厂址资金不足");f.Owned=true;Revision++;return Ok("第二厂址已购入，放置仓库后可接收调拨",f.Id);
             }
-            switch(c.Kind){case CommandKind.Explore:case CommandKind.Collect:case CommandKind.Return:case CommandKind.Transfer:case CommandKind.HireCollector:case CommandKind.HireHauler:case CommandKind.Station:case CommandKind.Boost:return VehicleCommand(c);}
+            switch(c.Kind){case CommandKind.Explore:case CommandKind.Collect:case CommandKind.Return:case CommandKind.Transfer:case CommandKind.HireCollector:case CommandKind.HireHauler:case CommandKind.Station:case CommandKind.Boost:case CommandKind.PickupPurchase:return VehicleCommand(c);}
             var n=Node(c.Node);if(n==null)return Fail("未选择有效节点");
             if(c.Kind==CommandKind.CancelChange){n.PendingRemove=false;n.PendingRecipe="";return Ok("已取消待完成改建");}
             if(c.Kind==CommandKind.Upgrade)

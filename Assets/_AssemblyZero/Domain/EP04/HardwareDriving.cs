@@ -7,6 +7,9 @@ namespace AssemblyZero.Domain.EP04
     {
         private CommandResult DrivingCommand(WorldCommand c)
         {
+            // Retain the driving implementation and save fields while the module is frozen.
+            if(c.Kind==CommandKind.TakeControl||c.Kind==CommandKind.Drive||c.Kind==CommandKind.Interact||c.Kind==CommandKind.RightVehicle)
+                return Fail("手动驾驶暂时冻结；请在运输页规划自动采集或自提任务");
             var v=State.Vehicles.FirstOrDefault(x=>x.Id==c.Vehicle);if(v==null||v.Role!=VehicleRole.Pickup)return Fail("请选择自用货车");
             if(v.RescueTicks>0)return Fail("正在救援，货物暂不可操作");
             if(c.Kind==CommandKind.TakeControl)
@@ -16,7 +19,7 @@ namespace AssemblyZero.Domain.EP04
                 v.Manual=true;v.Loop=false;v.DriveX=v.Position.X;v.DriveZ=v.Position.Z;v.Speed=0;v.Throttle=v.Steer=0;v.Status="手动驾驶";return Ok("WASD 驾驶 · E 装卸 · Tab 停靠并查看工厂");
             }
             if(c.Kind==CommandKind.ReleaseControl){if(!v.Manual)return Fail("车辆未被接管");v.Manual=false;v.Throttle=v.Steer=v.Speed=0;v.Phase=VehiclePhase.Idle;v.Journey=9;v.Status="停靠，等待玩家";return Ok("车辆已停靠");}
-            if(c.Kind==CommandKind.RecoverVehicle){v.Manual=false;v.Throttle=v.Steer=v.Speed=0;v.RescueTicks=Settings.Hardware.RescueSeconds*60;v.Status="救援返库中";return Ok("救援耗时 "+Settings.Hardware.RescueSeconds+" 秒，货物保留");}
+            if(c.Kind==CommandKind.RecoverVehicle){v.Manual=false;v.Loop=false;v.PickupTask=false;v.WorkTicks=0;v.Throttle=v.Steer=v.Speed=0;v.RescueTicks=Settings.Hardware.RescueSeconds*60;v.Status="救援返库中";return Ok("救援耗时 "+Settings.Hardware.RescueSeconds+" 秒，货物保留");}
             if(!v.Manual)return Fail("请先接管货车");
             if(c.Kind==CommandKind.Drive){v.Throttle=Math.Max(-1,Math.Min(1,c.Throttle));v.Steer=Math.Max(-1,Math.Min(1,c.Steer));return Ok("驾驶");}
             if(c.Kind==CommandKind.RightVehicle){v.Speed=v.Throttle=v.Steer=0;v.Heading=0;return Ok("已原地回正，位置与货物不变");}
@@ -48,7 +51,7 @@ namespace AssemblyZero.Domain.EP04
         }
         private void TickDrivenVehicle(WorldVehicle v)
         {
-            if(v.RescueTicks>0){if(--v.RescueTicks==0){var p=Factory(1).Dock;v.Position=p;v.DriveX=p.X;v.DriveZ=p.Z;v.Phase=VehiclePhase.Idle;v.Status="救援完成，请卸货";}return;}
+            if(v.RescueTicks>0){if(--v.RescueTicks==0){var p=Factory(1).Dock;v.Position=p;v.TargetFactory=1;v.DriveX=p.X;v.DriveZ=p.Z;v.Path.Clear();v.PathIndex=0;v.Phase=VehiclePhase.Unloading;v.Status="救援完成，自动卸货";}return;}
             v.Speed+=(v.Throttle*5-v.Speed)*.06;v.Heading+=v.Steer*Math.Min(1,Math.Abs(v.Speed))*1.7/60;
             var x=v.DriveX+Math.Sin(v.Heading)*v.Speed/60;var z=v.DriveZ+Math.Cos(v.Heading)*v.Speed/60;
             var p2=new GridPoint((int)Math.Round(x),(int)Math.Round(z));

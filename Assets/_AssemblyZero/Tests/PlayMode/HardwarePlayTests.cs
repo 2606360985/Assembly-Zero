@@ -72,17 +72,26 @@ namespace AssemblyZero.Tests
             }
             finally{InputSystem.RemoveDevice(mouse);}
         }
-        [UnityTest] public IEnumerator Hardware_DrivingInputPauseAndDrawerExclusion()
+        [UnityTest] public IEnumerator Hardware_TransportPlanningPauseAndFrozenDrivingInput()
         {
             yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();var keyboard=InputSystem.AddDevice<Keyboard>();
             try
             {
-                game.Speed=2;game.ToggleDriving();Assert.IsTrue(game.Truck.Manual);Assert.AreEqual(1,game.Speed);var z=game.Truck.DriveZ;
-                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W));yield return new WaitForSeconds(.35f);Assert.Greater(game.Truck.DriveZ,z);
-                InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;game.TogglePause();var tick=game.World.State.Tick;var position=game.Truck.DriveZ;yield return new WaitForSeconds(.1f);Assert.AreEqual(tick,game.World.State.Tick);Assert.AreEqual(position,game.Truck.DriveZ);
-                game.TogglePause();game.ToggleDriving();Assert.IsFalse(game.Truck.Manual);Assert.AreEqual(2,game.Speed);game.SetDrawer("订单");yield return null;Assert.AreEqual("订单",game.Drawer);game.SetDrawer("采购");yield return null;Assert.AreEqual("采购",game.Drawer);
+                game.Speed=2;game.ToggleDriving();Assert.IsFalse(game.Truck.Manual);Assert.AreEqual("运输",game.Drawer);Assert.AreEqual(2,game.Speed);var p=game.Truck.Position;
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W));yield return new WaitForSeconds(.35f);Assert.AreEqual(p,game.Truck.Position);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+                game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="规划循环采集铝原料").onClick.Invoke();Assert.IsTrue(game.Truck.Loop);Assert.AreEqual(VehiclePhase.Travelling,game.Truck.Phase);
+                game.TogglePause();var tick=game.World.State.Tick;var position=game.Truck.Position;yield return new WaitForSeconds(.1f);Assert.AreEqual(tick,game.World.State.Tick);Assert.AreEqual(position,game.Truck.Position);
+                game.TogglePause();game.SetDrawer("订单");yield return null;Assert.AreEqual("订单",game.Drawer);game.SetDrawer("采购");yield return null;Assert.AreEqual("采购",game.Drawer);
             }
             finally{InputSystem.RemoveDevice(keyboard);}
+        }
+        [UnityTest] public IEnumerator Hardware_GuideSelectsFirstOrderAndMissingSupplies()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;game.Hud.FollowGuide();Assert.AreEqual("订单",game.Drawer);Assert.AreEqual(1,game.SelectedOrder);
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单").onClick.Invoke();yield return null;game.Hud.FollowGuide();yield return null;
+            Assert.AreEqual("采购",game.Drawer);Assert.IsTrue(game.Hud.GetComponentsInChildren<TMPro.TMP_Text>().Any(t=>t.text.Contains("标准散热器 ×6")));
+            Assert.IsFalse(game.View.GetComponentsInChildren<MeshFilter>().Any(f=>f.sharedMesh!=null&&f.sharedMesh.name!="Cube"),"Station presentation must contain only box primitives.");
         }
     }
 }

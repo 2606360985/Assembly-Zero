@@ -66,12 +66,49 @@ namespace AssemblyZero.Tests
         {
             var w=Ready();Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=2});Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=2});Assert.AreEqual(0,w.ReservedCount(2));Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=2}).Success);
         }
-        [Test] public void Hardware_ManualControlExcludesAutomaticCommandsAndRescueKeepsCargo()
+        [Test] public void Hardware_ManualDrivingIsFrozenAndRescueUnloadsAutomatically()
         {
-            var w=New();Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.TakeControl}).Success);
-            Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);
-            Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});Run(w,2);var v=w.State.Vehicles[0];Assert.Greater(v.DriveZ,16);
-            Do(w,new WorldCommand{Kind=CommandKind.RecoverVehicle});Assert.Greater(v.RescueTicks,0);Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Interact}).Success);Run(w,60);Assert.AreEqual(w.Factory(1).Dock,v.Position);w.AssertConserved();
+            var w=New();Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.TakeControl}).Success);
+            Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);Run(w,5);var v=w.State.Vehicles[0];Assert.IsNotEmpty(v.Cargo);var ids=v.Cargo.Select(g=>g.Id).ToArray();
+            Do(w,new WorldCommand{Kind=CommandKind.RecoverVehicle});Assert.Greater(v.RescueTicks,0);Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);Run(w,61);Assert.AreEqual(w.Factory(1).Dock,v.Position);Assert.IsEmpty(v.Cargo);Assert.IsTrue(ids.All(id=>w.FinishedStock(1).Any(g=>g.Id==id)));w.AssertConserved();
+        }
+        [Test] public void Hardware_PickupRepeatsMiningWaitsAtFullWarehouseAndStopsSafely()
+        {
+            var w=New();var v=w.State.Vehicles[0];Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1});Run(w,90);
+            Assert.IsTrue(v.Loop);Assert.GreaterOrEqual(w.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Ore),72);
+            Do(w,new WorldCommand{Kind=CommandKind.Return});Run(w,30);Assert.IsFalse(v.Loop);Assert.Greater(v.Cargo.Count,0);Assert.AreEqual(VehiclePhase.Unloading,v.Phase);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Upgrade,Node=1}).Success);Run(w,10);
+            Assert.IsEmpty(v.Cargo);Assert.AreEqual(VehiclePhase.Idle,v.Phase);var created=w.State.Created;Run(w,10);Assert.AreEqual(created,w.State.Created);
+        }
+        [Test] public void Hardware_AutomaticPickupLoadsMultipleTripsAndFinishes()
+        {
+            var w=New();Buy(w,HardwareCatalog.Carton,55,2);Do(w,new WorldCommand{Kind=CommandKind.PickupPurchase});Run(w,90);
+            Assert.IsEmpty(w.State.Hardware.Deliveries);var v=w.State.Vehicles[0];Assert.IsEmpty(v.Cargo);Assert.IsFalse(v.Loop);Assert.IsFalse(v.PickupTask);Assert.AreEqual(VehiclePhase.Idle,v.Phase);
+            Assert.AreEqual(55,w.State.Nodes.SelectMany(n=>n.Input.Concat(n.Output).Concat(n.Batch)).Concat(w.State.Routes.SelectMany(r=>r.Cargo)).Count(g=>g.Material==HardwareCatalog.Carton&&!g.Gift));
+        }
+        [TestCase(false)] [TestCase(true)] public void Hardware_AutomaticTasksContinueExactlyAfterSave(bool pickup)
+        {
+            var a=New();if(pickup){Buy(a,HardwareCatalog.Carton,55,2);Do(a,new WorldCommand{Kind=CommandKind.PickupPurchase});}else Do(a,new WorldCommand{Kind=CommandKind.Collect,Resource=1});
+            Run(a,5);var b=new WorldSimulation(a.Settings,JsonUtility.FromJson<WorldState>(Save(a)));Run(a,90);Run(b,90);Assert.AreEqual(Save(a),Save(b));
+        }
+        [Test] public void Hardware_OldManualSaveResumesWithAutomaticCargoRecovery()
+        {
+            var a=New();Do(a,new WorldCommand{Kind=CommandKind.Collect,Resource=1});Run(a,5);var v=a.State.Vehicles[0];Assert.IsNotEmpty(v.Cargo);var ids=v.Cargo.Select(g=>g.Id).ToArray();v.Manual=true;
+            var b=new WorldSimulation(a.Settings,JsonUtility.FromJson<WorldState>(Save(a)));Assert.IsFalse(b.State.Vehicles[0].Manual);Run(b,30);Assert.IsTrue(ids.All(id=>b.FinishedStock(1).Any(g=>g.Id==id)));Assert.AreEqual(VehiclePhase.Idle,b.State.Vehicles[0].Phase);
+        }
+        [Test] public void Hardware_GuideFollowsRealProgressAndFirstProductSurvivesDeliveryAndSave()
+        {
+            var w=New();Assert.AreEqual("order",HardwareGuide.Evaluate(w).Key);Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});var hint=HardwareGuide.Evaluate(w);Assert.AreEqual("supply",hint.Key);Assert.AreEqual(6,hint.Quantity);
+            Buy(w,HardwareCatalog.Heat,6);Assert.AreEqual("arrival",HardwareGuide.Evaluate(w).Key);Run(w,850);Assert.Greater(w.State.Hardware.FirstProductTick,0);Assert.AreEqual("reserve",HardwareGuide.Evaluate(w).Key);
+            Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Assert.AreEqual("deliver",HardwareGuide.Evaluate(w).Key);Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1});
+            var b=new WorldSimulation(w.Settings,JsonUtility.FromJson<WorldState>(Save(w)));Assert.AreEqual(w.State.Hardware.FirstProductTick,b.State.Hardware.FirstProductTick);Assert.AreEqual(2,b.State.Hardware.Orders.First(o=>o.Id==HardwareGuide.Evaluate(b).Order).Template);
+        }
+        [Test] public void Hardware_GuideExplainsSelfMadeHeatAndMiningInputs()
+        {
+            var w=New();Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});
+            var hint=HardwareGuide.Evaluate(w);Assert.AreEqual(HardwareCatalog.Aluminum,hint.Material);Assert.AreEqual(12,hint.Quantity);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24}).Success);Assert.AreEqual("mining",HardwareGuide.Evaluate(w).Key);
         }
         [Test] public void Hardware_WarehouseCapacityLeavesArrivalInTransit()
         {
@@ -89,14 +126,13 @@ namespace AssemblyZero.Tests
             var s=w.State.Hardware.Settlements.Single();Assert.AreEqual(384000,s.Income);Assert.AreEqual(36000,s.MaterialCost);Assert.AreEqual(5200,s.ProcessingCost);Assert.AreEqual(1200,s.FreightCost);Assert.AreEqual(341600,s.Margin);
             var old=JsonUtility.ToJson(s);w.Settings.Hardware.Materials.First(m=>m.Id==HardwareCatalog.Heat).Price=99999;Assert.AreEqual(old,JsonUtility.ToJson(s));
         }
-        [Test] public void Hardware_ManualPickupAndHarvestSurviveSaveAndUnloadOnce()
+        [Test] public void Hardware_AutomaticPickupRejectsRetaskingLoadedCargoAndUnloadsOnce()
         {
-            var w=New();Buy(w,HardwareCatalog.Heat,6,2);Do(w,new WorldCommand{Kind=CommandKind.TakeControl});Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});
-            while(w.State.Vehicles[0].DriveZ<35&&w.State.Tick<1200)w.Tick();Do(w,new WorldCommand{Kind=CommandKind.Drive});Run(w,2);
-            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Interact}).Success);Assert.AreEqual(6,w.State.Vehicles[0].Cargo.Count);Do(w,new WorldCommand{Kind=CommandKind.Interact});Assert.AreEqual(6,w.State.Vehicles[0].Cargo.Count);
-            w=new WorldSimulation(w.Settings,JsonUtility.FromJson<WorldState>(Save(w)));Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=-1});
-            while(w.State.Vehicles[0].DriveZ>27.5&&w.State.Tick<2400)w.Tick();Do(w,new WorldCommand{Kind=CommandKind.Drive});Run(w,2);Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Interact}).Success);Run(w,4);Assert.Greater(w.State.Vehicles[0].Cargo.Count,6);
-            Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=-1});while(w.State.Vehicles[0].DriveZ>17.5&&w.State.Tick<3600)w.Tick();Do(w,new WorldCommand{Kind=CommandKind.Drive});Run(w,2);Do(w,new WorldCommand{Kind=CommandKind.Interact});Assert.AreEqual(0,w.State.Vehicles[0].Cargo.Count);w.AssertConserved();
+            var w=New();Buy(w,HardwareCatalog.Heat,6,2);Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.PickupPurchase}).Success);
+            while(w.State.Vehicles[0].Cargo.Count==0&&w.State.Tick<1200)w.Tick();Assert.AreEqual(6,w.State.Vehicles[0].Cargo.Count);
+            Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);Assert.AreEqual(6,w.State.Vehicles[0].Cargo.Count);
+            w=new WorldSimulation(w.Settings,JsonUtility.FromJson<WorldState>(Save(w)));Run(w,20);Assert.IsEmpty(w.State.Vehicles[0].Cargo);Assert.IsEmpty(w.State.Hardware.Deliveries);
+            Assert.AreEqual(6,w.State.Nodes.SelectMany(n=>n.Input.Concat(n.Output).Concat(n.Batch)).Concat(w.State.Routes.SelectMany(r=>r.Cargo)).Count(g=>g.Material==HardwareCatalog.Heat&&!g.Gift));w.AssertConserved();
         }
         [Test] public void Hardware_ReservationSurvivesWarehouseMoveAndBlocksCrossFactoryTransfer()
         {

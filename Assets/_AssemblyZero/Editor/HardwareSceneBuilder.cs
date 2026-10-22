@@ -33,26 +33,12 @@ namespace AssemblyZero.Unity.Editor
                 AssetDatabase.CreateAsset(font,Root+"/Chinese SDF.asset");foreach(var texture in font.atlasTextures)AssetDatabase.AddObjectToAsset(texture,font);AssetDatabase.AddObjectToAsset(font.material,font);
                 var texts=string.Concat(Directory.GetFiles("Assets/_AssemblyZero/Runtime/EP04","Hardware*.cs").Select(File.ReadAllText))+string.Concat(Directory.GetFiles("Assets/_AssemblyZero/Domain/EP04","Hardware*.cs").Select(File.ReadAllText));font.TryAddCharacters(new string(texts.Distinct().ToArray()),out _);EditorUtility.SetDirty(font);
             }
-            var machine=Visual("Assets/Models/DKGui_B.FBX","Machine",new Vector3(2.5f,2,2.5f),config.BaseMaterial);
-            var arm=Visual("Assets/Models/SM_IndustrialRobot01_01.FBX","Arm",new Vector3(2,2.5f,2),config.BaseMaterial);
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             var camera=new GameObject("Hardware Camera",typeof(Camera),typeof(AudioListener)).GetComponent<Camera>();camera.tag="MainCamera";camera.orthographic=true;camera.orthographicSize=25;camera.nearClipPlane=.1f;camera.farClipPlane=400;camera.backgroundColor=new Color(.34f,.38f,.34f);camera.transform.rotation=Quaternion.Euler(55,0,0);
             var sun=new GameObject("Afternoon sun",typeof(Light)).GetComponent<Light>();sun.type=LightType.Directional;sun.intensity=1.4f;sun.color=new Color(1,.94f,.82f);sun.transform.rotation=Quaternion.Euler(52,-35,0);sun.shadows=LightShadows.Soft;
             RenderSettings.ambientMode=AmbientMode.Flat;RenderSettings.ambientLight=new Color(.65f,.69f,.65f);
-            var game=new GameObject("Hardware business").AddComponent<HardwareGame>();game.Config=config;game.Font=font;game.ViewCamera=camera;game.MachineVisual=machine;game.ArmVisual=arm;
+            var game=new GameObject("Hardware business").AddComponent<HardwareGame>();game.Config=config;game.Font=font;game.ViewCamera=camera;
             EditorSceneManager.SaveScene(scene,ScenePath);AssetDatabase.SaveAssets();Debug.Log("Hardware slice scene ready. Existing EP scenes were not regenerated.");
-        }
-        // Copy mesh data only: old demo MonoBehaviours must never execute in the new simulation.
-        private static GameObject Visual(string source,string name,Vector3 limit,Material material)
-        {
-            var path=Root+"/"+name+"Visual.prefab";var existing=AssetDatabase.LoadAssetAtPath<GameObject>(path);if(existing!=null)return existing;
-            var original=AssetDatabase.LoadAssetAtPath<GameObject>(source);if(original==null)return null;var root=new GameObject(name+" visual");
-            foreach(var filter in original.GetComponentsInChildren<MeshFilter>(true))
-            {
-                if(filter.sharedMesh==null)continue;var child=new GameObject(filter.name,typeof(MeshFilter),typeof(MeshRenderer));child.transform.SetParent(root.transform);var matrix=original.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;child.transform.localPosition=matrix.GetColumn(3);child.transform.localRotation=matrix.rotation;child.transform.localScale=matrix.lossyScale;child.GetComponent<MeshFilter>().sharedMesh=filter.sharedMesh;child.GetComponent<MeshRenderer>().sharedMaterials=Enumerable.Repeat(material,filter.sharedMesh.subMeshCount).ToArray();
-            }
-            var renderers=root.GetComponentsInChildren<Renderer>();if(renderers.Length>0){var bounds=renderers[0].bounds;foreach(var renderer in renderers)bounds.Encapsulate(renderer.bounds);var scale=Mathf.Min(limit.x/Mathf.Max(.01f,bounds.size.x),limit.y/Mathf.Max(.01f,bounds.size.y),limit.z/Mathf.Max(.01f,bounds.size.z));foreach(Transform child in root.transform){child.localPosition=(child.localPosition-new Vector3(bounds.center.x,bounds.min.y,bounds.center.z))*scale;child.localScale*=scale;}}
-            var prefab=PrefabUtility.SaveAsPrefabAsset(root,path);UnityEngine.Object.DestroyImmediate(root);return prefab;
         }
         [MenuItem("Tools/Assembly Zero/Build Hardware Windows Player")]
         public static void Build()

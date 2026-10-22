@@ -33,13 +33,23 @@ namespace AssemblyZero.Domain.EP04
             {
                 if(v.Role!=VehicleRole.Pickup)return Fail("请使用皮卡探索");
                 var destination=new GridPoint(c.X,c.Z);var path=GridRouting.WorldPath(v.Position,destination);if(path==null)return Fail("目标不可达，请选择道路或空地");
-                v.Loop=false;v.TransferTask=false;SetJourney(v,path,0);return Ok("皮卡正在探索");
+                v.Loop=false;v.TransferTask=false;v.PickupTask=false;SetJourney(v,path,0);return Ok("皮卡正在探索");
             }
             if(c.Kind==CommandKind.Return)
             {
                 if(Factory(c.TargetFactory)?.Owned!=true)return Fail("目标工厂未购买");
-                v.TargetFactory=c.TargetFactory;v.Loop=false;
-                if(!Travel(v,Factory(c.TargetFactory).Dock,2))return Fail("返厂路径不可达");return Ok("正在返厂卸货");
+                var path=GridRouting.WorldPath(v.Position,Factory(c.TargetFactory).Dock);if(path==null)return Fail("返厂路径不可达");
+                v.TargetFactory=c.TargetFactory;v.Loop=false;v.PickupTask=false;v.WorkTicks=0;
+                SetJourney(v,path,2);return Ok("已停止循环；正在返厂自动卸货");
+            }
+            if(c.Kind==CommandKind.PickupPurchase)
+            {
+                if(!Settings.IsHardware||v.Role!=VehicleRole.Pickup||Factory(c.TargetFactory)?.Owned!=true)return Fail("请选择皮卡和已购买的目标工厂");
+                if(v.Cargo.Count>0)return Fail("请先返厂卸下当前货物");
+                if(!State.Hardware.Deliveries.Any(d=>d.Method==2&&d.Factory==c.TargetFactory&&d.Cargo.Count>0))return Fail("当前工厂没有待自提采购");
+                var path=GridRouting.WorldPath(v.Position,new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ));if(path==null)return Fail("采购站不可达");
+                v.TargetFactory=c.TargetFactory;v.TransferTask=false;v.PickupTask=true;v.Loop=true;v.WorkTicks=0;SetJourney(v,path,4);
+                return Ok("自动自提已规划：前往采购站、分批装运、返厂卸货，全部取回后待命");
             }
             if(c.Kind==CommandKind.Collect)
             {
@@ -47,20 +57,20 @@ namespace AssemblyZero.Domain.EP04
                 if(resource==null||Factory(c.TargetFactory)?.Owned!=true)return Fail("请选择已发现资源和有效目标工厂");
                 if(v.Cargo.Count>0)return Fail("请先将车上货物卸入仓库");
                 if(GridRouting.WorldPath(v.Position,resource.Point)==null)return Fail("资源点不可达");
-                v.Resource=c.Resource;v.TargetFactory=c.TargetFactory;v.TransferTask=false;v.Loop=v.Role==VehicleRole.Collector;StartTrip(v);return Ok("采集任务已下达");
+                v.Resource=c.Resource;v.TargetFactory=c.TargetFactory;v.TransferTask=false;v.PickupTask=false;v.WorkTicks=0;v.Loop=Settings.IsHardware||v.Role==VehicleRole.Collector;StartTrip(v);return Ok(v.Loop?"自动采集已规划：采满返厂、自动卸货后继续；可随时返厂停止":"采集任务已下达");
             }
             if(c.Kind==CommandKind.Transfer)
             {
                 if(Factory(c.Factory)?.Owned!=true||Factory(c.TargetFactory)?.Owned!=true||c.Factory==c.TargetFactory||!ValidMaterial(c.Material))return Fail("请选择两个不同的已购工厂及物料");
                 if(v.Cargo.Count>0)return Fail("请先卸下当前货物");
-                v.SourceFactory=c.Factory;v.TargetFactory=c.TargetFactory;v.Material=c.Material;v.TransferTask=true;v.Loop=v.Role==VehicleRole.Hauler;StartTrip(v);return Ok("调拨任务已下达");
+                v.SourceFactory=c.Factory;v.TargetFactory=c.TargetFactory;v.Material=c.Material;v.TransferTask=true;v.PickupTask=false;v.Loop=v.Role==VehicleRole.Hauler;StartTrip(v);return Ok("调拨任务已下达");
             }
             return Fail("未知车辆命令");
         }
         private bool ValidMaterial(int material)=>Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material):new[]{8,9,10,13,16,17,18,19}.Contains(material);
         private void SetJourney(WorldVehicle v,System.Collections.Generic.List<GridPoint> path,int journey)
         {
-            v.Path=path;v.PathIndex=0;v.SegmentTicks=0;v.Journey=journey;v.Phase=VehiclePhase.Travelling;v.Status=journey==0?"探索中":journey==1?"前往资源点":journey==2?"返厂运输":"前往调拨仓库";
+            v.Path=path;v.PathIndex=0;v.SegmentTicks=0;v.Journey=journey;v.Phase=VehiclePhase.Travelling;v.Status=journey==0?"探索中":journey==1?"前往资源点":journey==2?"返厂运输":journey==4?"前往采购站自提":"前往调拨仓库";
         }
         private bool Travel(WorldVehicle v,GridPoint end,int journey)
         {
@@ -68,10 +78,12 @@ namespace AssemblyZero.Domain.EP04
         }
         private void StartTrip(WorldVehicle v)
         {
-            var end=v.TransferTask?Factory(v.SourceFactory).Dock:State.Resources.First(r=>r.Id==v.Resource).Point;
+            if(v.PickupTask&&!State.Hardware.Deliveries.Any(d=>d.Method==2&&d.Factory==v.TargetFactory&&d.Cargo.Count>0))
+            {v.Loop=false;v.PickupTask=false;v.Phase=VehiclePhase.Idle;v.Status="自提完成，等待规划";return;}
+            var end=v.PickupTask?new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ):v.TransferTask?Factory(v.SourceFactory).Dock:State.Resources.First(r=>r.Id==v.Resource).Point;
             var path=GridRouting.WorldPath(v.Position,end);if(path==null){v.Phase=VehiclePhase.Idle;v.Status="道路不可达";return;}
             if(v.Role!=VehicleRole.Pickup&&!Pay(Settings.TripFee)){v.Phase=VehiclePhase.WaitingFunds;v.Status="资金不足，暂停派遣";return;}
-            SetJourney(v,path,v.TransferTask?3:1);
+            SetJourney(v,path,v.PickupTask?4:v.TransferTask?3:1);
         }
         private void Discover(GridPoint position)
         {
@@ -94,6 +106,7 @@ namespace AssemblyZero.Domain.EP04
                 if(v.Journey==1){v.Phase=VehiclePhase.Gathering;v.Status="采集中";}
                 if(v.Journey==2){v.Phase=VehiclePhase.Unloading;v.Status="正在卸货";}
                 if(v.Journey==3){v.Phase=VehiclePhase.WaitingStock;v.Status="装载调拨物资";}
+                if(v.Journey==4){v.Phase=VehiclePhase.WaitingStock;v.Status="自动装载采购物资";}
             }
             if(v.Phase==VehiclePhase.Gathering)
             {
@@ -107,6 +120,16 @@ namespace AssemblyZero.Domain.EP04
             }
             if(v.Phase==VehiclePhase.WaitingStock&&State.Tick%30==0)
             {
+                if(v.PickupTask)
+                {
+                    foreach(var d in State.Hardware.Deliveries.Where(d=>d.Method==2&&d.Factory==v.TargetFactory).OrderBy(d=>d.Id).ToArray())
+                    {
+                        foreach(var g in d.Cargo.Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){d.Cargo.Remove(g);v.Cargo.Add(g);}
+                        if(d.Cargo.Count==0)State.Hardware.Deliveries.Remove(d);
+                    }
+                    if(v.Cargo.Count>0)Travel(v,Factory(v.TargetFactory).Dock,2);else StartTrip(v);
+                    return;
+                }
                 foreach(var n in State.Nodes.Where(n=>n.Factory==v.SourceFactory&&n.Kind==BuildingKind.Warehouse).OrderBy(n=>n.Id))
                 foreach(var item in n.Output.Where(g=>g.Material==v.Material&&g.ReservedOrder==0).Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){n.Output.Remove(item);v.Cargo.Add(item);}
                 // Manufactured goods may be loaded directly at an output dock.

@@ -27,7 +27,7 @@ namespace AssemblyZero.Domain.EP04
     public enum VehicleRole { Pickup, Collector, Hauler }
     public enum VehiclePhase { Idle, Travelling, Gathering, Unloading, WaitingFunds, WaitingStock }
     public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost,
-        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle }
+        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle, PickupPurchase }
     [Serializable] public sealed class Goods
     {
         public int Id, Origin, Material;
@@ -113,7 +113,7 @@ namespace AssemblyZero.Domain.EP04
         public GridPoint Position; public VehicleRole Role;public VehiclePhase Phase;
         public bool Boost, Loop, TransferTask; public string Status="待命";
         public List<GridPoint> Path=new List<GridPoint>();public List<Goods> Cargo=new List<Goods>();
-        public bool Manual; public double DriveX,DriveZ,Heading,Speed,Throttle,Steer; public int RescueTicks;
+        public bool Manual, PickupTask; public double DriveX,DriveZ,Heading,Speed,Throttle,Steer; public int RescueTicks;
     }
     [Serializable] public sealed class WorldState
     {

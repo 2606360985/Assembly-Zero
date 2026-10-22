@@ -25,6 +25,17 @@ namespace AssemblyZero.Domain.EP04
             foreach(var route in State.Routes)route.Initialize();
             Index();
             if(restored==null&&Settings.IsHardware)InitializeHardware();
+            if(restored!=null&&Settings.IsHardware)
+            {
+                // Resume older saves without requiring the frozen driving module to unload cargo.
+                foreach(var v in State.Vehicles.Where(v=>v.Manual))
+                {
+                    v.Manual=false;v.Speed=v.Throttle=v.Steer=0;v.WorkTicks=0;v.Loop=false;v.PickupTask=false;
+                    Travel(v,Factory(v.TargetFactory)?.Dock??Factory(1).Dock,2);
+                }
+                if(State.Hardware.FirstProductTick==0&&(FinishedStock(1).Any(g=>g.Material==HardwareCatalog.Standard||g.Material==HardwareCatalog.Quiet)||State.Hardware.Settlements.Count>0))
+                    State.Hardware.FirstProductTick=Math.Max(1,State.Tick);
+            }
             AssertConserved();
         }
         private WorldState NewState()
@@ -93,6 +104,10 @@ namespace AssemblyZero.Domain.EP04
                 var product=Create(n.Factory,recipe.Output);
                 if(Settings.IsHardware){product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=recipe.SpecId;product.SpecVersion=recipe.SpecVersion;}
                 State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;n.Output.Add(product);
+                if(Settings.IsHardware&&State.Hardware.FirstProductTick==0&&(product.Material==HardwareCatalog.Standard||product.Material==HardwareCatalog.Quiet))
+                {
+                    State.Hardware.FirstProductTick=State.Tick;Log("首款产品下线！星铸 S1 已完成装配、检测和包装；入库后可在订单页预留交付。");
+                }
             }
             if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe))
             {

@@ -34,9 +34,9 @@ namespace AssemblyZero.Unity.EP04
             Cube("Service road",new Vector3(1.2f,-.07f,32),new Vector3(4,.2f,52),new Color(.16f,.18f,.17f),environment);
             for(var z=8;z<56;z+=4)Cube("Road marking",new Vector3(1.2f,.04f,z),new Vector3(.12f,.03f,1.8f),amber,environment);
             var h=game.Config.Economy.Hardware;
-            Cube("Supplier warehouse",new Vector3(7,.9f,h.SupplierZ*1.2f),new Vector3(6,2,4),steel,environment);Label("青港采购站 · E 提货",new Vector3(3,3,h.SupplierZ*1.2f),environment,.9f);
+            Cube("Supplier warehouse",new Vector3(7,.9f,h.SupplierZ*1.2f),new Vector3(6,2,4),new Color(.18f,.62f,.72f),environment);Cube("Supplier canopy",new Vector3(7,2.1f,h.SupplierZ*1.2f),new Vector3(6.4f,.3f,4.4f),amber,environment);Label("青港采购站 · 自动装运",new Vector3(3,3,h.SupplierZ*1.2f),environment,.9f);
             var r=game.World.State.Resources[0];for(int i=0;i<8;i++)Cube("Aluminum ore",new Vector3(4+i%3,.3f+i%2*.3f,r.Z*1.2f+i/3),new Vector3(.8f,.8f,.8f),new Color(.6f,.55f,.43f),environment);
-            Label("铝原料点 · E 采集",new Vector3(4,2.5f,r.Z*1.2f),environment,.9f);Label("车库 · E 卸货",new Vector3(2,2,19.2f),environment,.8f);
+            Label("铝原料点 · 点击规划采集",new Vector3(4,2.5f,r.Z*1.2f),environment,.9f);Label("车库 · 自动卸货",new Vector3(2,2,19.2f),environment,.8f);
             truck=new GameObject("Player truck").transform;truck.SetParent(transform);Cube("Chassis",Vector3.zero,new Vector3(1.4f,.5f,2.6f),amber,truck);Cube("Cabin",new Vector3(0,.5f,.8f),new Vector3(1.35f,.9f,.9f),amber,truck);Cube("Windscreen",new Vector3(0,.7f,1.27f),new Vector3(1.1f,.4f,.05f),dark,truck);Cube("Cargo bed",new Vector3(0,.3f,-.5f),new Vector3(1.25f,.2f,1.35f),steel,truck);
             foreach(var x in new[]{-.75f,.75f})foreach(var z in new[]{-.8f,.8f})Cube("Tire",new Vector3(x,-.15f,z),new Vector3(.25f,.65f,.6f),dark,truck);
             priorTruck=new Vector3(1.2f,.65f,19.2f);Rebuild();
@@ -60,18 +60,10 @@ namespace AssemblyZero.Unity.EP04
             {
                 var pos=Local(f,n.Center);var station=new GameObject("Station "+n.Id).transform;station.SetParent(root);station.position=pos;station.rotation=Quaternion.Euler(0,-n.Rotation*90,0);
                 Cube("Hazard footprint",new Vector3(0,-.45f,0),new Vector3(3.8f,.08f,3.8f),amber,station);Cube("Base",Vector3.zero,new Vector3(3.2f,.8f,3.2f),dark,station);
-                if(n.Kind==BuildingKind.Warehouse){for(int i=0;i<6;i++)Cube("Stock rack",new Vector3((i%2-.5f)*1.5f,.8f,(i/2-1)*.8f),new Vector3(1.2f,1.5f,.6f),steel,station);}
-                else if(n.Kind==BuildingKind.Sales){Cube("Dispatch desk",new Vector3(0,.8f,0),new Vector3(2.8f,.2f,2),steel,station);for(int i=0;i<3;i++)Cube("Carton",new Vector3(i*.8f-.8f,1.15f,0),Vector3.one*.65f,amber,station);}
-                else
+                BuildBlocks(n,station);
+                if(n.Kind!=BuildingKind.Warehouse&&n.Kind!=BuildingKind.Sales)
                 {
-                    if(game.MachineVisual!=null){var visual=Instantiate(game.MachineVisual,station);visual.transform.localPosition=new Vector3(0,.4f,0);}
-                    else Cube("Machine enclosure",new Vector3(0,1,0),new Vector3(2.6f,1.7f,2.5f),steel,station);
-                    Cube("Work surface",new Vector3(0,.8f,-1.1f),new Vector3(2.8f,.15f,1),steel,station);
-                    Cube("Control panel",new Vector3(1.2f,1.45f,-1.28f),new Vector3(.55f,.55f,.12f),dark,station);
-                    if(n.Kind==BuildingKind.Tester){foreach(var side in new[]{-1.25f,1.25f})Cube("Inspection gantry",new Vector3(side,1.4f,-.5f),new Vector3(.18f,2.2f,.18f),steel,station);Cube("Scan light",new Vector3(0,2.4f,-.5f),new Vector3(2.7f,.2f,.3f),green,station);}
-                    if(n.Kind==BuildingKind.Packaging){Cube("Packing roll",new Vector3(.9f,1.2f,0),new Vector3(.6f,.65f,1.3f),amber,station);Cube("Box stack",new Vector3(-1,1.1f,.8f),new Vector3(.7f,.9f,.7f),amber,station);}
-                    if(game.ArmVisual!=null&&(n.Kind==BuildingKind.BoardAssembly||n.Kind==BuildingKind.GPUAssembly)){var arm=Instantiate(game.ArmVisual,station);arm.transform.localPosition=new Vector3(-.8f,.5f,.4f);arm.transform.localScale*=.6f;}
-                    workpieces[n.Id]=Product(game.Config.Economy.Recipe(n.RecipeId)?.Output??HardwareCatalog.Board,station);workpieces[n.Id].localPosition=new Vector3(0,1,-1.2f);
+                    workpieces[n.Id]=Product(game.Config.Economy.Recipe(n.RecipeId)?.Output??HardwareCatalog.Board,station);workpieces[n.Id].localPosition=new Vector3(0,1,-.8f);
                 }
                 lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.3f,1.3f),new Vector3(.2f,.35f,.2f),green,station);
                 Cube("Input dock",new Vector3(-2.4f,0,0),new Vector3(.5f,.4f,.65f),green,station);Cube("Output dock",new Vector3(2.4f,0,0),new Vector3(.5f,.4f,.65f),amber,station);
@@ -87,6 +79,74 @@ namespace AssemblyZero.Unity.EP04
                 }
             }
         }
+        // Only colored box primitives; silhouettes describe the work performed at each station.
+        private void BuildBlocks(BusinessNode n,Transform station)
+        {
+            var ivory=new Color(.88f,.9f,.82f);var blue=new Color(.16f,.5f,.85f);var teal=new Color(.12f,.65f,.65f);
+            var coral=new Color(.87f,.3f,.2f);var violet=new Color(.57f,.38f,.85f);
+            var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):green;
+            Cube("Brick deck",new Vector3(0,.48f,0),new Vector3(3.1f,.24f,3.1f),color,station);
+            for(var i=0;i<n.Level;i++)Cube("Level brick",new Vector3(-1+i*.45f,.7f,-1.4f),new Vector3(.3f,.18f,.2f),ivory,station);
+            switch(n.Kind)
+            {
+                case BuildingKind.Warehouse:
+                    foreach(var x in new[]{-1.05f,1.05f})
+                    {
+                        foreach(var z in new[]{-.9f,.9f})Cube("Rack upright",new Vector3(x,1.45f,z),new Vector3(.25f,1.8f,.25f),teal,station);
+                        for(var y=0;y<2;y++){Cube("Rack shelf",new Vector3(x,.75f+y*.85f,0),new Vector3(.9f,.18f,2.5f),ivory,station);for(var z=0;z<3;z++)Cube("Stock brick",new Vector3(x,1+y*.85f,(z-1)*.7f),new Vector3(.65f,.4f,.55f),z%2==0?amber:blue,station);}
+                    }
+                    break;
+                case BuildingKind.Processor:
+                    Cube("Smelter body",new Vector3(0,1.3f,.35f),new Vector3(2.6f,1.4f,1.7f),coral,station);
+                    Cube("Furnace mouth",new Vector3(0,1.15f,-.55f),new Vector3(1.3f,.7f,.12f),dark,station);
+                    Cube("Hot billet",new Vector3(0,.95f,-.65f),new Vector3(.85f,.2f,.25f),amber,station);
+                    Cube("Stack",new Vector3(.8f,2.4f,.7f),new Vector3(.55f,1,.6f),ivory,station);
+                    Cube("Stack cap",new Vector3(.8f,2.95f,.7f),new Vector3(.8f,.2f,.85f),dark,station);
+                    break;
+                case BuildingKind.Manufacturer:
+                    foreach(var x in new[]{-1.1f,1.1f})Cube("Press pillar",new Vector3(x,1.35f,.2f),new Vector3(.5f,1.5f,1.5f),amber,station);
+                    Cube("Press crown",new Vector3(0,2.15f,.2f),new Vector3(2.9f,.4f,1.6f),amber,station);
+                    Cube("Press die",new Vector3(0,1.65f,0),new Vector3(1.15f,.45f,.8f),ivory,station);
+                    for(var i=0;i<5;i++)Cube("Cooling fin",new Vector3((i-2)*.3f,1,-.8f),new Vector3(.13f,.65f,.65f),steel,station);
+                    break;
+                case BuildingKind.BoardAssembly:
+                    Cube("PCB workbench",new Vector3(0,.85f,0),new Vector3(2.9f,.3f,2.5f),ivory,station);
+                    Cube("Large green board",new Vector3(0,1.05f,0),new Vector3(1.9f,.12f,1.6f),green,station);
+                    for(var i=0;i<4;i++)Cube("Chip feeder",new Vector3((i-1.5f)*.6f,1.5f,1),new Vector3(.4f,.9f,.6f),i%2==0?blue:dark,station);
+                    Cube("Placement rail",new Vector3(0,2.1f,.1f),new Vector3(2.8f,.25f,.35f),green,station);
+                    Cube("Pick head",new Vector3(.2f,1.7f,.1f),new Vector3(.35f,.6f,.35f),amber,station);
+                    break;
+                case BuildingKind.GPUAssembly:
+                    Cube("Assembly bench",new Vector3(0,.8f,0),new Vector3(2.8f,.25f,2.5f),ivory,station);
+                    foreach(var x in new[]{-1.05f,1.05f})
+                    {
+                        Cube("Robot pedestal",new Vector3(x,1.25f,.55f),new Vector3(.6f,1.1f,.7f),blue,station);
+                        Cube("Robot shoulder",new Vector3(x*.65f,1.9f,.55f),new Vector3(1.05f,.4f,.5f),blue,station);
+                        Cube("Robot tool",new Vector3(x*.3f,1.6f,.55f),new Vector3(.3f,.55f,.3f),amber,station);
+                    }
+                    break;
+                case BuildingKind.Tester:
+                    foreach(var x in new[]{-1.15f,1.15f})Cube("Scan tower",new Vector3(x,1.55f,0),new Vector3(.5f,1.9f,1.8f),violet,station);
+                    Cube("Scan bridge",new Vector3(0,2.55f,0),new Vector3(2.9f,.4f,1.8f),violet,station);
+                    Cube("Scan strip",new Vector3(0,2.3f,-.7f),new Vector3(1.8f,.15f,.2f),new Color(.3f,.95f,.95f),station);
+                    Cube("Test screen",new Vector3(1.25f,1.45f,-1),new Vector3(.5f,.6f,.18f),green,station);
+                    break;
+                case BuildingKind.Packaging:
+                    Cube("Packing table",new Vector3(0,.85f,0),new Vector3(2.9f,.25f,2.5f),ivory,station);
+                    foreach(var x in new[]{-1.1f,1.1f})Cube("Sealer support",new Vector3(x,1.45f,.5f),new Vector3(.4f,1.3f,.6f),color,station);
+                    Cube("Sealing bar",new Vector3(0,2.05f,.5f),new Vector3(2.6f,.3f,.6f),color,station);
+                    Cube("Tape cassette",new Vector3(0,2.4f,.5f),new Vector3(.7f,.5f,.6f),blue,station);
+                    for(var i=0;i<2;i++)Cube("Empty carton",new Vector3(-.9f,1.1f+i*.45f,-.8f),new Vector3(.65f,.4f,.7f),amber,station);
+                    break;
+                case BuildingKind.Sales:
+                    foreach(var x in new[]{-1.2f,1.2f})Cube("Dispatch post",new Vector3(x,1.5f,.7f),new Vector3(.25f,1.8f,.25f),green,station);
+                    Cube("Dispatch canopy",new Vector3(0,2.4f,.3f),new Vector3(3.1f,.3f,2.3f),green,station);
+                    Cube("Dispatch counter",new Vector3(0,.95f,-.5f),new Vector3(2.7f,.65f,1.2f),ivory,station);
+                    for(var i=0;i<3;i++)Cube("Delivery carton",new Vector3((i-1)*.8f,1.5f,-.5f),new Vector3(.6f,.45f,.6f),amber,station);
+                    break;
+            }
+            for(var i=0;i<4;i++)Cube("Square stud",new Vector3((i%2-.5f)*.65f,n.Kind==BuildingKind.Tester?2.82f:n.Kind==BuildingKind.Sales?2.62f:.66f,.2f+i/2*.6f),new Vector3(.3f,.12f,.3f),color,station);
+        }
         private Transform Product(int material,Transform parent)
         {
             var t=new GameObject("Cargo "+HardwareCatalog.Name(material)).transform;t.SetParent(parent,false);
@@ -94,7 +154,7 @@ namespace AssemblyZero.Unity.EP04
             else if(material>=HardwareCatalog.AssembledBoard)
             {
                 Cube("PCB",Vector3.zero,new Vector3(.85f,.07f,.45f),green,t);
-                if(material>HardwareCatalog.AssembledBoard){Cube("Heatsink",new Vector3(0,.1f,0),new Vector3(.8f,.16f,.42f),steel,t);if(material>=HardwareCatalog.Tested)for(int i=0;i<2;i++){var fan=GameObject.CreatePrimitive(PrimitiveType.Cylinder);fan.name="Fan";fan.transform.SetParent(t,false);fan.transform.localPosition=new Vector3((i-.5f)*.4f,.21f,0);fan.transform.localScale=new Vector3(.3f,.025f,.3f);fan.GetComponent<Renderer>().sharedMaterial=Paint(dark);Destroy(fan.GetComponent<Collider>());}}
+                if(material>HardwareCatalog.AssembledBoard){Cube("Heatsink",new Vector3(0,.1f,0),new Vector3(.8f,.16f,.42f),steel,t);if(material>=HardwareCatalog.Tested)for(int i=0;i<2;i++){var p=new Vector3((i-.5f)*.4f,.21f,0);Cube("Fan brick",p,new Vector3(.3f,.05f,.3f),dark,t);Cube("Fan blade",p+Vector3.up*.03f,new Vector3(.24f,.025f,.06f),steel,t);Cube("Fan blade",p+Vector3.up*.03f,new Vector3(.06f,.025f,.24f),steel,t);}}
             }
             else if(material==HardwareCatalog.Heat||material==HardwareCatalog.QuietHeat){for(int i=0;i<6;i++)Cube("Fin",new Vector3(i*.1f-.25f,0,0),new Vector3(.04f,.35f,.4f),steel,t);}
             else Cube("Material tray",Vector3.zero,new Vector3(.45f,.25f,.4f),material==HardwareCatalog.Aluminum?steel:material==HardwareCatalog.Core?dark:green,t);
@@ -104,7 +164,8 @@ namespace AssemblyZero.Unity.EP04
         {
             var w=game.World;var changed=w.State.Tick!=lastTick;
             if(changed){lastTick=w.State.Tick;foreach(var p in cargo)previousCargo[p.Key]=p.Value.position;priorTruck=truck.position;}
-            var v=game.Truck;var target=new Vector3((float)(v.Manual?v.DriveX:v.Position.X)*1.2f,.65f,(float)(v.Manual?v.DriveZ:v.Position.Z)*1.2f);truck.position=game.Paused?target:Vector3.Lerp(priorTruck,target,Mathf.Clamp01(interpolation));truck.rotation=Quaternion.Euler(0,(float)v.Heading*Mathf.Rad2Deg,0);
+            var v=game.Truck;var target=new Vector3(v.Position.X*1.2f,.65f,v.Position.Z*1.2f);truck.position=game.Paused?target:Vector3.Lerp(priorTruck,target,Mathf.Clamp01(interpolation));
+            if(v.PathIndex+1<v.Path.Count){var p=v.Path[v.PathIndex+1];var direction=new Vector3(p.X-v.Position.X,0,p.Z-v.Position.Z);if(direction.sqrMagnitude>0)truck.rotation=Quaternion.LookRotation(direction);}
             var alive=new HashSet<int>();
             foreach(var r in w.State.Routes.Where(r=>r.Factory==game.Factory))
             {

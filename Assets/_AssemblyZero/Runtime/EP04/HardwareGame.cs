@@ -13,12 +13,12 @@ namespace AssemblyZero.Unity.EP04
     public enum HardwareInteraction { Browsing, Placing, Selected, Driving, Modal }
     public sealed partial class HardwareGame : MonoBehaviour
     {
-        public EP04Config Config; public TMP_FontAsset Font; public Camera ViewCamera; public GameObject MachineVisual,ArmVisual;
+        public EP04Config Config; public TMP_FontAsset Font; public Camera ViewCamera;
         public WorldSimulation World {get;private set;} public HardwareHud Hud {get;private set;} public HardwareFactoryView View {get;private set;}
         public HardwareInteraction Interaction; public int SelectedNode,Factory=1,Speed=1; public bool Paused;
         public BuildingKind? Placing; public bool Moving; public int Rotation; public string Message="欢迎来到星铸显卡工厂：接首单，留意散热器缺口。";
         public string Drawer=""; public int SelectedOrder=1; public string[] Notices=Array.Empty<string>();
-        private double accumulator; private float uiTime,saveTime; private int previousSpeed=1; private Vector3 cameraFocus; private bool pan; private Vector2 lastMouse; private int savedRevision=-1;
+        private double accumulator; private float uiTime,saveTime; private Vector3 cameraFocus; private bool pan; private Vector2 lastMouse; private int savedRevision=-1;private long seenFirstProduct;
         public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json");
         private bool verifying;
         public WorldVehicle Truck=>World.State.Vehicles.First(v=>v.Role==VehicleRole.Pickup);
@@ -39,8 +39,8 @@ namespace AssemblyZero.Unity.EP04
         private void Update()
         {
             if(World==null)return;if(!verifying)HandleInput();
-            if(!Paused){accumulator+=Time.unscaledDeltaTime*(Truck.Manual?1:Speed);var steps=0;while(accumulator>=1d/60&&steps++<32){World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
-            if(Truck.Manual){cameraFocus=new Vector3((float)Truck.DriveX*1.2f,0,(float)Truck.DriveZ*1.2f);ViewCamera.orthographicSize=12;}
+            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<32){World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
+            if(seenFirstProduct==0&&World.State.Hardware.FirstProductTick>0){seenFirstProduct=World.State.Hardware.FirstProductTick;Message="首款产品下线！星铸 S1 已完成装配、检测和包装。成品入库后可预留交付。";Notices=Notices.Concat(new[]{Message}).TakeLast(3).ToArray();}
             ViewCamera.transform.position=cameraFocus+new Vector3(26,42,-29);ViewCamera.transform.rotation=Quaternion.LookRotation(cameraFocus-ViewCamera.transform.position);
             View.Present((float)(accumulator*60));
             uiTime+=Time.unscaledDeltaTime;saveTime+=Time.unscaledDeltaTime;
@@ -54,10 +54,10 @@ namespace AssemblyZero.Unity.EP04
         public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
         public void ToggleDriving()
         {
-            if(Truck.Manual){Submit(new WorldCommand{Kind=CommandKind.ReleaseControl});Speed=previousSpeed;Interaction=HardwareInteraction.Browsing;FocusFactory();}
-            else if(Submit(new WorldCommand{Kind=CommandKind.TakeControl}).Success){previousSpeed=Speed;Speed=1;Drawer="";Placing=null;Interaction=HardwareInteraction.Driving;}
-            Hud.RebuildDrawer();
+            SetDrawer("运输");
         }
+        public void FocusLogistics(){cameraFocus=new Vector3(8,0,34);ViewCamera.orthographicSize=22;}
+        public void FocusNode(int id){var n=World.Node(id);if(n==null)return;Factory=n.Factory;SelectedNode=id;var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);Drawer="设备";View.Rebuild();Hud.RebuildDrawer();}
         public void TogglePause(){Paused=!Paused;Interaction=Paused?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
         public void ChangeFactory(){if(Factory==1&&World.Factory(2).Owned){Factory=2;}else Factory=1;SelectedNode=0;FocusFactory();View.Rebuild();}
         private void HandleInput()
@@ -69,12 +69,6 @@ namespace AssemblyZero.Unity.EP04
             if(Paused)return;
             if(k.spaceKey.wasPressedThisFrame){TogglePause();return;}
             if(k.tabKey.wasPressedThisFrame)ToggleDriving();
-            if(Truck.Manual)
-            {
-                var throttle=(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0);var steer=(k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0);
-                if(Truck.Throttle!=throttle||Truck.Steer!=steer)Submit(new WorldCommand{Kind=CommandKind.Drive,Throttle=throttle,Steer=steer});
-                if(k.eKey.wasPressedThisFrame)Submit(new WorldCommand{Kind=CommandKind.Interact});return;
-            }
             if(k.rKey.wasPressedThisFrame)Rotation=(Rotation+1)%4;
             var pointer=m.position.ReadValue();var over=EventSystem.current!=null&&EventSystem.current.IsPointerOverGameObject();
             if(m.middleButton.wasPressedThisFrame||m.rightButton.wasPressedThisFrame){pan=!over;lastMouse=pointer;}
@@ -89,7 +83,7 @@ namespace AssemblyZero.Unity.EP04
                 View.Ghost(x,z,Rotation,World.PlacementError(Factory,x,z,Moving?SelectedNode:0)==null);
                 if(m.leftButton.wasPressedThisFrame){var r=Submit(new WorldCommand{Kind=Moving?CommandKind.Move:CommandKind.Build,Factory=Factory,Node=SelectedNode,Building=Placing.Value,X=x,Z=z,Rotation=Rotation});if(r.Success){Placing=null;Moving=false;Hud.RebuildDrawer();}}
             }
-            else{View.HideGhost();if(m.leftButton.wasPressedThisFrame){SelectedNode=World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;Drawer=SelectedNode==0?"":"设备";Interaction=SelectedNode==0?HardwareInteraction.Browsing:HardwareInteraction.Selected;Hud.RebuildDrawer();}}
+            else{View.HideGhost();if(m.leftButton.wasPressedThisFrame){var resource=World.State.Resources.FirstOrDefault(r=>r.Discovered&&Math.Abs(hit.x/1.2f-r.X)<3&&Math.Abs(hit.z/1.2f-r.Z)<3);if(resource!=null){Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=resource.Id,TargetFactory=Factory});Drawer="运输";Hud.RebuildDrawer();return;}SelectedNode=World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;Drawer=SelectedNode==0?"":"设备";Interaction=SelectedNode==0?HardwareInteraction.Browsing:HardwareInteraction.Selected;Hud.RebuildDrawer();}}
         }
         public bool Save()
         {
@@ -97,10 +91,10 @@ namespace AssemblyZero.Unity.EP04
         }
         public bool Load()
         {
-            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;accumulator=0;SelectedNode=0;Factory=1;Drawer="";Speed=1;FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
+            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;seenFirstProduct=World.State.Hardware.FirstProductTick;Notices=Array.Empty<string>();accumulator=0;SelectedNode=0;Factory=1;Drawer="";Speed=1;FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
             return false;
         }
-        public void NewGame(){World=new WorldSimulation(Config.Economy);accumulator=0;SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；赠送物料清单见产品页";}
+        public void NewGame(){World=new WorldSimulation(Config.Economy);seenFirstProduct=0;Notices=Array.Empty<string>();accumulator=0;SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标完成第一款产品";}
         public void OpenLegacy(){SceneManager.LoadScene("EP04_Business");}
     }
 }

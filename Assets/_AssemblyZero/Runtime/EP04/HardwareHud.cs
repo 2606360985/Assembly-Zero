@@ -10,8 +10,8 @@ namespace AssemblyZero.Unity.EP04
 {
     public sealed class HardwareHud : MonoBehaviour
     {
-        private HardwareGame game;private Canvas canvas;private RectTransform drawer,content,pause,modal,build,goals,notices,driving;
-        private TMP_Text top,goal,notice,details,driveInfo,selection;private int material=HardwareCatalog.Heat,quantity=6,delivery;private float zoom=1;private bool confirmNew;
+        private HardwareGame game;private Canvas canvas;private RectTransform drawer,content,pause,modal,build,goals,notices;
+        private TMP_Text top,goal,notice,details,selection,guideAction;private int material=HardwareCatalog.Heat,quantity=6,delivery;private float zoom=1;private bool confirmNew;
         private readonly Color panel=new Color(.075f,.085f,.082f,.97f),ink=new Color(.91f,.91f,.85f),accent=new Color(.9f,.55f,.17f);
         public void Initialize(HardwareGame g)
         {
@@ -21,7 +21,7 @@ namespace AssemblyZero.Unity.EP04
             var bar=Box("Status",canvas.transform);Anchor(bar,new Vector2(0,1),Vector2.one,new Vector2(0,-56),Vector2.zero);var row=Row(bar);top=Label(row,"",23,50,1000);Button(row,"工厂",()=>{game.ChangeFactory();},82);Button(row,"1× / 2×",()=>{if(!game.Truck.Manual)game.Speed=game.Speed==1?2:1;},105);Button(row,"菜单",game.TogglePause,82);
             var nav=Box("Navigation",canvas.transform);Anchor(nav,new Vector2(0,1),new Vector2(0,1),new Vector2(8,-496),new Vector2(68,-72));var list=Column(nav);
             foreach(var label in new[]{"工厂","订单","产品","采购","运输","报表"}){var target=label;Button(list,target,()=>{if(target=="工厂"){game.FocusFactory();game.Drawer="";RebuildDrawer();}else game.SetDrawer(target);},0,56);}
-            goals=Box("Tracked order",canvas.transform);Anchor(goals,new Vector2(0,1),new Vector2(0,1),new Vector2(80,-220),new Vector2(360,-72));goal=Label(Column(goals),"",18,132);
+            goals=Box("Tracked order",canvas.transform);Anchor(goals,new Vector2(0,1),new Vector2(0,1),new Vector2(80,-392),new Vector2(400,-72));var gc=Column(goals);goal=Label(gc,"",18,240);Button(gc,"下一步",FollowGuide,0,48);guideAction=gc.GetComponentsInChildren<UnityEngine.UI.Button>().Last().GetComponentInChildren<TMP_Text>();
             drawer=Box("Context drawer",canvas.transform);Anchor(drawer,new Vector2(1,0),Vector2.one,new Vector2(-356,116),new Vector2(-12,-72));
             var scroll=drawer.gameObject.AddComponent<UnityEngine.UI.ScrollRect>();scroll.horizontal=false;scroll.movementType=UnityEngine.UI.ScrollRect.MovementType.Clamped;
             var viewport=Box("Viewport",drawer);Stretch(viewport,8);viewport.gameObject.AddComponent<UnityEngine.UI.RectMask2D>();
@@ -29,7 +29,6 @@ namespace AssemblyZero.Unity.EP04
             build=Box("Construction",canvas.transform);Anchor(build,new Vector2(.5f,0),new Vector2(.5f,0),new Vector2(-600,12),new Vector2(600,108));var buildColumn=Column(build);selection=Label(buildColumn,"建设设备 · 右键/中键拖动 · 滚轮缩放",16,24);var buildRow=Row(Box("Categories",buildColumn,false));
             foreach(var b in game.Config.Economy.Hardware.Buildings){var kind=b.Kind;Button(buildRow,b.Name+"\n"+HardwareGame.Money(b.Cost),()=>game.BeginBuild(kind),136,48);}
             notices=Box("Notifications",canvas.transform);Anchor(notices,new Vector2(1,1),Vector2.one,new Vector2(-356,-226),new Vector2(-12,-72));var nc=Column(notices);notice=Label(nc,"",16,92);Button(nc,"处理供料 / 查看采购",()=>game.SetDrawer("采购"),0,34);
-            driving=Box("Driving",canvas.transform);Anchor(driving,new Vector2(.5f,0),new Vector2(.5f,0),new Vector2(-370,12),new Vector2(370,128));var dc=Column(driving);driveInfo=Label(dc,"",18,50);var dr=Row(Box("Actions",dc,false));Button(dr,"装卸 E",()=>game.Submit(new WorldCommand{Kind=CommandKind.Interact}),130);Button(dr,"原地回正",()=>game.Submit(new WorldCommand{Kind=CommandKind.RightVehicle}),140);Button(dr,"停靠 / Tab",game.ToggleDriving,140);
             modal=Box("Modal blocker",canvas.transform);Stretch(modal);modal.GetComponent<UnityEngine.UI.Image>().color=new Color(0,0,0,.45f);pause=Box("Pause",modal);Anchor(pause,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-220,-280),new Vector2(220,280));var pc=Column(pause);Label(pc,"已暂停 · 全部业务冻结",24,48);Button(pc,"继续",game.TogglePause);Button(pc,"保存显卡战役",()=>game.Save());Button(pc,"读取显卡战役",()=>game.Load());Button(pc,"新战役（再次点击确认）",()=>{if(confirmNew){game.NewGame();confirmNew=false;}else{confirmNew=true;game.Message="再次点击新战役确认；下次保存才更新显卡存档";}});Button(pc,"旧 EP04 经营原型",game.OpenLegacy);Button(pc,"界面缩放 100 / 115 / 130%",()=>{zoom=zoom>=1.3f?1:zoom+.15f;scaler.referenceResolution=new Vector2(1920/zoom,1080/zoom);});Button(pc,"退出",()=>{game.Save();Application.Quit();});modal.gameObject.SetActive(false);
             RebuildDrawer();Refresh();
         }
@@ -87,7 +86,7 @@ namespace AssemblyZero.Unity.EP04
                 Button(content,"切换采购物料",()=>{var ms=game.Config.Economy.Hardware.Materials.Where(m=>m.Price>0).Select(m=>m.Id).ToArray();material=ms[(Array.IndexOf(ms,material)+1)%ms.Length];});
                 var qr=Row(Box("Quantity",content,false));Button(qr,"−1",()=>quantity=Math.Max(1,quantity-1),80);Button(qr,"+1",()=>quantity=Math.Min(80,quantity+1),80);Button(qr,"数量 6 / 8 / 12",()=>quantity=quantity==6?8:quantity==8?12:6,132);
                 Button(content,"切换：常规 / 加急 / 自提",()=>delivery=(delivery+1)%3);
-                Button(content,"支付并采购",()=>game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery}));
+                Button(content,"支付并采购",()=>{var result=game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery});if(result.Success&&delivery==2&&game.Truck.Phase==VehiclePhase.Idle&&game.Truck.Cargo.Count==0)game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory});});
             }
             if(game.Drawer=="产品")
             {
@@ -98,25 +97,39 @@ namespace AssemblyZero.Unity.EP04
             }
             if(game.Drawer=="运输")
             {
-                Button(content,"接管 / 继续驾驶 Tab",game.ToggleDriving);Button(content,"救援返回车库 · 耗时60秒",()=>game.Submit(new WorldCommand{Kind=CommandKind.RecoverVehicle}));
-                Button(content,"自动采集铝原料",()=>game.Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1,TargetFactory=game.Factory}));
-                Button(content,"自动返回当前工厂",()=>game.Submit(new WorldCommand{Kind=CommandKind.Return,TargetFactory=game.Factory}));
+                Button(content,"查看矿点与车库",game.FocusLogistics);
+                Button(content,"规划循环采集铝原料",()=>game.Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1,TargetFactory=game.Factory}));
+                Button(content,"自动取回当前厂采购",()=>game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory}));
+                Button(content,"停止任务并返厂卸货",()=>game.Submit(new WorldCommand{Kind=CommandKind.Return,TargetFactory=game.Factory}));
+                Button(content,"救援返回车库 · 耗时60秒",()=>game.Submit(new WorldCommand{Kind=CommandKind.RecoverVehicle}));
                 Button(content,"购买第二工厂",()=>game.Submit(new WorldCommand{Kind=CommandKind.BuyFactory,Factory=2}));
                 Button(content,"调拨铝材到另一工厂",()=>game.Submit(new WorldCommand{Kind=CommandKind.Transfer,Factory=game.Factory,TargetFactory=game.Factory==1?2:1,Material=HardwareCatalog.Aluminum}));
             }
             Refresh();
         }
         private static string Phase(HardwareOrderPhase p)=>new[]{"可接","进行中","可交付","已交付","已过期","已取消"}[(int)p];
+        public void FollowGuide()
+        {
+            var hint=HardwareGuide.Evaluate(game.World,game.Factory);
+            var order=game.World.State.Hardware.Orders.FirstOrDefault(o=>o.Id==hint.Order);
+            if(order!=null&&game.Factory!=order.Factory){game.Factory=order.Factory;game.FocusFactory();game.View.Rebuild();}
+            if(hint.Order>0)game.SelectedOrder=hint.Order;
+            if(hint.Key=="build"){game.BeginBuild(hint.Building);return;}
+            if(hint.Node>0){game.FocusNode(hint.Node);return;}
+            if(hint.Key=="supply"){material=hint.Material;quantity=Math.Clamp(hint.Quantity,1,80);delivery=0;game.Drawer="采购";}
+            else game.Drawer=hint.Key=="order"||hint.Key=="reserve"||hint.Key=="deliver"||hint.Key=="free"?"订单":hint.Key=="pickup"||hint.Key=="mining"?"运输":hint.Key=="arrival"?"采购":"产品";
+            RebuildDrawer();
+        }
         public void Refresh()
         {
             if(top==null||game.World==null)return;var w=game.World;var h=w.State.Hardware;
             top.text="ASSEMBLY ZERO     "+HardwareGame.Money(w.State.Money)+"    近5分钟现金 "+HardwareGame.Money(w.RecentCash)+"    "+(w.State.Tick/3600)+":"+(w.State.Tick/60%60).ToString("00")+"   "+(game.Paused?"暂停":game.Speed+"×")+"   "+game.Factory+"号厂";
-            var tracked=h.Orders.FirstOrDefault(o=>o.Phase==HardwareOrderPhase.Active||o.Phase==HardwareOrderPhase.Ready);
-            goal.text=tracked==null?(h.Orders.Any(o=>o.Template==1&&o.Phase==HardwareOrderPhase.Delivered)?"首单已交付\n接下静音版订单\n切换产线并采购低噪散热器\n小额维修订单可重复接受":"当前目标\n接下首批显卡订单\n首单缺 6 个散热器\n可自制，或采购补料"):tracked.Name+"\n预留 "+w.ReservedCount(tracked.Id)+" / "+tracked.Quantity+"   剩余 "+Math.Max(0,(tracked.Deadline-w.State.Tick)/60)+" 秒\n下一步："+(w.ReservedCount(tracked.Id)==tracked.Quantity?"订单页交付":"补料 → 生产 → 预留成品");
+            var hint=HardwareGuide.Evaluate(w,game.Factory);var tracked=h.Orders.FirstOrDefault(o=>o.Id==hint.Order);
+            goal.text="<color=#F2AD45>"+hint.Title+"</color>\n\n"+hint.Detail+(tracked!=null&&tracked.Deadline>0?"\n\n交期剩余 "+Math.Max(0,(tracked.Deadline-w.State.Tick)/60)+" 秒":"");guideAction.text=hint.Action;
             notice.text=string.Join("\n",game.Notices.Reverse());notices.gameObject.SetActive(game.Drawer==""&&game.Notices.Length>0&&!game.Truck.Manual);
-            build.gameObject.SetActive(!game.Truck.Manual);driving.gameObject.SetActive(game.Truck.Manual);goals.gameObject.SetActive(true);
+            build.gameObject.SetActive(true);goals.gameObject.SetActive(true);
             selection.text=game.Placing.HasValue?"放置 "+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==game.Placing).Name+" · 输入青色 / 输出琥珀 · R旋转 · Esc取消":"建设设备 · 右键/中键拖动 · 滚轮缩放";
-            var v=game.Truck;driveInfo.text="货车  "+Math.Abs(v.Speed*4.32).ToString("F0")+" km/h    载货 "+v.Cargo.Count+" / "+game.Config.Economy.VehicleCapacity+"\nWASD 行驶 · 北向道路：铝矿 → 采购站；南向返回车库";
+            var v=game.Truck;
             if(details==null)return;
             if(game.Drawer=="设备")
             {
@@ -131,10 +144,10 @@ namespace AssemblyZero.Unity.EP04
             if(game.Drawer=="采购")
             {
                 var m=game.Config.Economy.Hardware.Materials.FirstOrDefault(m=>m.Id==material&&m.Price>0);if(m==null){material=HardwareCatalog.Heat;m=game.Config.Economy.Hardware.Materials.First(m=>m.Id==material);}var config=game.Config.Economy.Hardware;var fee=delivery==0?config.DeliveryFee:delivery==1?config.ExpressFee:config.PickupFee;
-                details.text="青港元件供应站\n"+m.Name+" ×"+quantity+"\n单价 "+HardwareGame.Money(m.Price)+" · 库存 "+h.Stock.First(s=>s.Material==material).Quantity+"\n"+new[]{"常规 90秒","加急 25秒","自提：驾驶到采购站"}[delivery]+"\n运费 "+HardwareGame.Money(fee)+"\n合计 "+HardwareGame.Money((long)m.Price*quantity+fee)+"\n固定120秒补货；仓满则等待\n在途 / 待提："+h.Deliveries.Sum(d=>d.Cargo.Count)+" 件\n采购即扣款；自提允许分次装载";
+                details.text="青港元件供应站\n"+m.Name+" ×"+quantity+"\n单价 "+HardwareGame.Money(m.Price)+" · 库存 "+h.Stock.First(s=>s.Material==material).Quantity+"\n"+new[]{"常规 90秒","加急 25秒","自提：空闲皮卡自动装运"}[delivery]+"\n运费 "+HardwareGame.Money(fee)+"\n合计 "+HardwareGame.Money((long)m.Price*quantity+fee)+"\n固定120秒补货；仓满则等待\n在途 / 待提："+h.Deliveries.Sum(d=>d.Cargo.Count)+" 件\n皮卡忙碌时，在运输页另行派遣";
             }
             if(game.Drawer=="产品")details.text="星铸 S1 · 原创游戏规格\n标准：成本较低，普通订单\n静音：低噪散热器，低噪客户\nGPU核心与显存分别采购\n\n开局赠送：6座基础设施，8套核心/显存/板材/外壳/包装，2个标准散热器；账面成本为0。\n当前回收额度 "+h.SpotRemaining+" 件 / 每5分钟\n切换等待批次完成；分别检查三台设备状态";
-            if(game.Drawer=="运输")details.text="货车 #1 · "+v.Status+"\n载货 "+v.Cargo.Count+" / "+game.Config.Economy.VehicleCapacity+"\n车库 (1,16)\n铝原料点 (1,27)\n采购站 (1,37)\n沿西侧道路向北行驶\n自提货物 "+h.Deliveries.Where(d=>d.Method==2).Sum(d=>d.Cargo.Count)+" 件\n驾驶固定1×；Tab停靠后工厂继续\n二厂需完成首单后购买";
+            if(game.Drawer=="运输")details.text="皮卡 #1 · "+v.Status+"\n载货 "+v.Cargo.Count+" / "+game.Config.Economy.VehicleCapacity+" · 送往 "+v.TargetFactory+"号厂\n任务："+(v.PickupTask?"取回采购":v.Loop?"循环采集":"单次 / 待命")+"\n\n选择矿点与目标工厂后自动执行\n采满 → 返厂 → 卸货 → 再采集\n仓满或矿空会等待，不会丢货\n停止任务会返厂卸货后待命\n待自提 "+h.Deliveries.Where(d=>d.Method==2&&d.Factory==game.Factory).Sum(d=>d.Cargo.Count)+" 件\nTab 打开运输；手动驾驶暂时冻结";
             if(game.Drawer=="报表")details.text="现金流 ≠ 利润\n近5分钟净流入 "+HardwareGame.Money(w.RecentCash)+"\n累计收入 "+HardwareGame.Money(w.State.Revenue)+"\n累计现金支出 "+HardwareGame.Money(w.State.Expenses)+"\n设备投资 "+HardwareGame.Money(w.State.Nodes.Sum(n=>n.Investment))+"\n\n"+string.Join("\n",h.Settlements.TakeLast(3).Select(s=>"订单 #"+s.Order+" 收入 "+HardwareGame.Money(s.Income)+"\n材料 "+HardwareGame.Money(s.MaterialCost)+" 加工 "+HardwareGame.Money(s.ProcessingCost)+" 运费 "+HardwareGame.Money(s.FreightCost)+"\n实际毛利 "+HardwareGame.Money(s.Margin)));
         }
         private void LateUpdate(){if(details!=null){var e=details.GetComponent<UnityEngine.UI.LayoutElement>();e.preferredHeight=Mathf.Max(220,details.preferredHeight+8);}}

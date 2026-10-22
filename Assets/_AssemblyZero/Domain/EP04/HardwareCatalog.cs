@@ -25,6 +25,7 @@ namespace AssemblyZero.Domain.EP04
         public List<HardwareOrder> Orders=new List<HardwareOrder>(); public List<SupplierStock> Stock=new List<SupplierStock>();
         public List<PurchaseDelivery> Deliveries=new List<PurchaseDelivery>(); public List<Settlement> Settlements=new List<Settlement>();
         public List<CashEntry> Cash=new List<CashEntry>();
+        public long FirstProductTick;
     }
     public static class HardwareCatalog
     {

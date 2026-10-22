@@ -19,13 +19,15 @@ namespace AssemblyZero.Unity.EP04
             Drawer="订单";Hud.RebuildDrawer();yield return Capture("Orders",folder);
             for(int i=0;i<360*60;i++)World.Tick();
             Drawer="设备";SelectedNode=3;Hud.RebuildDrawer();yield return Capture("Shortage",folder);NewGame();
-            Drawer="";Hud.RebuildDrawer();ToggleDriving();yield return Capture("Driving",folder);ToggleDriving();
+            Drawer="运输";Hud.RebuildDrawer();FocusLogistics();Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1});for(var i=0;i<300;i++)World.Tick();yield return Capture("AutomaticMining",folder);NewGame();
+            Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24});Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});Drawer="";Hud.RebuildDrawer();View.Rebuild();yield return Capture("BlockStations",folder);NewGame();
+            Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Submit(new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=6});
+            while(World.State.Hardware.FirstProductTick==0&&World.State.Tick<600*60)World.Tick();View.Rebuild();Drawer="";Hud.RebuildDrawer();yield return Capture("FirstProduct",folder);
             string error=null;string walkthrough=null;
             try
             {
                 walkthrough=HardwareWalkthrough.Run(false)+"\n"+HardwareWalkthrough.Run(true)+"\n"+HardwareWalkthrough.RunMake()+"\n"+HardwareWalkthrough.RunRecovery();
-                Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Submit(new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=6});
-                for(int i=0;i<850*60;i++)World.Tick();Submit(new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});
+                while(World.State.Tick<850*60)World.Tick();Submit(new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});
                 if(!Submit(new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1}).Success)throw new InvalidOperationException("Standalone first order failed");
                 World.CaptureState();var copy=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(JsonUtility.ToJson(World.State)));for(int i=0;i<3600;i++){World.Tick();copy.Tick();}World.CaptureState();copy.CaptureState();if(JsonUtility.ToJson(World.State)!=JsonUtility.ToJson(copy.State))throw new InvalidOperationException("Save continuation mismatch");
             }
@@ -42,7 +44,7 @@ namespace AssemblyZero.Unity.EP04
                 Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24});Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});Submit(new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Aluminum,Quantity=12});
                 yield return SampleFrames(folder,"Expanded");
             }
-            File.WriteAllText(Path.Combine(folder,"Verification.txt"),"PASS: command-driven standalone production, delivery, driving domain walkthrough and save continuation.\nScreenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.\n"+SystemInfo.processorType+" / "+SystemInfo.graphicsDeviceName+" / "+SystemInfo.graphicsDeviceType+" / Unity "+Application.unityVersion+"\nNo user saves read or written.");Application.Quit(0);
+            File.WriteAllText(Path.Combine(folder,"Verification.txt"),"PASS: command-driven standalone production, delivery, automatic collection/pickup and save continuation.\nScreenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.\n"+SystemInfo.processorType+" / "+SystemInfo.graphicsDeviceName+" / "+SystemInfo.graphicsDeviceType+" / Unity "+Application.unityVersion+"\nNo user saves read or written.");Application.Quit(0);
         }
         private IEnumerator Capture(string name,string folder){Hud.Refresh();yield return new WaitForSecondsRealtime(.3f);yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(Path.Combine(folder,name+".png"));for(int i=0;i<4;i++)yield return null;}
         private IEnumerator SampleFrames(string folder,string label)
@@ -61,10 +63,7 @@ namespace AssemblyZero.Unity.EP04
             var w=new WorldSimulation(HardwareCatalog.Create());Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=6,Delivery=pickup?2:0});
             if(pickup)
             {
-                Do(w,new WorldCommand{Kind=CommandKind.TakeControl});Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});
-                TravelTo(w,35,true);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);Do(w,new WorldCommand{Kind=CommandKind.Interact});
-                Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=-1});TravelTo(w,17.5,false);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);Do(w,new WorldCommand{Kind=CommandKind.Interact});
-                if(w.State.Vehicles[0].Cargo.Count!=0)throw new InvalidOperationException("Manual unload incomplete");Do(w,new WorldCommand{Kind=CommandKind.ReleaseControl});
+                Do(w,new WorldCommand{Kind=CommandKind.PickupPurchase});
             }
             long first=0;while(w.State.Tick<850*60){w.Tick();if(first==0&&w.FinishedStock(1).Any(g=>g.Material==HardwareCatalog.Standard))first=w.State.Tick;}
             Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=2});
@@ -78,20 +77,16 @@ namespace AssemblyZero.Unity.EP04
         {
             var w=new WorldSimulation(HardwareCatalog.Create());Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});Do(w,new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Aluminum,Quantity=12});RunTicks(w,850*60);Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=1});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=1});return "Make heatsinks: completed at 850s; cash "+w.State.Money+" cents; equipment investment 18000 cents (separate from margin).";
         }
-        private static void TravelTo(WorldSimulation w,double z,bool north)
-        {
-            var deadline=w.State.Tick+3600;while((north?w.State.Vehicles[0].DriveZ<z:w.State.Vehicles[0].DriveZ>z)&&w.State.Tick<deadline)w.Tick();
-            if(w.State.Tick>=deadline)throw new InvalidOperationException("Driving route blocked; no teleport fallback");
-        }
         public static string RunRecovery()
         {
             var w=new WorldSimulation(HardwareCatalog.Create());
             foreach(var c in new[]{new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Core,Quantity=16},new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=1},new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Board,Quantity=1,Delivery=2}})Do(w,c);
-            Do(w,new WorldCommand{Kind=CommandKind.TakeControl});Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});TravelTo(w,25.5,true);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);
             // Conveyors must deliver the gifted inputs before the first processing fee is charged.
             for(int i=0;i<120*60&&w.State.Money>0;i++)w.Tick();
             if(w.State.Money!=0)throw new InvalidOperationException("Recovery fixture must actually exhaust cash using purchases and production; remaining "+w.State.Money);
-            Do(w,new WorldCommand{Kind=CommandKind.Interact});RunTicks(w,21*60);Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=-1});TravelTo(w,17.5,false);Do(w,new WorldCommand{Kind=CommandKind.Drive});RunTicks(w,100);Do(w,new WorldCommand{Kind=CommandKind.Interact});Do(w,new WorldCommand{Kind=CommandKind.ReleaseControl});
+            Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1});var deadline=w.State.Tick+120*60;
+            while(w.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Ore)<20&&w.State.Tick<deadline)w.Tick();
+            if(w.State.Tick>=deadline)throw new InvalidOperationException("Automatic recovery collection failed");Do(w,new WorldCommand{Kind=CommandKind.Return});RunTicks(w,10*60);
             Do(w,new WorldCommand{Kind=CommandKind.SpotSell,Material=HardwareCatalog.Ore,Quantity=20});Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=3});RunTicks(w,500*60);Do(w,new WorldCommand{Kind=CommandKind.ReserveOrder,Order=3});Do(w,new WorldCommand{Kind=CommandKind.DeliverOrder,Order=3});w.AssertConserved();return "Recovery: cash exhausted via over-purchasing; mined/recycled 20 ore and delivered repair order; final cash "+w.State.Money+" cents. No cash injection.";
         }
     }
