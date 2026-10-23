@@ -12,15 +12,19 @@ namespace AssemblyZero.Unity.EP04
     {
         private IEnumerator VerifyPlayer()
         {
-            Paused=true;var folder=Path.Combine(Directory.GetCurrentDirectory(),"Reports","Hardware",Screen.width+"x"+Screen.height);Directory.CreateDirectory(folder);
+            Paused=true;var folder=Path.Combine(Directory.GetCurrentDirectory(),"Reports","Hardware","VisualIteration",Screen.width+"x"+Screen.height);Directory.CreateDirectory(folder);
             for(int i=0;i<10;i++)yield return null;
             yield return Capture("Default",folder);
+            var gallery=View.CreateProductGallery();var canvas=Hud.GetComponentInChildren<Canvas>();canvas.enabled=false;cameraFocus=gallery.position;ViewCamera.orthographicSize=10;
+            yield return Capture("ProductStages",folder);Destroy(gallery.gameObject);canvas.enabled=true;FocusFactory();
+            Drawer="运输";Hud.RebuildDrawer();FocusMine();yield return Capture("Mine",folder);FocusSupplier();yield return Capture("Supplier",folder);FocusFactory();
+            if(Environment.GetCommandLineArgs().Contains("--hardware-video"))yield return CaptureTransport(folder);
             Drawer="产品";Hud.RebuildDrawer();yield return Capture("Products",folder);
             Drawer="订单";Hud.RebuildDrawer();yield return Capture("Orders",folder);
             for(int i=0;i<360*60;i++)World.Tick();
-            Drawer="设备";SelectedNode=3;Hud.RebuildDrawer();yield return Capture("Shortage",folder);NewGame();
+            Drawer="设备";SelectedNode=3;Hud.RebuildDrawer();yield return Capture("Shortage",folder);yield return CaptureConveyorCorner(folder);NewGame();
             Drawer="运输";Hud.RebuildDrawer();FocusLogistics();Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1});for(var i=0;i<300;i++)World.Tick();yield return Capture("AutomaticMining",folder);NewGame();
-            Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24});Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});Drawer="";Hud.RebuildDrawer();View.Rebuild();yield return Capture("BlockStations",folder);NewGame();
+            Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24});Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24});Drawer="";Hud.RebuildDrawer();View.Rebuild();yield return Capture("TechnologyStations",folder);NewGame();
             Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});Submit(new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Heat,Quantity=6});
             while(World.State.Hardware.FirstProductTick==0&&World.State.Tick<600*60)World.Tick();View.Rebuild();Drawer="";Hud.RebuildDrawer();yield return Capture("FirstProduct",folder);
             string error=null;string walkthrough=null;
@@ -46,7 +50,34 @@ namespace AssemblyZero.Unity.EP04
             }
             File.WriteAllText(Path.Combine(folder,"Verification.txt"),"PASS: command-driven standalone production, delivery, automatic collection/pickup and save continuation.\nScreenshots require visual inspection. Does not certify physical mouse/keyboard playtesting.\n"+SystemInfo.processorType+" / "+SystemInfo.graphicsDeviceName+" / "+SystemInfo.graphicsDeviceType+" / Unity "+Application.unityVersion+"\nNo user saves read or written.");Application.Quit(0);
         }
-        private IEnumerator Capture(string name,string folder){Hud.Refresh();yield return new WaitForSecondsRealtime(.3f);yield return new WaitForEndOfFrame();ScreenCapture.CaptureScreenshot(Path.Combine(folder,name+".png"));for(int i=0;i<4;i++)yield return null;}
+        private IEnumerator CaptureTransport(string folder)
+        {
+            NewGame();Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1});Paused=false;
+            var frames=Path.Combine(folder,"TransportFrames");Directory.CreateDirectory(frames);var csv=new List<string>{"frame,realtime,tick,x,z,paused"};
+            ViewCamera.orthographicSize=13;Drawer="运输";Hud.RebuildDrawer();
+            for(var frame=0;frame<180;frame++)
+            {
+                Paused=frame>=70&&frame<85;cameraFocus=View.TruckVisual.position;yield return new WaitForSecondsRealtime(1f/15);yield return new WaitForEndOfFrame();
+                var p=View.TruckVisual.position;csv.Add(frame+","+Time.realtimeSinceStartup.ToString("F4",System.Globalization.CultureInfo.InvariantCulture)+","+World.State.Tick+","+p.x.ToString("F4",System.Globalization.CultureInfo.InvariantCulture)+","+p.z.ToString("F4",System.Globalization.CultureInfo.InvariantCulture)+","+Paused);
+                ScreenCapture.CaptureScreenshot(Path.Combine(frames,frame.ToString("D4")+".png"));
+            }
+            File.WriteAllLines(Path.Combine(folder,"TransportMotion.csv"),csv);Paused=true;NewGame();
+        }
+        private IEnumerator CaptureConveyorCorner(string folder)
+        {
+            if(!View.TryGetConveyorCorner(out var point))yield break;
+            cameraFocus=point;ViewCamera.orthographicSize=3.3f;var canvas=Hud.GetComponentInChildren<Canvas>();canvas.enabled=false;
+            var labels=View.GetComponentsInChildren<TMPro.TextMeshPro>();foreach(var label in labels)label.enabled=false;
+            yield return Capture("ConveyorCorner",folder);foreach(var label in labels)label.enabled=true;canvas.enabled=true;FocusFactory();
+        }
+        private IEnumerator Capture(string name,string folder)
+        {
+            Hud.Refresh();yield return new WaitForSecondsRealtime(.3f);yield return new WaitForEndOfFrame();
+            var texture=ScreenCapture.CaptureScreenshotAsTexture();var pixels=texture.GetPixels32();var rendered=false;
+            for(var i=0;i<pixels.Length;i+=Math.Max(1,pixels.Length/512))if(pixels[i].r+pixels[i].g+pixels[i].b>8){rendered=true;break;}
+            if(!rendered){File.WriteAllText(Path.Combine(folder,"Verification.txt"),"FAIL: capture was black; the player must have a rendering window.");Destroy(texture);Application.Quit(2);yield break;}
+            File.WriteAllBytes(Path.Combine(folder,name+".png"),texture.EncodeToPNG());Destroy(texture);for(int i=0;i<4;i++)yield return null;
+        }
         private IEnumerator SampleFrames(string folder,string label)
         {
             var until=Time.realtimeSinceStartup+30;while(Time.realtimeSinceStartup<until)yield return null;

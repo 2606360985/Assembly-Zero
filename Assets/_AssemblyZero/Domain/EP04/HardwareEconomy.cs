@@ -8,7 +8,8 @@ namespace AssemblyZero.Domain.EP04
     {
         private void InitializeHardware()
         {
-            State.Resources.RemoveAll(r=>r.Id!=1);State.Resources[0].Material=HardwareCatalog.Ore;State.Resources[0].X=1;State.Resources[0].Z=27;
+            State.Resources.RemoveAll(r=>r.Id!=1);State.Resources[0].Material=HardwareCatalog.Ore;State.Resources[0].X=Settings.Hardware.OreX;State.Resources[0].Z=Settings.Hardware.OreZ;
+            State.Hardware.LayoutVersion=Settings.Hardware.LayoutVersion;
             State.Factories[0].FreeWarehouse=false;State.Factories[0].FreeSales=false;
             foreach(var m in Settings.Hardware.Materials.Where(m=>m.Price>0))State.Hardware.Stock.Add(new SupplierStock{Material=m.Id,Quantity=m.Stock});
             foreach(var t in Settings.Hardware.Orders)State.Hardware.Orders.Add(NewOrder(t,t.Id));

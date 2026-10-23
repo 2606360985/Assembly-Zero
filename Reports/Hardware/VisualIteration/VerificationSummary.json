@@ -1,0 +1,492 @@
+{
+  "nativeTests": {
+    "EditMode": {
+      "passed": 72,
+      "failed": 0
+    },
+    "PlayMode": {
+      "passed": 12,
+      "failed": 0
+    }
+  },
+  "screenshots": [
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/AutomaticMining.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        70.01639660493827,
+        89.05381944444444,
+        91.34548611111111
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/ConveyorCorner.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        131.4405864197531,
+        144.77507716049382,
+        143.6224922839506
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Default.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        93.12268518518519,
+        112.69945987654322,
+        115.71682098765432
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/FirstProduct.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        92.07214506172839,
+        111.36149691358025,
+        114.70756172839506
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/LargeUI.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        74.78356481481481,
+        91.48495370370371,
+        98.33063271604938
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Mine.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        69.96489197530865,
+        89.00327932098766,
+        91.29668209876543
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Orders.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        84.35976080246914,
+        102.08256172839506,
+        107.43344907407408
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Products.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        84.46508487654322,
+        102.31442901234568,
+        107.64988425925925
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/ProductStages.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        93.05266203703704,
+        114.76793981481481,
+        112.15181327160494
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Settlement.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        82.5366512345679,
+        100.00096450617283,
+        105.2332175925926
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Shortage.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        83.8179012345679,
+        101.69540895061728,
+        107.20814043209876
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/Supplier.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        71.96662808641975,
+        92.61014660493827,
+        95.89371141975309
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1366x768/TechnologyStations.png",
+      "size": [
+        1366,
+        768
+      ],
+      "meanRGB": [
+        91.34471450617283,
+        110.10416666666667,
+        113.06423611111111
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/AutomaticMining.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        69.58082561728395,
+        88.6261574074074,
+        90.94116512345678
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/ConveyorCorner.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        131.41377314814815,
+        144.76060956790124,
+        143.5997299382716
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Default.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        92.92091049382717,
+        112.49749228395062,
+        115.52353395061728
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/FirstProduct.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        91.79861111111111,
+        111.08738425925925,
+        114.4440586419753
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/LargeUI.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        74.55324074074075,
+        91.2613811728395,
+        98.12172067901234
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Mine.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        69.5354938271605,
+        88.58043981481481,
+        90.89834104938272
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Orders.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        83.94637345679013,
+        101.67476851851852,
+        107.05266203703704
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Products.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        84.02314814814815,
+        101.87538580246914,
+        107.23302469135803
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/ProductStages.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        93.02237654320987,
+        114.74845679012346,
+        112.13233024691358
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Settlement.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        82.22492283950618,
+        99.70659722222223,
+        104.95042438271605
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Shortage.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        83.46045524691358,
+        101.3503086419753,
+        106.87770061728395
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/Supplier.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        71.55054012345678,
+        92.19135802469135,
+        95.50019290123457
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/1920x1080/TechnologyStations.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "meanRGB": [
+        91.11612654320987,
+        109.87808641975309,
+        112.84239969135803
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/AutomaticMining.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        71.3491512345679,
+        90.5480324074074,
+        92.3269675925926
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/ConveyorCorner.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        128.7091049382716,
+        143.84162808641975,
+        145.0216049382716
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Default.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        90.51890432098766,
+        108.72608024691358,
+        110.76427469135803
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/FirstProduct.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        89.17226080246914,
+        107.16396604938272,
+        109.42534722222223
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/LargeUI.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        74.8894675925926,
+        90.859375,
+        96.48726851851852
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Mine.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        71.13715277777777,
+        90.38966049382717,
+        92.22492283950618
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Orders.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        82.93923611111111,
+        99.64467592592592,
+        103.54070216049382
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Products.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        82.92554012345678,
+        99.74266975308642,
+        103.5925925925926
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/ProductStages.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        92.83217592592592,
+        113.2391975308642,
+        110.97260802469135
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Settlement.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        81.67554012345678,
+        98.23495370370371,
+        102.0403163580247
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Shortage.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        82.90895061728395,
+        99.87229938271605,
+        103.97183641975309
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/Supplier.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        73.13464506172839,
+        93.76118827160494,
+        97.1508487654321
+      ]
+    },
+    {
+      "path": "Reports/Hardware/VisualIteration/2560x1080/TechnologyStations.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "meanRGB": [
+        88.59085648148148,
+        106.18113425925925,
+        108.15046296296296
+      ]
+    }
+  ],
+  "motion": {
+    "frames": 180,
+    "duration": 23.7881,
+    "pausedFrames": 15,
+    "pausedPositionCount": 1,
+    "pausedTickCount": 1,
+    "movingPositionCount": 83
+  },
+  "protectedFilesMatchInitialBytes": true,
+  "playerConsoleErrors": []
+}

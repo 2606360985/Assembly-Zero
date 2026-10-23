@@ -24,6 +24,15 @@ namespace AssemblyZero.Domain.EP04
                 (p.Z>=43&&p.Z<=46&&p.X>=4&&p.X<=43&&!(p.X>=22&&p.X<=28));
         }
         public static List<GridPoint> WorldPath(GridPoint start,GridPoint end)=>Search(start,end,WorldBlocked,false);
+        public static bool HardwareBlocked(GridPoint p,IEnumerable<FactorySite> factories)
+        {
+            if(WorldBlocked(p))return true;
+            foreach(var f in factories)
+                if(p.X>=f.X-1&&p.X<=f.X+Width+1&&p.Z>=f.Z-1&&p.Z<=f.Z+Depth+1)return true;
+            return false;
+        }
+        public static List<GridPoint> HardwarePath(GridPoint start,GridPoint end,IEnumerable<FactorySite> factories)
+            =>Search(start,end,p=>HardwareBlocked(p,factories),false);
         public static List<GridPoint> FactoryPath(BusinessNode from,BusinessNode to,IEnumerable<BusinessNode> nodes,IEnumerable<BusinessRoute> routes)
         {
             var start=from.Port(true);var end=to.Port(false);

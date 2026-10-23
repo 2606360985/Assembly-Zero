@@ -7,41 +7,33 @@ using UnityEngine;
 namespace AssemblyZero.Unity.EP04
 {
     // Pure presentation: transforms never own goods, progress, or cash.
-    public sealed class HardwareFactoryView : MonoBehaviour
+    public sealed partial class HardwareFactoryView : MonoBehaviour
     {
         private HardwareGame game; private Transform root,environment,truck,ghost;
         private readonly Dictionary<Color,Material> colors=new Dictionary<Color,Material>();
         private readonly Dictionary<int,TMP_Text> labels=new Dictionary<int,TMP_Text>();
         private readonly Dictionary<int,Transform> lamps=new Dictionary<int,Transform>();
-        private readonly Dictionary<int,Vector3[]> paths=new Dictionary<int,Vector3[]>();
+        private readonly Dictionary<int,HardwareConveyorPath> paths=new Dictionary<int,HardwareConveyorPath>();
         private readonly Dictionary<int,Transform> cargo=new Dictionary<int,Transform>();
-        private readonly Dictionary<int,Vector3> previousCargo=new Dictionary<int,Vector3>();
+        private readonly Dictionary<int,(int Route,float Distance)> previousCargo=new Dictionary<int,(int Route,float Distance)>();
         private readonly Dictionary<int,Transform> workpieces=new Dictionary<int,Transform>();
-        private long lastTick=-1;private Vector3 priorTruck;private float labelTimer;
-        private readonly Color steel=new Color(.42f,.47f,.45f),dark=new Color(.12f,.15f,.14f),amber=new Color(.95f,.61f,.18f),green=new Color(.22f,.65f,.4f);
+        private float labelTimer;
+        private readonly Color steel=new Color(.54f,.63f,.68f),dark=new Color(.075f,.11f,.15f),amber=new Color(.95f,.61f,.18f),green=new Color(.22f,.65f,.4f);
+        private WorldSimulation builtWorld;
+        private int builtFactory, geometryKey;
+        private readonly HashSet<int> alive=new HashSet<int>();
+        private readonly List<int> removed=new List<int>();
+        private readonly Dictionary<int,Stack<Transform>> cargoPool=new Dictionary<int,Stack<Transform>>();
+        private readonly Dictionary<int,int> cargoMaterials=new Dictionary<int,int>();
+        private readonly Dictionary<int,Transform> inputPieces=new Dictionary<int,Transform>();
+        private readonly Dictionary<int,Transform> actions=new Dictionary<int,Transform>();
+        private readonly Dictionary<int,Vector3> actionOrigins=new Dictionary<int,Vector3>();
+        public Transform TruckVisual=>truck;
         public void Initialize(HardwareGame g)
         {
-            game=g;environment=new GameObject("Hardware environment").transform;environment.SetParent(transform);
-            Cube("Terrain",new Vector3(58,-.6f,44),new Vector3(150,.5f,120),new Color(.28f,.32f,.27f),environment);
-            foreach(var f in game.World.State.Factories)
-            {
-                Cube("Factory foundation",new Vector3((f.X+20)*1.2f,-.2f,(f.Z+16)*1.2f),new Vector3(49,.5f,39),new Color(.53f,.53f,.47f),environment);
-                for(int x=0;x<=40;x+=4)Cube("Floor seam",new Vector3((f.X+x)*1.2f,.06f,(f.Z+16)*1.2f),new Vector3(.025f,.015f,38),new Color(.38f,.39f,.35f),environment);
-                for(int z=0;z<=32;z+=4)Cube("Floor seam",new Vector3((f.X+20)*1.2f,.06f,(f.Z+z)*1.2f),new Vector3(48,.015f,.025f),new Color(.38f,.39f,.35f),environment);
-                for(int x=2;x<40;x+=4){Cube("Rear fence",new Vector3((f.X+x)*1.2f,1.1f,(f.Z+32)*1.2f),new Vector3(.15f,2.2f,.15f),steel,environment);}
-                Cube("Rear rail",new Vector3((f.X+20)*1.2f,1.8f,(f.Z+32)*1.2f),new Vector3(48,.12f,.12f),steel,environment);
-            }
-            Cube("Service road",new Vector3(1.2f,-.07f,32),new Vector3(4,.2f,52),new Color(.16f,.18f,.17f),environment);
-            for(var z=8;z<56;z+=4)Cube("Road marking",new Vector3(1.2f,.04f,z),new Vector3(.12f,.03f,1.8f),amber,environment);
-            var h=game.Config.Economy.Hardware;
-            Cube("Supplier warehouse",new Vector3(7,.9f,h.SupplierZ*1.2f),new Vector3(6,2,4),new Color(.18f,.62f,.72f),environment);Cube("Supplier canopy",new Vector3(7,2.1f,h.SupplierZ*1.2f),new Vector3(6.4f,.3f,4.4f),amber,environment);Label("青港采购站 · 自动装运",new Vector3(3,3,h.SupplierZ*1.2f),environment,.9f);
-            var r=game.World.State.Resources[0];for(int i=0;i<8;i++)Cube("Aluminum ore",new Vector3(4+i%3,.3f+i%2*.3f,r.Z*1.2f+i/3),new Vector3(.8f,.8f,.8f),new Color(.6f,.55f,.43f),environment);
-            Label("铝原料点 · 点击规划采集",new Vector3(4,2.5f,r.Z*1.2f),environment,.9f);Label("车库 · 自动卸货",new Vector3(2,2,19.2f),environment,.8f);
-            truck=new GameObject("Player truck").transform;truck.SetParent(transform);Cube("Chassis",Vector3.zero,new Vector3(1.4f,.5f,2.6f),amber,truck);Cube("Cabin",new Vector3(0,.5f,.8f),new Vector3(1.35f,.9f,.9f),amber,truck);Cube("Windscreen",new Vector3(0,.7f,1.27f),new Vector3(1.1f,.4f,.05f),dark,truck);Cube("Cargo bed",new Vector3(0,.3f,-.5f),new Vector3(1.25f,.2f,1.35f),steel,truck);
-            foreach(var x in new[]{-.75f,.75f})foreach(var z in new[]{-.8f,.8f})Cube("Tire",new Vector3(x,-.15f,z),new Vector3(.25f,.65f,.6f),dark,truck);
-            priorTruck=new Vector3(1.2f,.65f,19.2f);Rebuild();
+            game=g;BuildEnvironment();BuildTruck();Rebuild();
         }
-        private Material Paint(Color c){if(!colors.TryGetValue(c,out var m)){m=new Material(game.Config.BaseMaterial);m.color=c;m.enableInstancing=true;colors.Add(c,m);}return m;}
+        private Material Paint(Color c){if(!colors.TryGetValue(c,out var m)){m=new Material(game.Config.BaseMaterial);m.color=c;m.SetFloat("_Metallic",c==steel?.72f:.12f);m.SetFloat("_Smoothness",.42f);m.enableInstancing=true;colors.Add(c,m);}return m;}
         private Transform Cube(string name,Vector3 position,Vector3 scale,Color color,Transform parent)
         {
             var o=GameObject.CreatePrimitive(PrimitiveType.Cube);o.name=name;o.transform.SetParent(parent,false);o.transform.localPosition=position;o.transform.localScale=scale;o.GetComponent<Renderer>().sharedMaterial=Paint(color);Destroy(o.GetComponent<Collider>());return o.transform;
@@ -49,41 +41,46 @@ namespace AssemblyZero.Unity.EP04
         private TMP_Text Label(string text,Vector3 p,Transform parent,float size=.6f)
         {
             var o=new GameObject("Label",typeof(TextMeshPro));o.transform.SetParent(parent,false);o.transform.localPosition=p;o.transform.rotation=Quaternion.LookRotation(-new Vector3(26,42,-29));
-            var t=o.GetComponent<TextMeshPro>();t.font=game.Font;t.text=text;t.fontSize=14;t.alignment=TextAlignmentOptions.Center;t.rectTransform.sizeDelta=new Vector2(18,4);t.transform.localScale=Vector3.one*size;t.color=new Color(.08f,.11f,.1f);return t;
+            var t=o.GetComponent<TextMeshPro>();t.font=game.Font;t.text=text;t.fontSize=14;t.alignment=TextAlignmentOptions.Center;t.rectTransform.sizeDelta=new Vector2(18,4);t.transform.localScale=Vector3.one*size;t.color=new Color(.13f,.22f,.28f);return t;
         }
         private Vector3 Local(FactorySite f,GridPoint p)=>new Vector3((f.X+p.X)*1.2f,.6f+p.H*1.2f,(f.Z+p.Z)*1.2f);
         public void Rebuild()
         {
-            if(root!=null)Destroy(root.gameObject);root=new GameObject("Factory machinery").transform;root.SetParent(transform);labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();
+            var worldChanged=builtWorld!=game.World;
+            if(worldChanged){if(builtWorld!=null)BuildEnvironment();builtWorld=game.World;truck.rotation=Quaternion.identity;truck.position=SampleTruck(game.Truck,0);truckLoad.gameObject.SetActive(game.Truck.Cargo.Count>0);}
+            var key=17;unchecked{foreach(var n in game.World.State.Nodes)if(n.Factory==game.Factory){key=key*31+n.Id;key=key*31+n.X;key=key*31+n.Z;key=key*31+n.Rotation;key=key*31+n.Level;key=key*31+(n.RecipeId?.GetHashCode()??0);}
+                foreach(var r in game.World.State.Routes)if(r.Factory==game.Factory){key=key*31+r.Id;key=key*31+r.Material;key=key*31+r.Length;}}
+            if(!worldChanged&&builtFactory==game.Factory&&geometryKey==key&&root!=null)return;
+            builtFactory=game.Factory;geometryKey=key;ClearCargo();ClearRouteMeshes();
+            if(root!=null){root.gameObject.SetActive(false);Destroy(root.gameObject);}root=new GameObject("Factory machinery").transform;root.SetParent(transform);labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();inputPieces.Clear();actions.Clear();actionOrigins.Clear();
             var f=game.World.Factory(game.Factory);
             foreach(var n in game.World.State.Nodes.Where(n=>n.Factory==game.Factory))
             {
                 var pos=Local(f,n.Center);var station=new GameObject("Station "+n.Id).transform;station.SetParent(root);station.position=pos;station.rotation=Quaternion.Euler(0,-n.Rotation*90,0);
                 Cube("Hazard footprint",new Vector3(0,-.45f,0),new Vector3(3.8f,.08f,3.8f),amber,station);Cube("Base",Vector3.zero,new Vector3(3.2f,.8f,3.2f),dark,station);
-                BuildBlocks(n,station);
+                BuildBlocks(n,station);DetailStation(n,station);
                 if(n.Kind!=BuildingKind.Warehouse&&n.Kind!=BuildingKind.Sales)
                 {
-                    workpieces[n.Id]=Product(game.Config.Economy.Recipe(n.RecipeId)?.Output??HardwareCatalog.Board,station);workpieces[n.Id].localPosition=new Vector3(0,1,-.8f);
+                    var recipe=game.Config.Economy.Recipe(n.RecipeId);
+                    workpieces[n.Id]=Product(recipe?.Output??HardwareCatalog.Board,station);workpieces[n.Id].localPosition=new Vector3(0,1.18f,-.7f);
+                    inputPieces[n.Id]=Product(recipe!=null&&recipe.Inputs.Length>0?recipe.Inputs[0].Material:HardwareCatalog.Board,station);inputPieces[n.Id].localPosition=workpieces[n.Id].localPosition;
+                    workpieces[n.Id].gameObject.SetActive(n.Output.Count>0);inputPieces[n.Id].gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
                 }
-                lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.3f,1.3f),new Vector3(.2f,.35f,.2f),green,station);
+                lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.3f,1.3f),new Vector3(.2f,.35f,.2f),n.Batch.Count>0?green:amber,station);
                 Cube("Input dock",new Vector3(-2.4f,0,0),new Vector3(.5f,.4f,.65f),green,station);Cube("Output dock",new Vector3(2.4f,0,0),new Vector3(.5f,.4f,.65f),amber,station);
                 labels[n.Id]=Label(game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name,pos+Vector3.up*3.8f,root,.6f);
             }
             foreach(var r in game.World.State.Routes.Where(r=>r.Factory==game.Factory))
             {
-                var pts=r.Points.Select(p=>Local(f,p)).ToArray();paths[r.Id]=pts;
-                for(int i=1;i<pts.Length;i++)
-                {
-                    var delta=pts[i]-pts[i-1];var seg=Cube("Conveyor "+r.Id,(pts[i]+pts[i-1])/2,new Vector3(.62f,.16f,delta.magnitude+.05f),dark,root);seg.rotation=Quaternion.LookRotation(delta,Mathf.Abs(delta.y)>.1f?Vector3.forward:Vector3.up);
-                    if(i%3==0)Cube("Support",(pts[i]+pts[i-1])/2-Vector3.up*.3f,new Vector3(.1f,.6f,.1f),steel,root);
-                }
+                var raw=r.Points.Select(p=>Local(f,p)).ToArray();var path=new HardwareConveyorPath(raw);paths[r.Id]=path;
+                BuildConveyorRoute(r,path.Points,raw);
             }
         }
-        // Only colored box primitives; silhouettes describe the work performed at each station.
+        // Station silhouettes keep their original footprints and ports.
         private void BuildBlocks(BusinessNode n,Transform station)
         {
-            var ivory=new Color(.88f,.9f,.82f);var blue=new Color(.16f,.5f,.85f);var teal=new Color(.12f,.65f,.65f);
-            var coral=new Color(.87f,.3f,.2f);var violet=new Color(.57f,.38f,.85f);
+            var ivory=new Color(.79f,.85f,.88f);var blue=new Color(.12f,.4f,.56f);var teal=new Color(.12f,.52f,.57f);
+            var coral=new Color(.5f,.26f,.19f);var violet=new Color(.3f,.39f,.56f);
             var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):green;
             Cube("Brick deck",new Vector3(0,.48f,0),new Vector3(3.1f,.24f,3.1f),color,station);
             for(var i=0;i<n.Level;i++)Cube("Level brick",new Vector3(-1+i*.45f,.7f,-1.4f),new Vector3(.3f,.18f,.2f),ivory,station);
@@ -147,44 +144,99 @@ namespace AssemblyZero.Unity.EP04
             }
             for(var i=0;i<4;i++)Cube("Square stud",new Vector3((i%2-.5f)*.65f,n.Kind==BuildingKind.Tester?2.82f:n.Kind==BuildingKind.Sales?2.62f:.66f,.2f+i/2*.6f),new Vector3(.3f,.12f,.3f),color,station);
         }
-        private Transform Product(int material,Transform parent)
+        private Transform Product(int material,Transform parent)=>BuildProduct(material,parent);
+        public void BeforeTick()
         {
-            var t=new GameObject("Cargo "+HardwareCatalog.Name(material)).transform;t.SetParent(parent,false);
-            if(material>=HardwareCatalog.Standard)Cube("Retail box",Vector3.zero,new Vector3(.8f,.35f,.5f),amber,t);
-            else if(material>=HardwareCatalog.AssembledBoard)
+            // Capture authoritative pre-tick positions, including multiple ticks in one frame.
+            foreach(var r in game.World.State.Routes)
             {
-                Cube("PCB",Vector3.zero,new Vector3(.85f,.07f,.45f),green,t);
-                if(material>HardwareCatalog.AssembledBoard){Cube("Heatsink",new Vector3(0,.1f,0),new Vector3(.8f,.16f,.42f),steel,t);if(material>=HardwareCatalog.Tested)for(int i=0;i<2;i++){var p=new Vector3((i-.5f)*.4f,.21f,0);Cube("Fan brick",p,new Vector3(.3f,.05f,.3f),dark,t);Cube("Fan blade",p+Vector3.up*.03f,new Vector3(.24f,.025f,.06f),steel,t);Cube("Fan blade",p+Vector3.up*.03f,new Vector3(.06f,.025f,.24f),steel,t);}}
+                if(r.Factory!=game.Factory||!paths.TryGetValue(r.Id,out var path))continue;
+                r.Backend.CreateSnapshot(r.Snapshot);
+                foreach(var item in r.Snapshot.Items)previousCargo[item.ItemId.Value]=(r.Id,item.Distance);
             }
-            else if(material==HardwareCatalog.Heat||material==HardwareCatalog.QuietHeat){for(int i=0;i<6;i++)Cube("Fin",new Vector3(i*.1f-.25f,0,0),new Vector3(.04f,.35f,.4f),steel,t);}
-            else Cube("Material tray",Vector3.zero,new Vector3(.45f,.25f,.4f),material==HardwareCatalog.Aluminum?steel:material==HardwareCatalog.Core?dark:green,t);
-            return t;
+        }
+        private void ClearCargo()
+        {
+            foreach(var pair in cargo)ReleaseCargo(pair.Key,pair.Value);
+            cargo.Clear();cargoMaterials.Clear();previousCargo.Clear();
+        }
+        private void ReleaseCargo(int id,Transform view)
+        {
+            view.gameObject.SetActive(false);var material=cargoMaterials[id];
+            if(!cargoPool.TryGetValue(material,out var pool)){pool=new Stack<Transform>();cargoPool.Add(material,pool);}pool.Push(view);
+        }
+        public static Vector3 SampleTruck(WorldVehicle v,float interpolation)
+        {
+            var p=new Vector3(v.Position.X*1.2f,.65f,v.Position.Z*1.2f);
+            if(v.RescueTicks==0&&v.Phase==VehiclePhase.Travelling&&v.PathIndex+1<v.Path.Count)
+            {
+                var next=v.Path[v.PathIndex+1];var t=Mathf.Clamp01((v.SegmentTicks+interpolation)/(v.Boost?5f:10f));
+                return Vector3.Lerp(p,new Vector3(next.X*1.2f,.65f,next.Z*1.2f),t);
+            }
+            return p;
         }
         public void Present(float interpolation)
         {
-            var w=game.World;var changed=w.State.Tick!=lastTick;
-            if(changed){lastTick=w.State.Tick;foreach(var p in cargo)previousCargo[p.Key]=p.Value.position;priorTruck=truck.position;}
-            var v=game.Truck;var target=new Vector3(v.Position.X*1.2f,.65f,v.Position.Z*1.2f);truck.position=game.Paused?target:Vector3.Lerp(priorTruck,target,Mathf.Clamp01(interpolation));
-            if(v.PathIndex+1<v.Path.Count){var p=v.Path[v.PathIndex+1];var direction=new Vector3(p.X-v.Position.X,0,p.Z-v.Position.Z);if(direction.sqrMagnitude>0)truck.rotation=Quaternion.LookRotation(direction);}
-            var alive=new HashSet<int>();
-            foreach(var r in w.State.Routes.Where(r=>r.Factory==game.Factory))
+            var w=game.World;var v=game.Truck;truck.position=SampleTruck(v,interpolation);
+            if(!game.Paused&&v.RescueTicks==0&&v.Phase==VehiclePhase.Travelling&&v.PathIndex+1<v.Path.Count)
             {
-                if(!paths.TryGetValue(r.Id,out var path))continue;r.Backend.CreateSnapshot(r.Snapshot);
+                var next=v.Path[v.PathIndex+1];var direction=new Vector3(next.X-v.Position.X,0,next.Z-v.Position.Z);
+                if(direction.sqrMagnitude>0)truck.rotation=Quaternion.RotateTowards(truck.rotation,Quaternion.LookRotation(direction),720*Time.unscaledDeltaTime*game.Speed);
+            }
+            alive.Clear();
+            foreach(var r in w.State.Routes)
+            {
+                if(r.Factory!=game.Factory||!paths.TryGetValue(r.Id,out var path))continue;r.Backend.CreateSnapshot(r.Snapshot);
                 foreach(var item in r.Snapshot.Items)
                 {
-                    var id=item.ItemId.Value;
-                    alive.Add(id);var t=Position(path,item.Distance/(float)Mathf.Max(1,r.Length-512))+Vector3.up*.25f;
-                    if(!cargo.TryGetValue(id,out var view)){view=Product(r.Material,transform);view.position=t;cargo.Add(id,view);previousCargo[id]=t;}
-                    view.position=game.Paused?t:Vector3.Lerp(previousCargo.TryGetValue(id,out var old)?old:t,t,Mathf.Clamp01(interpolation));
+                    var id=item.ItemId.Value;alive.Add(id);
+                    if(!cargo.TryGetValue(id,out var view))
+                    {
+                        view=cargoPool.TryGetValue(r.Material,out var pool)&&pool.Count>0?pool.Pop():Product(r.Material,transform);
+                        // Keep the largest product inside the existing 512-unit cargo pitch,
+                        // including the shorter visual length of a rounded centreline.
+                        var scale=Mathf.Min(.58f,path.Length*512/Mathf.Max(1,r.Length-512)*.85f/.94f);view.localScale=Vector3.one*scale;
+                        view.gameObject.SetActive(true);cargo.Add(id,view);cargoMaterials.Add(id,r.Material);if(!previousCargo.ContainsKey(id))previousCargo[id]=(r.Id,item.Distance);
+                    }
+                    var distance=previousCargo.TryGetValue(id,out var previous)&&previous.Route==r.Id?Mathf.Lerp(previous.Distance,item.Distance,Mathf.Clamp01(interpolation)):item.Distance;
+                    view.position=path.Sample(distance/Mathf.Max(1,r.Length-512),out var heading)+Vector3.up*(CargoHeight(r.Material)*view.localScale.x+.01f);
+                    view.rotation=Quaternion.LookRotation(heading)*Quaternion.Euler(0,-90,0);
                 }
             }
-            foreach(var id in cargo.Keys.Where(id=>!alive.Contains(id)).ToArray()){Destroy(cargo[id].gameObject);cargo.Remove(id);previousCargo.Remove(id);}
+            removed.Clear();foreach(var id in cargo.Keys)if(!alive.Contains(id))removed.Add(id);
+            foreach(var id in removed){ReleaseCargo(id,cargo[id]);cargo.Remove(id);cargoMaterials.Remove(id);previousCargo.Remove(id);}
+            removed.Clear();foreach(var id in previousCargo.Keys)if(!alive.Contains(id))removed.Add(id);foreach(var id in removed)previousCargo.Remove(id);
+            var phase=(w.State.Tick+interpolation)/60f;
+            foreach(var pair in actions)
+            {
+                var n=w.Node(pair.Key);if(n==null)continue;var origin=actionOrigins[pair.Key];
+                var progress=n.WorkTotal>0?1-n.WorkRemaining/(float)n.WorkTotal:0;
+                pair.Value.localPosition=origin+(n.Batch.Count>0?(n.Kind==BuildingKind.BoardAssembly?Vector3.right*Mathf.Sin(progress*24)*.7f:Vector3.up*Mathf.Sin(progress*30)*.13f):Vector3.zero);
+                if(n.Kind==BuildingKind.Tester)pair.Value.localPosition=origin+(n.Batch.Count>0?Vector3.forward*Mathf.Sin(phase*2)*.55f:Vector3.zero);
+            }
             labelTimer+=Time.unscaledDeltaTime;if(labelTimer<.2f)return;labelTimer=0;
-            foreach(var pair in labels){var n=w.Node(pair.Key);if(n==null)continue;pair.Value.text=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name+"\n"+n.Status;pair.Value.color=game.SelectedNode==n.Id?new Color(.65f,.28f,.02f):new Color(.08f,.11f,.1f);lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Paint(n.Batch.Count>0?green:amber);if(workpieces.TryGetValue(n.Id,out var piece))piece.gameObject.SetActive(n.Batch.Count>0||n.Output.Count>0);}
+            truckLoad.gameObject.SetActive(v.Cargo.Count>0);
+            var resource=w.State.Resources[0];oreLabel.text="北岭铝矿 / 自动采集\n储量 "+resource.Stock+" / "+resource.Capacity;
+            var visibleRocks=resource.Capacity>0?Mathf.CeilToInt(oreRocks.Count*resource.Stock/(float)resource.Capacity):0;
+            for(var i=0;i<oreRocks.Count;i++)oreRocks[i].gameObject.SetActive(i<visibleRocks);
+            foreach(var pair in labels)
+            {
+                var n=w.Node(pair.Key);if(n==null)continue;var selected=game.SelectedNode==n.Id;
+                pair.Value.gameObject.SetActive(selected||game.ViewCamera.orthographicSize<29);
+                var name=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name;
+                pair.Value.text=name+(selected||game.ViewCamera.orthographicSize<20?"\n"+n.Status:"");pair.Value.color=selected?new Color(.02f,.48f,.57f):new Color(.13f,.22f,.28f);
+                lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Paint(n.Batch.Count>0?green:amber);
+                if(workpieces.TryGetValue(n.Id,out var piece))piece.gameObject.SetActive(n.Output.Count>0);
+                if(inputPieces.TryGetValue(n.Id,out var input))input.gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
+            }
         }
-        private static Vector3 Position(Vector3[] points,float ratio){var lengths=0f;for(int i=1;i<points.Length;i++)lengths+=Vector3.Distance(points[i-1],points[i]);var d=Mathf.Clamp01(ratio)*lengths;for(int i=1;i<points.Length;i++){var l=Vector3.Distance(points[i-1],points[i]);if(d<=l)return Vector3.Lerp(points[i-1],points[i],l==0?0:d/l);d-=l;}return points[points.Length-1];}
+        private static float CargoHeight(int material)
+        {
+            var style=HardwareVisualCatalog.Get(material);
+            return style.Form==HardwareProductForm.Ore?.2f:style.Form==HardwareProductForm.Shell?.1f:style.Form==HardwareProductForm.Billet||style.Form==HardwareProductForm.Carton||style.Form==HardwareProductForm.Cooler?.08f:.035f;
+        }
         public void Ghost(int x,int z,int rotation,bool valid){if(ghost==null)ghost=Cube("Placement footprint",Vector3.zero,new Vector3(3.6f,.15f,3.6f),green,transform);ghost.gameObject.SetActive(true);ghost.position=Local(game.World.Factory(game.Factory),new GridPoint(x,z));ghost.rotation=Quaternion.Euler(0,-rotation*90,0);ghost.GetComponent<Renderer>().sharedMaterial=Paint(valid?green:Color.red);}
         public void HideGhost(){if(ghost!=null)ghost.gameObject.SetActive(false);}
-        private void OnDestroy(){foreach(var m in colors.Values)Destroy(m);}
+        private void OnDestroy(){ClearRouteMeshes();foreach(var m in colors.Values)Destroy(m);foreach(var mesh in ownedMeshes)Destroy(mesh);}
     }
 }

@@ -10,7 +10,7 @@ namespace AssemblyZero.Domain.EP04
     [Serializable] public sealed class HardwareDefinition
     {
         public string Id="az-gpu"; public int Version=1, RestockSeconds=120, DeliverySeconds=90, ExpressSeconds=25, DeliveryFee=1200, ExpressFee=4800, PickupFee=300;
-        public int SupplierX=1,SupplierZ=37, SpotCapacity=20, RescueSeconds=60;
+        public int SupplierX=36,SupplierZ=64, OreX=12,OreZ=72,LayoutVersion=1, SpotCapacity=20, RescueSeconds=60;
         public MaterialDefinition[] Materials; public HardwareBuilding[] Buildings; public OrderTemplate[] Orders;
     }
     public enum HardwareOrderPhase { Available, Active, Ready, Delivered, Expired, Cancelled }
@@ -21,7 +21,7 @@ namespace AssemblyZero.Domain.EP04
     [Serializable] public sealed class Settlement { public int Order,Quantity; public long Tick,Income,MaterialCost,ProcessingCost,FreightCost; public long Margin=>Income-MaterialCost-ProcessingCost-FreightCost; }
     [Serializable] public sealed class HardwareState
     {
-        public string ContentId="az-gpu"; public int ContentVersion=1,NextOrder=4,NextPurchase=1,SpotRemaining=20;
+        public string ContentId="az-gpu"; public int ContentVersion=1,LayoutVersion,NextOrder=4,NextPurchase=1,SpotRemaining=20;
         public List<HardwareOrder> Orders=new List<HardwareOrder>(); public List<SupplierStock> Stock=new List<SupplierStock>();
         public List<PurchaseDelivery> Deliveries=new List<PurchaseDelivery>(); public List<Settlement> Settlements=new List<Settlement>();
         public List<CashEntry> Cash=new List<CashEntry>();

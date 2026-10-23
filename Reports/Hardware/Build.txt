@@ -1,4 +1,10 @@
 Result: Succeeded
 Errors: 0
-Warnings: 0
-Time: 00:00:06.2820701
+Warnings: 6
+Time: 00:00:30.2114749
+Warning: Assets\_AssemblyZero\Runtime\SimulationDriver.cs(42,59): warning CS0618: 'FindObjectsSortMode' is obsolete: 'FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter.'
+Warning: Assets\_AssemblyZero\Runtime\SimulationDriver.cs(42,26): warning CS0618: 'Object.FindObjectsByType<T>(FindObjectsSortMode)' is obsolete: 'FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03UiVisibility.cs(25,102): warning CS0618: 'FindObjectsSortMode' is obsolete: 'FindObjectsSortMode has been deprecated. Use the FindObjectsByType overloads that do not take a FindObjectsSortMode parameter.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03UiVisibility.cs(25,40): warning CS0618: 'Object.FindObjectsByType<T>(FindObjectsInactive, FindObjectsSortMode)' is obsolete: 'FindObjectsByType with FindObjectsSortMode parameter has been deprecated. Use FindObjectsByType<T>() or FindObjectsByType<T>(FindObjectsInactive) instead. InstanceID will be replaced in the future with EntityId and previous sort order cannot be maintained.'
+Warning: Assets\_AssemblyZero\Runtime\EP03\EP03SimulationDriver.cs(52,66): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'
+Warning: Assets\_AssemblyZero\Runtime\EP04\EP04Interface.cs(39,16): warning CS0618: 'Object.FindFirstObjectByType<T>()' is obsolete: 'FindFirstObjectByType has been deprecated because it relies on instance ID ordering. Use FindAnyObjectByType instead, which does not depend on ordering.'

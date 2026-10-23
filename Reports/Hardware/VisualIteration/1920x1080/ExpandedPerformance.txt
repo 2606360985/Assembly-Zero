@@ -1,0 +1,6 @@
+Visible player; VSync=0; unlimited; warmup 30s; sample 120s
+Intel(R) Xeon(R) Silver 4210 CPU @ 2.20GHz / NVIDIA Quadro RTX 5000
+Resolution 1920x1080 Quality PC
+Nodes 8 Routes 14
+Frames 55088 Mean ms 2.178 P95 ms 2.796
+Budget mean<=16.7, P95<=25: True

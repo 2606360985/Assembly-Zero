@@ -5,6 +5,40 @@ namespace AssemblyZero.Domain.EP04
 {
     public sealed partial class WorldSimulation
     {
+        private System.Collections.Generic.List<GridPoint> VehiclePath(GridPoint start,GridPoint end)
+            =>Settings.IsHardware?GridRouting.HardwarePath(start,end,State.Factories):GridRouting.WorldPath(start,end);
+
+        private void MigrateHardwareLayout()
+        {
+            if(State.Hardware.LayoutVersion>=Settings.Hardware.LayoutVersion)return;
+            var resource=State.Resources.First(r=>r.Id==1);
+            resource.X=Settings.Hardware.OreX;resource.Z=Settings.Hardware.OreZ;
+            foreach(var v in State.Vehicles)
+            {
+                // Loading an old save may place the truck inside a newly enclosed factory.
+                if(GridRouting.HardwareBlocked(v.Position,State.Factories))
+                {
+                    var closest=v.Position;var distance=int.MaxValue;
+                    for(var x=0;x<GridRouting.WorldWidth;x++)for(var z=0;z<GridRouting.WorldDepth;z++)
+                    {
+                        var p=new GridPoint(x,z);var d=GridPoint.Distance(v.Position,p);
+                        if(d<distance&&!GridRouting.HardwareBlocked(p,State.Factories)){closest=p;distance=d;}
+                    }
+                    v.Position=closest;v.DriveX=closest.X;v.DriveZ=closest.Z;
+                }
+                if(v.Manual||v.RescueTicks>0)continue;
+                if(v.Phase==VehiclePhase.Travelling)
+                {
+                    var end=v.Journey==1?resource.Point:v.Journey==4?new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ):
+                        v.Journey==2?Factory(v.TargetFactory).Dock:v.Journey==3?Factory(v.SourceFactory).Dock:
+                        v.Path.Count>0?v.Path[v.Path.Count-1]:v.Position;
+                    Travel(v,end,v.Journey);
+                }
+                else if(v.Phase==VehiclePhase.Gathering)Travel(v,resource.Point,1);
+                else if(v.Phase==VehiclePhase.WaitingStock&&v.PickupTask)Travel(v,new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ),4);
+            }
+            State.Hardware.LayoutVersion=Settings.Hardware.LayoutVersion;
+        }
         private CommandResult VehicleCommand(WorldCommand c)
         {
             var v=State.Vehicles.FirstOrDefault(x=>x.Id==c.Vehicle);
@@ -32,13 +66,13 @@ namespace AssemblyZero.Domain.EP04
             if(c.Kind==CommandKind.Explore)
             {
                 if(v.Role!=VehicleRole.Pickup)return Fail("请使用皮卡探索");
-                var destination=new GridPoint(c.X,c.Z);var path=GridRouting.WorldPath(v.Position,destination);if(path==null)return Fail("目标不可达，请选择道路或空地");
+                var destination=new GridPoint(c.X,c.Z);var path=VehiclePath(v.Position,destination);if(path==null)return Fail("目标不可达，请选择道路或空地");
                 v.Loop=false;v.TransferTask=false;v.PickupTask=false;SetJourney(v,path,0);return Ok("皮卡正在探索");
             }
             if(c.Kind==CommandKind.Return)
             {
                 if(Factory(c.TargetFactory)?.Owned!=true)return Fail("目标工厂未购买");
-                var path=GridRouting.WorldPath(v.Position,Factory(c.TargetFactory).Dock);if(path==null)return Fail("返厂路径不可达");
+                var path=VehiclePath(v.Position,Factory(c.TargetFactory).Dock);if(path==null)return Fail("返厂路径不可达");
                 v.TargetFactory=c.TargetFactory;v.Loop=false;v.PickupTask=false;v.WorkTicks=0;
                 SetJourney(v,path,2);return Ok("已停止循环；正在返厂自动卸货");
             }
@@ -47,7 +81,7 @@ namespace AssemblyZero.Domain.EP04
                 if(!Settings.IsHardware||v.Role!=VehicleRole.Pickup||Factory(c.TargetFactory)?.Owned!=true)return Fail("请选择皮卡和已购买的目标工厂");
                 if(v.Cargo.Count>0)return Fail("请先返厂卸下当前货物");
                 if(!State.Hardware.Deliveries.Any(d=>d.Method==2&&d.Factory==c.TargetFactory&&d.Cargo.Count>0))return Fail("当前工厂没有待自提采购");
-                var path=GridRouting.WorldPath(v.Position,new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ));if(path==null)return Fail("采购站不可达");
+                var path=VehiclePath(v.Position,new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ));if(path==null)return Fail("采购站不可达");
                 v.TargetFactory=c.TargetFactory;v.TransferTask=false;v.PickupTask=true;v.Loop=true;v.WorkTicks=0;SetJourney(v,path,4);
                 return Ok("自动自提已规划：前往采购站、分批装运、返厂卸货，全部取回后待命");
             }
@@ -56,7 +90,7 @@ namespace AssemblyZero.Domain.EP04
                 var resource=State.Resources.FirstOrDefault(r=>r.Id==c.Resource&&r.Discovered);
                 if(resource==null||Factory(c.TargetFactory)?.Owned!=true)return Fail("请选择已发现资源和有效目标工厂");
                 if(v.Cargo.Count>0)return Fail("请先将车上货物卸入仓库");
-                if(GridRouting.WorldPath(v.Position,resource.Point)==null)return Fail("资源点不可达");
+                if(VehiclePath(v.Position,resource.Point)==null)return Fail("资源点不可达");
                 v.Resource=c.Resource;v.TargetFactory=c.TargetFactory;v.TransferTask=false;v.PickupTask=false;v.WorkTicks=0;v.Loop=Settings.IsHardware||v.Role==VehicleRole.Collector;StartTrip(v);return Ok(v.Loop?"自动采集已规划：采满返厂、自动卸货后继续；可随时返厂停止":"采集任务已下达");
             }
             if(c.Kind==CommandKind.Transfer)
@@ -74,14 +108,14 @@ namespace AssemblyZero.Domain.EP04
         }
         private bool Travel(WorldVehicle v,GridPoint end,int journey)
         {
-            var path=GridRouting.WorldPath(v.Position,end);if(path==null){v.Phase=VehiclePhase.Idle;v.Status="道路不可达";return false;}SetJourney(v,path,journey);return true;
+            var path=VehiclePath(v.Position,end);if(path==null){v.Phase=VehiclePhase.Idle;v.Status="道路不可达";return false;}SetJourney(v,path,journey);return true;
         }
         private void StartTrip(WorldVehicle v)
         {
             if(v.PickupTask&&!State.Hardware.Deliveries.Any(d=>d.Method==2&&d.Factory==v.TargetFactory&&d.Cargo.Count>0))
             {v.Loop=false;v.PickupTask=false;v.Phase=VehiclePhase.Idle;v.Status="自提完成，等待规划";return;}
             var end=v.PickupTask?new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ):v.TransferTask?Factory(v.SourceFactory).Dock:State.Resources.First(r=>r.Id==v.Resource).Point;
-            var path=GridRouting.WorldPath(v.Position,end);if(path==null){v.Phase=VehiclePhase.Idle;v.Status="道路不可达";return;}
+            var path=VehiclePath(v.Position,end);if(path==null){v.Phase=VehiclePhase.Idle;v.Status="道路不可达";return;}
             if(v.Role!=VehicleRole.Pickup&&!Pay(Settings.TripFee)){v.Phase=VehiclePhase.WaitingFunds;v.Status="资金不足，暂停派遣";return;}
             SetJourney(v,path,v.PickupTask?4:v.TransferTask?3:1);
         }

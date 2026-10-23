@@ -22,8 +22,11 @@ MonoBehaviour:
       DeliveryFee: 1200
       ExpressFee: 4800
       PickupFee: 300
-      SupplierX: 1
-      SupplierZ: 37
+      SupplierX: 36
+      SupplierZ: 64
+      OreX: 12
+      OreZ: 72
+      LayoutVersion: 1
       SpotCapacity: 20
       RescueSeconds: 60
       Materials:

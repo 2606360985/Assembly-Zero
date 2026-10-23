@@ -27,6 +27,7 @@ namespace AssemblyZero.Domain.EP04
             if(restored==null&&Settings.IsHardware)InitializeHardware();
             if(restored!=null&&Settings.IsHardware)
             {
+                MigrateHardwareLayout();
                 // Resume older saves without requiring the frozen driving module to unload cargo.
                 foreach(var v in State.Vehicles.Where(v=>v.Manual))
                 {

@@ -26,7 +26,10 @@ namespace AssemblyZero.Unity.EP04
         private void Start()
         {
             Application.runInBackground=true;QualitySettings.vSyncCount=0;Application.targetFrameRate=-1;
-            World=new WorldSimulation(Config.Economy);Hud=gameObject.AddComponent<HardwareHud>();Hud.Initialize(this);View=gameObject.AddComponent<HardwareFactoryView>();View.Initialize(this);FocusFactory();
+            World=new WorldSimulation(Config.Economy);
+            ViewCamera.backgroundColor=new Color(.32f,.41f,.4f);RenderSettings.ambientLight=new Color(.55f,.62f,.68f);
+            foreach(var light in FindObjectsByType<Light>())if(light.type==LightType.Directional){light.intensity=1.25f;light.color=new Color(1,.97f,.91f);light.shadows=LightShadows.Soft;light.shadowStrength=.65f;}
+            Hud=gameObject.AddComponent<HardwareHud>();Hud.Initialize(this);View=gameObject.AddComponent<HardwareFactoryView>();View.Initialize(this);FocusFactory();
             verifying=Environment.GetCommandLineArgs().Contains("--hardware-verify");if(verifying)StartCoroutine(VerifyPlayer());
         }
         public CommandResult Submit(WorldCommand command)
@@ -39,7 +42,7 @@ namespace AssemblyZero.Unity.EP04
         private void Update()
         {
             if(World==null)return;if(!verifying)HandleInput();
-            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<32){World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
+            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<32){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
             if(seenFirstProduct==0&&World.State.Hardware.FirstProductTick>0){seenFirstProduct=World.State.Hardware.FirstProductTick;Message="首款产品下线！星铸 S1 已完成装配、检测和包装。成品入库后可预留交付。";Notices=Notices.Concat(new[]{Message}).TakeLast(3).ToArray();}
             ViewCamera.transform.position=cameraFocus+new Vector3(26,42,-29);ViewCamera.transform.rotation=Quaternion.LookRotation(cameraFocus-ViewCamera.transform.position);
             View.Present((float)(accumulator*60));
@@ -52,14 +55,21 @@ namespace AssemblyZero.Unity.EP04
         public void SetDrawer(string drawer){Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
         public void BeginBuild(BuildingKind kind){if(Truck.Manual)return;Placing=kind;Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
         public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
+        private void ResetPlacement()
+        {
+            Placing=null;Moving=false;Rotation=0;Interaction=Paused?HardwareInteraction.Modal:HardwareInteraction.Browsing;View?.HideGhost();
+        }
         public void ToggleDriving()
         {
             SetDrawer("运输");
         }
-        public void FocusLogistics(){cameraFocus=new Vector3(8,0,34);ViewCamera.orthographicSize=22;}
+        public void FocusLogistics(){FocusMine();}
+        public void FocusMine(){var r=World.State.Resources[0];cameraFocus=new Vector3(r.X*1.2f,0,r.Z*1.2f);ViewCamera.orthographicSize=16;}
+        public void FocusSupplier(){var h=Config.Economy.Hardware;cameraFocus=new Vector3(h.SupplierX*1.2f,0,h.SupplierZ*1.2f);ViewCamera.orthographicSize=16;}
+        public void FocusTruck(){cameraFocus=new Vector3(Truck.Position.X*1.2f,0,Truck.Position.Z*1.2f);ViewCamera.orthographicSize=16;}
         public void FocusNode(int id){var n=World.Node(id);if(n==null)return;Factory=n.Factory;SelectedNode=id;var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);Drawer="设备";View.Rebuild();Hud.RebuildDrawer();}
         public void TogglePause(){Paused=!Paused;Interaction=Paused?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
-        public void ChangeFactory(){if(Factory==1&&World.Factory(2).Owned){Factory=2;}else Factory=1;SelectedNode=0;FocusFactory();View.Rebuild();}
+        public void ChangeFactory(){ResetPlacement();if(Factory==1&&World.Factory(2).Owned){Factory=2;}else Factory=1;SelectedNode=0;FocusFactory();View.Rebuild();}
         private void HandleInput()
         {
             var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;
@@ -91,10 +101,10 @@ namespace AssemblyZero.Unity.EP04
         }
         public bool Load()
         {
-            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;seenFirstProduct=World.State.Hardware.FirstProductTick;Notices=Array.Empty<string>();accumulator=0;SelectedNode=0;Factory=1;Drawer="";Speed=1;FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
+            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;seenFirstProduct=World.State.Hardware.FirstProductTick;Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";Speed=1;FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
             return false;
         }
-        public void NewGame(){World=new WorldSimulation(Config.Economy);seenFirstProduct=0;Notices=Array.Empty<string>();accumulator=0;SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标完成第一款产品";}
+        public void NewGame(){World=new WorldSimulation(Config.Economy);seenFirstProduct=0;Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标完成第一款产品";}
         public void OpenLegacy(){SceneManager.LoadScene("EP04_Business");}
     }
 }
