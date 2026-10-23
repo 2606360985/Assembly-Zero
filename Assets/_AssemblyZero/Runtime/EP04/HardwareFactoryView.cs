@@ -41,6 +41,7 @@ namespace AssemblyZero.Unity.EP04
         private TMP_Text Label(string text,Vector3 p,Transform parent,float size=.6f)
         {
             var o=new GameObject("Label",typeof(TextMeshPro));o.transform.SetParent(parent,false);o.transform.localPosition=p;o.transform.rotation=Quaternion.LookRotation(-new Vector3(26,42,-29));
+            o.AddComponent<HardwareBillboard>().View=game.ViewCamera;
             var t=o.GetComponent<TextMeshPro>();t.font=game.Font;t.text=text;t.fontSize=14;t.alignment=TextAlignmentOptions.Center;t.rectTransform.sizeDelta=new Vector2(18,4);t.transform.localScale=Vector3.one*size;t.color=new Color(.13f,.22f,.28f);return t;
         }
         private Vector3 Local(FactorySite f,GridPoint p)=>new Vector3((f.X+p.X)*1.2f,.6f+p.H*1.2f,(f.Z+p.Z)*1.2f);

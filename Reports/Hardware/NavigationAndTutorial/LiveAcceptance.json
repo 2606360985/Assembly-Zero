@@ -1,0 +1,31 @@
+{
+  "success": true,
+  "command": "command eval_file",
+  "data": {
+    "command": "eval_file",
+    "parameters": {
+      "file": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp/az-live-acceptance.cs"
+    },
+    "result": {
+      "output": null,
+      "diagnostics": [],
+      "success": true,
+      "result": {
+        "saveLoad": "passed",
+        "failedPurchase": "passed",
+        "loadedGuide": "arrival",
+        "loadedDeliveries": 1,
+        "screenWidth": 1280,
+        "screenHeight": 720,
+        "frame": 83106
+      }
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

@@ -14,11 +14,14 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_AssemblyZero/Scenes/EP02_Demo.unity
     guid: ac8c7272a5a761043b9fa3cbab737c35
-  - enabled: 1
+  - enabled: 0
     path: Assets/_AssemblyZero/Scenes/EP03_Demo.unity
     guid: 3d719a1dc08fad84d9a3ba7f57754559
-  - enabled: 1
+  - enabled: 0
     path: Assets/_AssemblyZero/Scenes/EP03_Minimal.unity
     guid: 7ca08cee796af6d45bbd6632a4e694e3
+  - enabled: 1
+    path: Assets/_AssemblyZero/Scenes/Hardware_Business.unity
+    guid: 49b1bf17bd42dfe43bb8b5cc8db7e488
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

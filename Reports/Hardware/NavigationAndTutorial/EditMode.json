@@ -1,0 +1,287 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 19.73,
+      "summary": {
+        "total": 37,
+        "passed": 37,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticPickupLoadsMultipleTripsAndFinishes",
+          "Status": "Passed",
+          "Duration": 0.1665877,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticPickupRejectsRetaskingLoadedCargoAndUnloadsOnce",
+          "Status": "Passed",
+          "Duration": 0.0511399,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(False)",
+          "Status": "Passed",
+          "Duration": 0.2739619,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(True)",
+          "Status": "Passed",
+          "Duration": 0.2991252,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExhaustedSupplierAndCancelledRecoveryRemainUsable",
+          "Status": "Passed",
+          "Duration": 0.1590411,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExpiredOrderReleasesGoods",
+          "Status": "Passed",
+          "Duration": 1.5609125,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExteriorDestinationsAreReachableWithoutCrossingFactoryFootprints",
+          "Status": "Passed",
+          "Duration": 0.0128179,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_FailedFirstOrderCanRetryAndUnlockQuiet(False)",
+          "Status": "Passed",
+          "Duration": 1.0735893,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_FailedFirstOrderCanRetryAndUnlockQuiet(True)",
+          "Status": "Passed",
+          "Duration": 1.5073396,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_FormalStartProducesAndDeliversWithoutDriving",
+          "Status": "Passed",
+          "Duration": 1.1131299,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_GuideExplainsSelfMadeHeatAndMiningInputs",
+          "Status": "Passed",
+          "Duration": 0.0138133,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_GuideFollowsRealProgressAndFirstProductSurvivesDeliveryAndSave",
+          "Status": "Passed",
+          "Duration": 1.1083289,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_MakeHeatIsViableWithoutBuyingHeat",
+          "Status": "Passed",
+          "Duration": 1.3487488,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ManualDrivingIsFrozenAndRescueUnloadsAutomatically",
+          "Status": "Passed",
+          "Duration": 0.0867961,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldAndNewSavesCannotCrossLoad",
+          "Status": "Passed",
+          "Duration": 0.0086414,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldLayoutMigratesOncePreservingGoodsAndBusiness(Travelling)",
+          "Status": "Passed",
+          "Duration": 0.0245977,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldLayoutMigratesOncePreservingGoodsAndBusiness(Gathering)",
+          "Status": "Passed",
+          "Duration": 0.0244805,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldLayoutMigratesOncePreservingGoodsAndBusiness(Unloading)",
+          "Status": "Passed",
+          "Duration": 0.0115308,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldLayoutMigratesOncePreservingGoodsAndBusiness(WaitingStock)",
+          "Status": "Passed",
+          "Duration": 0.026327,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldManualSaveResumesWithAutomaticCargoRecovery",
+          "Status": "Passed",
+          "Duration": 0.0714634,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PickupRepeatsMiningWaitsAtFullWarehouseAndStopsSafely",
+          "Status": "Passed",
+          "Duration": 0.4762492,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PurchaseFailureIsAtomicAndFreightIsExact",
+          "Status": "Passed",
+          "Duration": 0.0050269,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_QuietOrderRejectsStandardGoods",
+          "Status": "Passed",
+          "Duration": 1.0739945,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ReservationPreventsCompetingOrdersSpotSaleAndTransfer",
+          "Status": "Passed",
+          "Duration": 1.116432,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ReservationSurvivesWarehouseMoveAndBlocksCrossFactoryTransfer",
+          "Status": "Passed",
+          "Duration": 1.2298977,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SaveRestoresOrdersCostsAndInTransitPurchases",
+          "Status": "Passed",
+          "Duration": 0.7975448,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SettlementMatchesAuditableCostAndNeverReprices",
+          "Status": "Passed",
+          "Duration": 1.11299,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_WarehouseCapacityLeavesArrivalInTransit",
+          "Status": "Passed",
+          "Duration": 0.1098031,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(0)",
+          "Status": "Passed",
+          "Duration": 0.0262799,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(1)",
+          "Status": "Passed",
+          "Duration": 0.0002276,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(2)",
+          "Status": "Passed",
+          "Duration": 0.0001858,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(3)",
+          "Status": "Passed",
+          "Duration": 0.0001689,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.EveryExpandedHardwareRouteUsesRoundedGeometryWithoutChangingSimulation",
+          "Status": "Passed",
+          "Duration": 0.0188184,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ExtractedSweepMatchesEveryAcceptedEp03BeltMesh(\"Full\",\"EP03_Demo\")",
+          "Status": "Passed",
+          "Duration": 4.3725166,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ExtractedSweepMatchesEveryAcceptedEp03BeltMesh(\"Minimal\",\"EP03_Minimal\")",
+          "Status": "Passed",
+          "Duration": 0.400013,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.RoundedCargoFollowsTheSameArcAsTheBeltWithContinuousHeading(1)",
+          "Status": "Passed",
+          "Duration": 0.0053262,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.RoundedCargoFollowsTheSameArcAsTheBeltWithContinuousHeading(-1)",
+          "Status": "Passed",
+          "Duration": 0.0089227,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

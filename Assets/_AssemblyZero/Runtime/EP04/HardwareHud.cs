@@ -9,7 +9,7 @@ using UnityEngine.InputSystem.UI;
 
 namespace AssemblyZero.Unity.EP04
 {
-    public sealed class HardwareHud : MonoBehaviour
+    public sealed partial class HardwareHud : MonoBehaviour
     {
         private HardwareGame game;private Canvas canvas;private RectTransform drawer,content,pause,modal,build,goals,notices;
         private TMP_Text top,goal,notice,details,selection,guideAction;private int material=HardwareCatalog.Heat,quantity=6,delivery;private float zoom=1;private bool confirmNew;
@@ -48,7 +48,7 @@ namespace AssemblyZero.Unity.EP04
             if(FindAnyObjectByType<EventSystem>()==null)new GameObject("Hardware EventSystem",typeof(EventSystem),typeof(InputSystemUIInputModule));
             var bar=Box("Status",canvas.transform);Anchor(bar,new Vector2(0,1),Vector2.one,new Vector2(0,-56),Vector2.zero);var row=Row(bar);top=Label(row,"",18,46,1000);Button(row,"工厂",()=>{game.ChangeFactory();},82);Button(row,"1× / 2×",()=>{if(!game.Truck.Manual)game.Speed=game.Speed==1?2:1;},105);Button(row,"菜单",game.TogglePause,82);
             var nav=Box("Navigation",canvas.transform);Anchor(nav,new Vector2(0,1),new Vector2(0,1),new Vector2(8,-496),new Vector2(68,-72));var list=Column(nav);
-            foreach(var label in new[]{"工厂","订单","产品","采购","运输","报表"}){var target=label;Button(list,target,()=>{if(target=="工厂"){game.FocusFactory();game.Drawer="";RebuildDrawer();}else game.SetDrawer(target);},0,56);}
+            foreach(var label in new[]{"工厂","订单","产品","采购","运输","报表"}){var target=label;Button(list,target,()=>{if(target=="工厂"){game.FocusFactory();game.Drawer="";RebuildDrawer();}else game.SetDrawer(target);},0,56,"nav:"+target);}
             goals=Box("Tracked order",canvas.transform);Anchor(goals,new Vector2(0,1),new Vector2(0,1),new Vector2(84,-308),new Vector2(354,-72));var gc=Column(goals);goal=Label(gc,"",16,152);Button(gc,"下一步",FollowGuide,0,48);guideAction=gc.GetComponentsInChildren<UnityEngine.UI.Button>().Last().GetComponentInChildren<TMP_Text>();
             drawer=Box("Context drawer",canvas.transform);Anchor(drawer,new Vector2(1,0),Vector2.one,new Vector2(-356,116),new Vector2(-12,-72));
             var scroll=drawer.gameObject.AddComponent<UnityEngine.UI.ScrollRect>();scroll.horizontal=false;scroll.movementType=UnityEngine.UI.ScrollRect.MovementType.Clamped;
@@ -58,10 +58,10 @@ namespace AssemblyZero.Unity.EP04
             buildViewport.gameObject.AddComponent<UnityEngine.UI.RectMask2D>();
             var buildRow=Row(Box("Categories",buildViewport,false));buildRow.anchorMin=new Vector2(0,0);buildRow.anchorMax=new Vector2(0,1);buildRow.pivot=new Vector2(0,.5f);buildRow.sizeDelta=new Vector2(1170,0);buildRow.anchoredPosition=Vector2.zero;
             var buildScroll=buildViewport.gameObject.AddComponent<UnityEngine.UI.ScrollRect>();buildScroll.viewport=buildViewport;buildScroll.content=buildRow;buildScroll.horizontal=true;buildScroll.vertical=false;buildScroll.movementType=UnityEngine.UI.ScrollRect.MovementType.Clamped;buildScroll.scrollSensitivity=35;
-            foreach(var b in game.Config.Economy.Hardware.Buildings){var kind=b.Kind;Button(buildRow,b.Name+"\n"+HardwareGame.Money(b.Cost),()=>game.BeginBuild(kind),136,48);}
+            foreach(var b in game.Config.Economy.Hardware.Buildings){var kind=b.Kind;Button(buildRow,b.Name+"\n"+HardwareGame.Money(b.Cost),()=>game.BeginBuild(kind),136,48,"build:"+kind);}
             notices=Box("Notifications",canvas.transform);Anchor(notices,new Vector2(1,1),Vector2.one,new Vector2(-356,-226),new Vector2(-12,-72));var nc=Column(notices);notice=Label(nc,"",16,92);Button(nc,"处理供料 / 查看采购",()=>game.SetDrawer("采购"),0,34);
             modal=Box("Modal blocker",canvas.transform);Stretch(modal);modal.GetComponent<UnityEngine.UI.Image>().color=new Color(0,0,0,.45f);pause=Box("Pause",modal);Anchor(pause,new Vector2(.5f,.5f),new Vector2(.5f,.5f),new Vector2(-220,-280),new Vector2(220,280));var pc=Column(pause);Label(pc,"已暂停 · 全部业务冻结",24,48);Button(pc,"继续",game.TogglePause);Button(pc,"保存显卡战役",()=>game.Save());Button(pc,"读取显卡战役",()=>game.Load());Button(pc,"新战役（再次点击确认）",()=>{if(confirmNew){game.NewGame();confirmNew=false;}else{confirmNew=true;game.Message="再次点击新战役确认；下次保存才更新显卡存档";}});Button(pc,"旧 EP04 经营原型",game.OpenLegacy);Button(pc,"界面缩放 100 / 115 / 130%",()=>{zoom=zoom>=1.3f?1:zoom+.15f;scaler.referenceResolution=new Vector2(1920/zoom,1080/zoom);});Button(pc,"退出",()=>{game.Save();Application.Quit();});modal.gameObject.SetActive(false);
-            RebuildDrawer();Refresh();
+            InitializeNavigation();RebuildDrawer();Refresh();
         }
         private RectTransform Box(string name,Transform parent,bool background=true)
         {
@@ -78,7 +78,7 @@ namespace AssemblyZero.Unity.EP04
         {
             var r=Box("Text",parent,false);var t=r.gameObject.AddComponent<TextMeshProUGUI>();t.font=game.Font;t.fontSize=size;t.color=ink;t.text=text;t.raycastTarget=false;t.overflowMode=TextOverflowModes.Ellipsis;t.textWrappingMode=TextWrappingModes.Normal;var e=r.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();e.preferredHeight=height;e.minHeight=height;if(width>0){e.flexibleWidth=1;e.preferredWidth=width;}return t;
         }
-        private UnityEngine.UI.Button Button(Transform parent,string label,Action action,float width=0,float height=40)
+        private UnityEngine.UI.Button Button(Transform parent,string label,Action action,float width=0,float height=40,string actionId=null)
         {
             var r=Box(label,parent);r.GetComponent<UnityEngine.UI.Image>().color=Color.white;var b=r.gameObject.AddComponent<UnityEngine.UI.Button>();
             var state=b.colors;state.normalColor=new Color(.13f,.21f,.29f);state.highlightedColor=new Color(.18f,.35f,.43f);state.pressedColor=new Color(.06f,.48f,.58f);state.selectedColor=new Color(.12f,.36f,.45f);state.disabledColor=new Color(.1f,.14f,.18f,.55f);state.fadeDuration=.1f;b.colors=state;b.onClick.AddListener(()=>action());var e=r.gameObject.AddComponent<UnityEngine.UI.LayoutElement>();e.preferredHeight=height;e.minHeight=height;if(width>0)e.preferredWidth=width;else e.flexibleWidth=1;
@@ -89,6 +89,7 @@ namespace AssemblyZero.Unity.EP04
                 BuildingIcon(r,index);
                 var rt=(RectTransform)t.transform;rt.offsetMin=new Vector2(34,4);
             }
+            if(actionId!=null)guideTargets[actionId]=r;
             return b;
         }
         private void BuildingIcon(Transform parent,int index)
@@ -113,13 +114,15 @@ namespace AssemblyZero.Unity.EP04
         public void ShowPause(bool value){modal.gameObject.SetActive(value);if(value)modal.SetAsLastSibling();}
         public void RebuildDrawer()
         {
+            ClearDrawerGuide();
             orderCards.Clear();orderActions.Clear();
             foreach(Transform child in content){child.gameObject.SetActive(false);Destroy(child.gameObject);}details=null;drawer.gameObject.SetActive(game.Drawer!=""&&!game.Truck.Manual);if(!drawer.gameObject.activeSelf)return;
             Label(content,"<color=#16B8D1>//</color>  "+game.Drawer,24,42);Button(content,"关闭",()=>{game.Drawer="";RebuildDrawer();});
             details=Label(content,"",18,220);
+            guideTargets["drawer:details"]=(RectTransform)details.transform;
             if(game.Drawer=="设备")
             {
-                Button(content,"采购缺料",()=>{var n=game.World.Node(game.SelectedNode);var r=game.Config.Economy.Recipe(n?.RecipeId);if(r!=null){var missing=r.Inputs.FirstOrDefault(i=>n.Input.Count(g=>g.Material==i.Material)<i.Quantity&&game.Config.Economy.Hardware.Materials.Any(m=>m.Id==i.Material&&m.Price>0));if(missing!=null)material=missing.Material;}game.Drawer="采购";RebuildDrawer();});
+                Button(content,"采购缺料",()=>{var n=game.World.Node(game.SelectedNode);var r=game.Config.Economy.Recipe(n?.RecipeId);if(r!=null){var missing=r.Inputs.FirstOrDefault(i=>n.Input.Count(g=>g.Material==i.Material)<i.Quantity&&game.Config.Economy.Hardware.Materials.Any(m=>m.Id==i.Material&&m.Price>0));if(missing!=null)material=missing.Material;}game.Drawer="采购";RebuildDrawer();},actionId:"drawer:shortage");
                 Button(content,"切换配方",()=>{var n=game.World.Node(game.SelectedNode);if(n==null)return;var rs=game.Config.Economy.Recipes.Where(r=>r.Machine==n.Kind).ToArray();if(rs.Length>0)game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=rs[(Array.FindIndex(rs,r=>r.Id==n.RecipeId)+1)%rs.Length].Id});});
                 Button(content,"查看上游",()=>{var route=game.World.State.Routes.FirstOrDefault(r=>r.To==game.SelectedNode);if(route!=null)game.SelectedNode=route.From;});
                 Button(content,"移动 / 旋转",game.BeginMove);Button(content,"升级",()=>game.Submit(new WorldCommand{Kind=CommandKind.Upgrade,Node=game.SelectedNode}));
@@ -127,21 +130,21 @@ namespace AssemblyZero.Unity.EP04
             }
             if(game.Drawer=="订单")
             {
-                foreach(var pair in new[]{("接单",CommandKind.AcceptOrder),("预留合格库存",CommandKind.ReserveOrder),("整单交付",CommandKind.DeliverOrder),("释放预留",CommandKind.ReleaseOrder),("取消订单（库存保留）",CommandKind.CancelOrder)}){var kind=pair.Item2;orderActions[pair.Item1]=Button(content,pair.Item1,()=>{game.Submit(new WorldCommand{Kind=kind,Order=game.SelectedOrder,Factory=game.Factory});RebuildDrawer();});}
-                foreach(var o in game.World.State.Hardware.Orders.Where(o=>o.Phase!=HardwareOrderPhase.Delivered&&o.Phase!=HardwareOrderPhase.Cancelled&&o.Phase!=HardwareOrderPhase.Expired)){var id=o.Id;var card=Column(Box("Order card "+id,content));Button(card,o.Name,()=>{game.SelectedOrder=id;Refresh();},0,48);var status=Label(card,"",15,38);var track=Box("Order progress",card);track.GetComponent<UnityEngine.UI.Image>().color=new Color(.12f,.2f,.27f);track.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight=6;var fill=Box("Available product fill",track);Stretch(fill);var image=fill.GetComponent<UnityEngine.UI.Image>();image.color=accent;image.type=UnityEngine.UI.Image.Type.Filled;image.fillMethod=UnityEngine.UI.Image.FillMethod.Horizontal;image.fillOrigin=0;image.raycastTarget=false;orderCards[id]=(status,image);}
+                foreach(var pair in new[]{("接单",CommandKind.AcceptOrder),("预留合格库存",CommandKind.ReserveOrder),("整单交付",CommandKind.DeliverOrder),("释放预留",CommandKind.ReleaseOrder),("取消订单（库存保留）",CommandKind.CancelOrder)}){var kind=pair.Item2;orderActions[pair.Item1]=Button(content,pair.Item1,()=>{game.Submit(new WorldCommand{Kind=kind,Order=game.SelectedOrder,Factory=game.Factory});RebuildDrawer();},actionId:"drawer:"+pair.Item1);}
+                foreach(var o in game.World.State.Hardware.Orders.Where(o=>o.Phase!=HardwareOrderPhase.Delivered&&o.Phase!=HardwareOrderPhase.Cancelled&&o.Phase!=HardwareOrderPhase.Expired)){var id=o.Id;var card=Column(Box("Order card "+id,content));Button(card,o.Name,()=>{game.SelectedOrder=id;Refresh();},0,48,"drawer:order:"+id);var status=Label(card,"",15,38);var track=Box("Order progress",card);track.GetComponent<UnityEngine.UI.Image>().color=new Color(.12f,.2f,.27f);track.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().preferredHeight=6;var fill=Box("Available product fill",track);Stretch(fill);var image=fill.GetComponent<UnityEngine.UI.Image>();image.color=accent;image.type=UnityEngine.UI.Image.Type.Filled;image.fillMethod=UnityEngine.UI.Image.FillMethod.Horizontal;image.fillOrigin=0;image.raycastTarget=false;orderCards[id]=(status,image);}
             }
             if(game.Drawer=="采购")
             {
-                Button(content,"切换采购物料",()=>{var ms=game.Config.Economy.Hardware.Materials.Where(m=>m.Price>0).Select(m=>m.Id).ToArray();material=ms[(Array.IndexOf(ms,material)+1)%ms.Length];});
-                var qr=Row(Box("Quantity",content,false));Button(qr,"−1",()=>quantity=Math.Max(1,quantity-1),80);Button(qr,"+1",()=>quantity=Math.Min(80,quantity+1),80);Button(qr,"数量 6 / 8 / 12",()=>quantity=quantity==6?8:quantity==8?12:6,132);
+                Button(content,"切换采购物料",()=>{var ms=game.Config.Economy.Hardware.Materials.Where(m=>m.Price>0).Select(m=>m.Id).ToArray();material=ms[(Array.IndexOf(ms,material)+1)%ms.Length];},actionId:"drawer:material");
+                var qr=Row(Box("Quantity",content,false));Button(qr,"−1",()=>quantity=Math.Max(1,quantity-1),80,actionId:"drawer:minus");Button(qr,"+1",()=>quantity=Math.Min(80,quantity+1),80,actionId:"drawer:plus");Button(qr,"数量 6 / 8 / 12",()=>quantity=quantity==6?8:quantity==8?12:6,132);
                 Button(content,"切换：常规 / 加急 / 自提",()=>delivery=(delivery+1)%3);
-                Button(content,"支付并采购",()=>{var result=game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery});if(result.Success&&delivery==2&&game.Truck.Phase==VehiclePhase.Idle&&game.Truck.Cargo.Count==0)game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory});});
+                Button(content,"支付并采购",()=>{var result=game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery});if(result.Success&&delivery==2&&game.Truck.Phase==VehiclePhase.Idle&&game.Truck.Cargo.Count==0)game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory});},actionId:"drawer:purchase");
             }
             if(game.Drawer=="产品")
             {
                 ProductCard(content,HardwareCatalog.Standard);ProductCard(content,HardwareCatalog.Quiet);
                 Label(content,"PCB 裸板  →  核心 / 显存贴装\n→  散热总装  →  检测合格  →  品牌包装",15,60);
-                Button(content,"切换产线：标准 / 静音",()=>{var nodes=game.World.State.Nodes.Where(n=>n.Factory==game.Factory&&(n.Kind==BuildingKind.GPUAssembly||n.Kind==BuildingKind.Tester||n.Kind==BuildingKind.Packaging)).ToArray();var quiet=nodes.Any(n=>!n.RecipeId.StartsWith("quiet-"));foreach(var n in nodes){var id=n.Kind==BuildingKind.GPUAssembly?"gpu":n.Kind==BuildingKind.Tester?"test":"pack";game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=(quiet?"quiet-":"")+id});}});
+                Button(content,"切换产线：标准 / 静音",()=>{var nodes=game.World.State.Nodes.Where(n=>n.Factory==game.Factory&&(n.Kind==BuildingKind.GPUAssembly||n.Kind==BuildingKind.Tester||n.Kind==BuildingKind.Packaging)).ToArray();var quiet=nodes.Any(n=>!n.RecipeId.StartsWith("quiet-"));foreach(var n in nodes){var id=n.Kind==BuildingKind.GPUAssembly?"gpu":n.Kind==BuildingKind.Tester?"test":"pack";game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=(quiet?"quiet-":"")+id});}},actionId:"drawer:recipe");
                 Button(content,"回收 1 张未预留标准版",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=HardwareCatalog.Standard,Quantity=1}));
                 Button(content,"回收 1 张未预留静音版",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=HardwareCatalog.Quiet,Quantity=1}));
                 Button(content,"回收 1 份铝原料（恢复现金）",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=HardwareCatalog.Ore,Quantity=1}));
@@ -150,8 +153,8 @@ namespace AssemblyZero.Unity.EP04
             {
                 Button(content,"查看矿点与车库",game.FocusLogistics);
                 var cameras=Row(Box("Logistics cameras",content,false));Button(cameras,"矿区",game.FocusMine);Button(cameras,"采购站",game.FocusSupplier);Button(cameras,"皮卡",game.FocusTruck);Button(content,"返回工厂",game.FocusFactory);
-                Button(content,"规划循环采集铝原料",()=>game.Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1,TargetFactory=game.Factory}));
-                Button(content,"自动取回当前厂采购",()=>game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory}));
+                Button(content,"规划循环采集铝原料",()=>game.Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1,TargetFactory=game.Factory}),actionId:"drawer:mining");
+                Button(content,"自动取回当前厂采购",()=>game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory}),actionId:"drawer:pickup");
                 Button(content,"停止任务并返厂卸货",()=>game.Submit(new WorldCommand{Kind=CommandKind.Return,TargetFactory=game.Factory}));
                 Button(content,"救援返回车库 · 耗时60秒",()=>game.Submit(new WorldCommand{Kind=CommandKind.RecoverVehicle}));
                 Button(content,"购买第二工厂",()=>game.Submit(new WorldCommand{Kind=CommandKind.BuyFactory,Factory=2}));
@@ -177,10 +180,11 @@ namespace AssemblyZero.Unity.EP04
             if(top==null||game.World==null)return;var w=game.World;var h=w.State.Hardware;
             top.text="<color=#16B8D1>星铸  /  GPU FACTORY</color>   "+HardwareGame.Money(w.State.Money)+"    5分钟净流入 "+HardwareGame.Money(w.RecentCash)+"    "+(w.State.Tick/3600)+":"+(w.State.Tick/60%60).ToString("00")+"   "+(game.Paused?"暂停":game.Speed+"×")+"   "+game.Factory+"号厂";
             var hint=HardwareGuide.Evaluate(w,game.Factory);var tracked=h.Orders.FirstOrDefault(o=>o.Id==hint.Order);
+            tutorialHint=hint;
             goal.text="<color=#16B8D1>当前目标 / "+hint.Title+"</color>\n"+hint.Detail+(tracked!=null&&tracked.Deadline>0?"\n交期剩余 "+Math.Max(0,(tracked.Deadline-w.State.Tick)/60)+" 秒":"");guideAction.text=hint.Action;
             notice.text=string.Join("\n",game.Notices.Reverse());notices.gameObject.SetActive(game.Drawer==""&&game.Notices.Length>0&&!game.Truck.Manual);
             build.gameObject.SetActive(true);goals.gameObject.SetActive(true);
-            selection.text=game.Placing.HasValue?"放置 "+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==game.Placing).Name+" · 输入青色 / 输出琥珀 · R旋转 · Esc取消":"建设设备 · 右键/中键拖动 · 滚轮缩放";
+            selection.text=game.Placing.HasValue?"放置 "+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==game.Placing).Name+" · R旋转设备 · Esc取消 · Q/E旋转视角":"WASD移动 · Q/E旋转视角 · 右键/中键拖动 · 滚轮缩放 · H引导";
             var v=game.Truck;
             foreach(var card in orderCards)
             {
@@ -220,8 +224,13 @@ namespace AssemblyZero.Unity.EP04
         private void LateUpdate()
         {
             if(canvas==null)return;var width=((RectTransform)canvas.transform).rect.width;
-            if(Mathf.Abs(layoutWidth-width)>.5f){layoutWidth=width;var bw=Mathf.Min(1200,width-24);build.offsetMin=new Vector2(-bw*.5f,12);build.offsetMax=new Vector2(bw*.5f,116);}
+            if(Mathf.Abs(layoutWidth-width)>.5f)
+            {
+                layoutWidth=width;var bw=Mathf.Min(1200,width-24);
+                build.offsetMin=new Vector2(-bw*.5f,12);build.offsetMax=new Vector2(bw*.5f,116);
+            }
             if(details!=null){var e=details.GetComponent<UnityEngine.UI.LayoutElement>();var height=Mathf.Max(220,details.preferredHeight+8);if(Mathf.Abs(e.preferredHeight-height)>1)e.preferredHeight=height;}
+            UpdateTutorial();
         }
         private int SettingsOrderSeconds(int id)=>game.Config.Economy.Hardware.Orders.First(t=>t.Id==id).Seconds;
     }

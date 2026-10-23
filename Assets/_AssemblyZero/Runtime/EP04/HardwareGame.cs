@@ -21,6 +21,7 @@ namespace AssemblyZero.Unity.EP04
         private double accumulator; private float uiTime,saveTime; private Vector3 cameraFocus; private bool pan; private Vector2 lastMouse; private int savedRevision=-1;private long seenFirstProduct;
         public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json");
         private bool verifying;
+        public bool LastActionFailed {get;private set;}
         public WorldVehicle Truck=>World.State.Vehicles.First(v=>v.Role==VehicleRole.Pickup);
         public static string Money(long cents)=>"¥"+(cents/100m).ToString("N2");
         private void Start()
@@ -35,6 +36,7 @@ namespace AssemblyZero.Unity.EP04
         public CommandResult Submit(WorldCommand command)
         {
             command.Factory=command.Factory==0?Factory:command.Factory;World.Enqueue(command);World.FlushCommands();var r=World.LastResult;
+            LastActionFailed=!r.Success;
             if(command.Kind!=CommandKind.Drive){Message=r.Message;Notices=Notices.Concat(new[]{Message}).Distinct().Reverse().Take(3).Reverse().ToArray();}
             if(command.Kind==CommandKind.Build&&r.Success){SelectedNode=r.Entity;Drawer="设备";}
             Hud?.Refresh();return r;
@@ -44,7 +46,7 @@ namespace AssemblyZero.Unity.EP04
             if(World==null)return;if(!verifying)HandleInput();
             if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<32){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
             if(seenFirstProduct==0&&World.State.Hardware.FirstProductTick>0){seenFirstProduct=World.State.Hardware.FirstProductTick;Message="首款产品下线！星铸 S1 已完成装配、检测和包装。成品入库后可预留交付。";Notices=Notices.Concat(new[]{Message}).TakeLast(3).ToArray();}
-            ViewCamera.transform.position=cameraFocus+new Vector3(26,42,-29);ViewCamera.transform.rotation=Quaternion.LookRotation(cameraFocus-ViewCamera.transform.position);
+            UpdateCamera(Time.unscaledDeltaTime);
             View.Present((float)(accumulator*60));
             uiTime+=Time.unscaledDeltaTime;saveTime+=Time.unscaledDeltaTime;
             if(uiTime>.25f){uiTime=0;Hud.Refresh();}
@@ -57,7 +59,7 @@ namespace AssemblyZero.Unity.EP04
         public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
         private void ResetPlacement()
         {
-            Placing=null;Moving=false;Rotation=0;Interaction=Paused?HardwareInteraction.Modal:HardwareInteraction.Browsing;View?.HideGhost();
+            LastActionFailed=false;Placing=null;Moving=false;Rotation=0;Interaction=Paused?HardwareInteraction.Modal:HardwareInteraction.Browsing;View?.HideGhost();
         }
         public void ToggleDriving()
         {
@@ -68,24 +70,27 @@ namespace AssemblyZero.Unity.EP04
         public void FocusSupplier(){var h=Config.Economy.Hardware;cameraFocus=new Vector3(h.SupplierX*1.2f,0,h.SupplierZ*1.2f);ViewCamera.orthographicSize=16;}
         public void FocusTruck(){cameraFocus=new Vector3(Truck.Position.X*1.2f,0,Truck.Position.Z*1.2f);ViewCamera.orthographicSize=16;}
         public void FocusNode(int id){var n=World.Node(id);if(n==null)return;Factory=n.Factory;SelectedNode=id;var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);Drawer="设备";View.Rebuild();Hud.RebuildDrawer();}
-        public void TogglePause(){Paused=!Paused;Interaction=Paused?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
+        public void TogglePause(){pan=false;Paused=!Paused;Interaction=Paused?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
         public void ChangeFactory(){ResetPlacement();if(Factory==1&&World.Factory(2).Owned){Factory=2;}else Factory=1;SelectedNode=0;FocusFactory();View.Rebuild();}
         private void HandleInput()
         {
-            var k=Keyboard.current;var m=Mouse.current;if(k==null||m==null)return;
-            var focused=EventSystem.current?.currentSelectedGameObject;
-            if(focused!=null&&(focused.GetComponent<TMP_InputField>()!=null||focused.GetComponent<UnityEngine.UI.InputField>()!=null))return;
+            var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused||TextInputFocused()){pan=false;return;}
+            if(k.hKey.wasPressedThisFrame)Hud.ToggleTutorial();
             if(k.escapeKey.wasPressedThisFrame){if(Paused){TogglePause();return;}if(Placing.HasValue){Placing=null;Moving=false;}else if(Drawer!=""){Drawer="";Hud.RebuildDrawer();}else TogglePause();}
             if(Paused)return;
             if(k.spaceKey.wasPressedThisFrame){TogglePause();return;}
             if(k.tabKey.wasPressedThisFrame)ToggleDriving();
             if(k.rKey.wasPressedThisFrame)Rotation=(Rotation+1)%4;
-            var pointer=m.position.ReadValue();var over=EventSystem.current!=null&&EventSystem.current.IsPointerOverGameObject();
+            MoveView(new Vector2((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0)),Time.unscaledDeltaTime);
+            if(k.qKey.wasPressedThisFrame)RotateViewStep(-1);
+            if(k.eKey.wasPressedThisFrame)RotateViewStep(1);
+            if(m==null)return;
+            var pointer=m.position.ReadValue();var over=PointerOverUi(pointer);
             if(m.middleButton.wasPressedThisFrame||m.rightButton.wasPressedThisFrame){pan=!over;lastMouse=pointer;}
-            if(pan&&(m.middleButton.isPressed||m.rightButton.isPressed)){var delta=pointer-lastMouse;cameraFocus+=new Vector3(-delta.x,0,-delta.y)*ViewCamera.orthographicSize/500;lastMouse=pointer;return;}
+            if(pan&&(m.middleButton.isPressed||m.rightButton.isPressed)){PanView(pointer-lastMouse);lastMouse=pointer;return;}
             if(m.middleButton.wasReleasedThisFrame||m.rightButton.wasReleasedThisFrame){pan=false;return;}
             if(over){View.HideGhost();return;}
-            ViewCamera.orthographicSize=Mathf.Clamp(ViewCamera.orthographicSize-m.scroll.ReadValue().y*.015f,12,40);
+            ZoomView(m.scroll.ReadValue().y);
             var ray=ViewCamera.ScreenPointToRay(pointer);if(!new Plane(Vector3.up,Vector3.zero).Raycast(ray,out var distance))return;var hit=ray.GetPoint(distance);var f=World.Factory(Factory);
             var x=Mathf.RoundToInt(hit.x/1.2f)-f.X;var z=Mathf.RoundToInt(hit.z/1.2f)-f.Z;
             if(Placing.HasValue)

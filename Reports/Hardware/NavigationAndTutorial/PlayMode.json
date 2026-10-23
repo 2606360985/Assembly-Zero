@@ -1,0 +1,168 @@
+{
+  "success": true,
+  "command": "command test_status",
+  "data": {
+    "command": "test_status",
+    "parameters": {},
+    "result": {
+      "status": "completed",
+      "duration": 9.08,
+      "summary": {
+        "total": 20,
+        "passed": 20,
+        "failed": 0,
+        "skipped": 0,
+        "inconclusive": 0
+      },
+      "results": [
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.InputFocusPauseAndUiPreventUnwantedNavigation",
+          "Status": "Passed",
+          "Duration": 0.9647438,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.MinimapClickMovesViewWithoutBusinessSideEffects",
+          "Status": "Passed",
+          "Duration": 0.1999556,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.MovementZoomInputAndRotatedPicking",
+          "Status": "Passed",
+          "Duration": 2.5730117,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.OrbitAnimatesAccumulatesAndReturnsToOrigin",
+          "Status": "Passed",
+          "Duration": 1.0806503,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.SelfMadeSupplyAndMiningGuideDoNotRepeatDispatch",
+          "Status": "Passed",
+          "Duration": 0.3285925,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.TutorialFollowsRealOrderAndClearsAfterDelivery",
+          "Status": "Passed",
+          "Duration": 1.4013576,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.TutorialTogglePersistsAndDrawerRebinds",
+          "Status": "Passed",
+          "Duration": 0.3711239,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNavigationTests.UiScalingKeepsMapAndGuidanceInsideCanvas",
+          "Status": "Passed",
+          "Duration": 0.2441103,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_BuildPointerAndUiBlocking",
+          "Status": "Passed",
+          "Duration": 0.2646899,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_EnvironmentResetsAndProductStagesAreExplicit",
+          "Status": "Passed",
+          "Duration": 0.2423406,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_GuideSelectsFirstOrderAndMissingSupplies",
+          "Status": "Passed",
+          "Duration": 0.1986159,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_PauseModalBlocksUnderlyingOrderButtons",
+          "Status": "Passed",
+          "Duration": 0.2004659,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_QuietShortageOpensCorrectPurchasableMaterial",
+          "Status": "Passed",
+          "Duration": 0.2330236,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TransportPlanningPauseAndFrozenDrivingInput",
+          "Status": "Passed",
+          "Duration": 0.6662771,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(30,1)",
+          "Status": "Passed",
+          "Duration": 0.0038159,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(60,1)",
+          "Status": "Passed",
+          "Duration": 0.0017724,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(120,1)",
+          "Status": "Passed",
+          "Duration": 0.0019549,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(30,2)",
+          "Status": "Passed",
+          "Duration": 0.0017094,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(60,2)",
+          "Status": "Passed",
+          "Duration": 0.0017453,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwarePlayTests.Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(120,2)",
+          "Status": "Passed",
+          "Duration": 0.001801,
+          "Message": null,
+          "StackTrace": null
+        }
+      ]
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "G:\\UnityProjects2026\\Assembly Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}
