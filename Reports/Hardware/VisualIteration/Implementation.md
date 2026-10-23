@@ -54,7 +54,7 @@ Unity 6000.4.0f1 / Direct3D11 / Windows Development Player，1920×1080、PC 画
 
 - [总览](1920x1080/Default.png)、[工序和型号对照](1920x1080/ProductStages.png)、[圆弧带床与护栏近景](1920x1080/ConveyorCorner.png)。
 - [矿区](1920x1080/Mine.png)、[采购区](1920x1080/Supplier.png)、[订单 UI](1920x1080/Orders.png)、[产品 UI](1920x1080/Products.png)。
-- [运输录像](1920x1080/Transport.mp4)：180 张实际 Unity 渲染帧，保留约 23.79 秒录制时间。15 个暂停采样中位置与 Tick 各只有一个唯一值。
+- [运输录像](1920x1080/Transport.mp4)：180 张实际 Unity 渲染帧，保留约 23.68 秒录制时间。15 个暂停采样中位置与 Tick 各只有一个唯一值。
 - 录像使用逐帧 PNG 采集，编码按实际时间间隔保留可变帧率，没有补帧；录制开销会降低视频采样率。流畅度预算以未录制时的上述 Player 帧时为准。
 - `EditMode.xml`、`PlayMode.xml`、`Build.txt`、`BuildLog.txt`、`Player-*.log`、各分辨率 `Walkthrough.txt` / `Verification.txt`、`VerificationSummary.json` 与 `PlayerAssemblies.json` 保存验证依据。
 - 原始录像帧移至被 Git 忽略的 `Library/VisualIterationCaptureFrames`，编码脚本为本目录 `EncodeTransport.py`。编码工具仅用于报告，不是游戏运行依赖。
