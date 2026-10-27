@@ -16,10 +16,12 @@ namespace AssemblyZero.Unity.EP04
         public EP04Config Config; public TMP_FontAsset Font; public Camera ViewCamera;
         public WorldSimulation World {get;private set;} public HardwareHud Hud {get;private set;} public HardwareFactoryView View {get;private set;}
         public HardwareInteraction Interaction; public int SelectedNode,Factory=1,Speed=1; public bool Paused;
-        public BuildingKind? Placing; public bool Moving; public int Rotation; public string Message="欢迎来到星铸显卡工厂：接首单，留意散热器缺口。";
+        public BuildingKind? Placing; public bool Moving; public int Rotation; public string Message="欢迎来到星铸显卡工厂：接下首单，再放置总装、检测、包装打通产线。";
         public string Drawer=""; public int SelectedOrder=1; public string[] Notices=Array.Empty<string>();
         private double accumulator; private float uiTime,saveTime; private Vector3 cameraFocus; private bool pan; private Vector2 lastMouse; private int savedRevision=-1;private long seenFirstProduct;
-        public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json");
+        private int seenSettlements,seenEvent=-1;
+        public static readonly int[] Speeds={1,2,4,8};
+        public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v3.json");
         private bool verifying;
         public bool LastActionFailed {get;private set;}
         public WorldVehicle Truck=>World.State.Vehicles.First(v=>v.Role==VehicleRole.Pickup);
@@ -27,11 +29,30 @@ namespace AssemblyZero.Unity.EP04
         private void Start()
         {
             Application.runInBackground=true;QualitySettings.vSyncCount=0;Application.targetFrameRate=-1;
-            World=new WorldSimulation(Config.Economy);
+            verifying=Environment.GetCommandLineArgs().Contains("--hardware-verify");
+            // Older Economy.asset content would replay the previous rules; use the catalog until the asset is refreshed.
+            if(Config.Economy?.Hardware==null||Config.Economy.Hardware.Version<HardwareCatalog.ContentVersion)
+            {
+                Debug.LogWarning("Hardware Economy.asset is outdated; using HardwareCatalog defaults. Run Tools > Assembly Zero > Refresh Hardware Economy.");
+                Config=Instantiate(Config);Config.Economy=HardwareCatalog.Create();
+            }
+            World=new WorldSimulation(Config.Economy,null,verifying?0:NewSeed());SyncNotifications();
             ViewCamera.backgroundColor=new Color(.32f,.41f,.4f);RenderSettings.ambientLight=new Color(.55f,.62f,.68f);
             foreach(var light in FindObjectsByType<Light>())if(light.type==LightType.Directional){light.intensity=1.25f;light.color=new Color(1,.97f,.91f);light.shadows=LightShadows.Soft;light.shadowStrength=.65f;}
             Hud=gameObject.AddComponent<HardwareHud>();Hud.Initialize(this);View=gameObject.AddComponent<HardwareFactoryView>();View.Initialize(this);FocusFactory();
-            verifying=Environment.GetCommandLineArgs().Contains("--hardware-verify");if(verifying)StartCoroutine(VerifyPlayer());
+            if(verifying)StartCoroutine(VerifyPlayer());
+        }
+        private static int NewSeed()=>Environment.TickCount|1;
+        public void CycleSpeed(){var i=Array.IndexOf(Speeds,Speed);Speed=Speeds[(i+1)%Speeds.Length];Hud?.Refresh();}
+        private void Notify(string message){Message=message;Notices=Notices.Concat(new[]{message}).TakeLast(3).ToArray();}
+        private void SyncNotifications(){seenSettlements=World.State.Hardware.Settlements.Count;seenEvent=World.State.Hardware.Market.Current;seenFirstProduct=World.State.Hardware.FirstProductTick;}
+        // Surfaces automatic business outcomes that happen inside simulation ticks.
+        private void PollBusinessEvents()
+        {
+            var h=World.State.Hardware;
+            if(seenFirstProduct==0&&h.FirstProductTick>0){seenFirstProduct=h.FirstProductTick;Notify("首款产品下线！星铸 S1 已完成装配、检测和包装，入库后自动分配给订单。");}
+            while(seenSettlements<h.Settlements.Count){var s=h.Settlements[seenSettlements++];Hud.ShowSettlement(s);Notify("交付完成："+s.Name+" · 收入 "+Money(s.Income));}
+            if(seenEvent!=h.Market.Current){seenEvent=h.Market.Current;var e=World.CurrentEvent;Notify(e!=null?"市场事件「"+e.Name+"」："+e.Detail:"市场回归平稳。");Hud.FlashMarket();}
         }
         public CommandResult Submit(WorldCommand command)
         {
@@ -44,8 +65,8 @@ namespace AssemblyZero.Unity.EP04
         private void Update()
         {
             if(World==null)return;if(!verifying)HandleInput();
-            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<32){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
-            if(seenFirstProduct==0&&World.State.Hardware.FirstProductTick>0){seenFirstProduct=World.State.Hardware.FirstProductTick;Message="首款产品下线！星铸 S1 已完成装配、检测和包装。成品入库后可预留交付。";Notices=Notices.Concat(new[]{Message}).TakeLast(3).ToArray();}
+            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<64){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
+            PollBusinessEvents();
             UpdateCamera(Time.unscaledDeltaTime);
             View.Present((float)(accumulator*60));
             uiTime+=Time.unscaledDeltaTime;saveTime+=Time.unscaledDeltaTime;
@@ -55,7 +76,9 @@ namespace AssemblyZero.Unity.EP04
         }
         public void FocusFactory(){var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+20)*1.2f,0,(f.Z+16)*1.2f);ViewCamera.orthographicSize=25;}
         public void SetDrawer(string drawer){Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
-        public void BeginBuild(BuildingKind kind){if(Truck.Manual)return;Placing=kind;Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
+        public string PlacingRecipe="";
+        public void BeginBuild(BuildingKind kind)=>BeginBuild(kind,"");
+        public void BeginBuild(BuildingKind kind,string recipe){if(Truck.Manual)return;Placing=kind;PlacingRecipe=recipe??"";Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
         public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
         private void ResetPlacement()
         {
@@ -96,7 +119,7 @@ namespace AssemblyZero.Unity.EP04
             if(Placing.HasValue)
             {
                 View.Ghost(x,z,Rotation,World.PlacementError(Factory,x,z,Moving?SelectedNode:0)==null);
-                if(m.leftButton.wasPressedThisFrame){var r=Submit(new WorldCommand{Kind=Moving?CommandKind.Move:CommandKind.Build,Factory=Factory,Node=SelectedNode,Building=Placing.Value,X=x,Z=z,Rotation=Rotation});if(r.Success){Placing=null;Moving=false;Hud.RebuildDrawer();}}
+                if(m.leftButton.wasPressedThisFrame){var r=Submit(new WorldCommand{Kind=Moving?CommandKind.Move:CommandKind.Build,Factory=Factory,Node=SelectedNode,Building=Placing.Value,X=x,Z=z,Rotation=Rotation,Recipe=Moving?"":PlacingRecipe});if(r.Success){Placing=null;Moving=false;Hud.RebuildDrawer();}}
             }
             else{View.HideGhost();if(m.leftButton.wasPressedThisFrame){var resource=World.State.Resources.FirstOrDefault(r=>r.Discovered&&Math.Abs(hit.x/1.2f-r.X)<3&&Math.Abs(hit.z/1.2f-r.Z)<3);if(resource!=null){Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=resource.Id,TargetFactory=Factory});Drawer="运输";Hud.RebuildDrawer();return;}SelectedNode=World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;Drawer=SelectedNode==0?"":"设备";Interaction=SelectedNode==0?HardwareInteraction.Browsing:HardwareInteraction.Selected;Hud.RebuildDrawer();}}
         }
@@ -106,10 +129,10 @@ namespace AssemblyZero.Unity.EP04
         }
         public bool Load()
         {
-            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;seenFirstProduct=World.State.Hardware.FirstProductTick;Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";Speed=1;FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
+            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
+            if(File.Exists(Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json")))Message="旧版 v2 存档与新规则不兼容，已保留原文件；请开始新战役。";
             return false;
         }
-        public void NewGame(){World=new WorldSimulation(Config.Economy);seenFirstProduct=0;Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标完成第一款产品";}
-        public void OpenLegacy(){SceneManager.LoadScene("EP04_Business");}
+        public void NewGame(){World=new WorldSimulation(Config.Economy,null,verifying?0:NewSeed());SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标打通第一条产线";}
     }
 }

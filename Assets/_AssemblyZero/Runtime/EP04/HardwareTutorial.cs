@@ -19,7 +19,7 @@ namespace AssemblyZero.Unity.EP04
         private HardwareHint tutorialHint;
         public bool TutorialEnabled {get;private set;}
         public string CurrentGuideTarget {get;private set;}="";
-        public bool TutorialComplete=>game.World.State.Hardware.Orders.Any(o=>o.Template==1&&o.Phase==HardwareOrderPhase.Delivered);
+        public bool TutorialComplete=>game.World.State.Hardware.ScriptedDone>=1;
 
         private void InitializeNavigation()
         {
@@ -66,16 +66,16 @@ namespace AssemblyZero.Unity.EP04
         {
             instruction="点击高亮位置，继续当前步骤。";
             var order=game.World.State.Hardware.Orders.FirstOrDefault(o=>o.Id==hint.Order);
-            if(order!=null&&order.Factory!=game.Factory){instruction="点击“下一步”，前往订单所属工厂。";return "next";}
-            string page=hint.Key=="order"||hint.Key=="reserve"||hint.Key=="deliver"?"订单":hint.Key=="supply"||hint.Key=="arrival"?"采购":hint.Key=="mining"||hint.Key=="pickup"?"运输":hint.Key=="recipe"?"产品":"设备";
+            if(order!=null&&order.Phase!=HardwareOrderPhase.Available&&order.Factory!=game.Factory){instruction="点击“下一步”，前往订单所属工厂。";return "next";}
+            string page=hint.Key=="order"||hint.Key=="free"?"订单":hint.Key=="supply"||hint.Key=="arrival"?"采购":hint.Key=="mining"||hint.Key=="pickup"?"运输":hint.Key=="recipe"?"产品":"设备";
             if(hint.Key=="arrival"||hint.Key=="produce")
             {
-                instruction=hint.Key=="arrival"?"物料已采购，等待到货即可，无需重复付款。":"产线正在自动生产；可用顶部 2× 加速。";return "progress";
+                instruction=hint.Key=="arrival"?"物料已采购，等待到货即可，无需重复付款。":"产线正在自动生产，配齐后自动交付；顶部速度按钮可切到 4× / 8×。";return "progress";
             }
-            if(hint.Key=="build")
+            if(hint.Key=="build"||hint.Key=="bottleneck")
             {
                 var placingRequired=game.Placing==hint.Building&&!game.Moving;
-                instruction=placingRequired?"在工厂空地左键放置；R旋转设备，Esc取消。":"点击高亮设备，再选择工厂空地放置。";
+                instruction=placingRequired?"在地面青色推荐位（或任意空地）左键放置；R旋转设备，Esc取消。":"点击高亮设备，再选择工厂空地放置。";
                 return placingRequired?"progress":"build:"+hint.Building;
             }
             if(hint.Key=="blocked")
@@ -88,8 +88,8 @@ namespace AssemblyZero.Unity.EP04
             if(game.Drawer!=page){instruction="打开“"+page+"”，或点击“下一步”自动定位。";return "nav:"+page;}
             if(page=="订单")
             {
-                if(game.SelectedOrder!=hint.Order){instruction="先选择当前目标订单。";return "drawer:order:"+hint.Order;}
-                return hint.Key=="order"?"drawer:接单":hint.Key=="reserve"?"drawer:预留合格库存":"drawer:整单交付";
+                instruction=hint.Key=="order"?"核对交期与奖金，点击这张订单的“接单”。":"在订单板挑选口碑允许的订单。";
+                return hint.Key=="order"?"drawer:accept:"+hint.Order:"drawer:details";
             }
             if(hint.Key=="supply")
             {
@@ -120,7 +120,7 @@ namespace AssemblyZero.Unity.EP04
             if(complete&&!completedNotified)
             {
                 completedNotified=true;
-                if(TutorialEnabled){game.Message="新手引导已完成！首单已交付，可以自由经营。";game.Notices=game.Notices.Concat(new[]{game.Message}).TakeLast(3).ToArray();}
+                if(TutorialEnabled){game.Message="新手引导已完成！订单板与市场行情已开放，口碑决定能接多大的单。";game.Notices=game.Notices.Concat(new[]{game.Message}).TakeLast(3).ToArray();}
             }
             string instruction="";var key=TutorialEnabled&&!complete?TargetFor(tutorialHint??HardwareGuide.Evaluate(game.World,game.Factory),out instruction):"";
             tutorialText.text=complete?"首单已交付 · 新手引导完成":!TutorialEnabled?"引导已关闭 · 按 H 可重新开启":instruction;

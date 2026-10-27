@@ -16,11 +16,13 @@ namespace AssemblyZero.Domain.EP04
         private readonly Dictionary<int,BusinessNode> nodeIndex=new Dictionary<int,BusinessNode>();
         private readonly Dictionary<int,List<BusinessRoute>> outgoing=new Dictionary<int,List<BusinessRoute>>();
         private bool logisticsDirty;
-        public WorldSimulation(EconomySettings settings,WorldState restored=null)
+        public const int HardwareSaveVersion=3;
+        public WorldSimulation(EconomySettings settings,WorldState restored=null,int seed=0)
         {
             Settings=settings??throw new ArgumentNullException(nameof(settings));
             State=restored??NewState();
-            if(State.Version!=(Settings.IsHardware?2:1))throw new ArgumentException("存档版本与战役不匹配");
+            if(restored==null&&Settings.IsHardware&&seed!=0)State.Hardware.Rng=seed;
+            if(State.Version!=(Settings.IsHardware?HardwareSaveVersion:1))throw new ArgumentException("存档版本与战役不匹配");
             if(Settings.IsHardware&&(State.Hardware==null||State.Hardware.ContentId!=Settings.Hardware.Id||State.Hardware.ContentVersion!=Settings.Hardware.Version))throw new ArgumentException("显卡配置版本不匹配");
             foreach(var route in State.Routes)route.Initialize();
             Index();
@@ -42,7 +44,7 @@ namespace AssemblyZero.Domain.EP04
         private WorldState NewState()
         {
             var s=new WorldState{Money=Settings.StartingMoney};
-            if(Settings.IsHardware){s.Version=2;s.Hardware=new HardwareState{ContentVersion=Settings.Hardware.Version,SpotRemaining=Settings.Hardware.SpotCapacity};s.Unlocked=3;}
+            if(Settings.IsHardware){s.Version=HardwareSaveVersion;s.Hardware=new HardwareState{ContentVersion=Settings.Hardware.Version,SpotRemaining=Settings.Hardware.SpotCapacity,Reputation=Settings.Hardware.StartingReputation};s.Unlocked=3;}
             s.Factories.Add(new FactorySite{Id=1,X=4,Z=4,Owned=true,Discovered=true});
             s.Factories.Add(new FactorySite{Id=2,X=70,Z=48});
             s.Resources.Add(new ResourceSite{Id=1,Material=8,X=10,Z=39,Discovered=true});
@@ -56,7 +58,13 @@ namespace AssemblyZero.Domain.EP04
         {
             nodeIndex.Clear();outgoing.Clear();foreach(var n in State.Nodes){nodeIndex.Add(n.Id,n);outgoing.Add(n.Id,new List<BusinessRoute>());}
             foreach(var r in State.Routes)outgoing[r.From].Add(r);
+            // A machine missing any input route would only hoard the inputs it can reach.
+            unlinked.Clear();
+            if(Settings.IsHardware)foreach(var n in State.Nodes)
+                if(Settings.Recipe(n.RecipeId) is ProductRule recipe&&recipe.Inputs.Any(i=>!State.Routes.Any(r=>r.To==n.Id&&r.Material==i.Material)))unlinked.Add(n.Id);
         }
+        private readonly HashSet<int> unlinked=new HashSet<int>();
+        public bool Unlinked(BusinessNode n)=>unlinked.Contains(n.Id);
         public BusinessNode Node(int id)=>nodeIndex.TryGetValue(id,out var n)?n:null;
         public FactorySite Factory(int id)=>State.Factories.FirstOrDefault(f=>f.Id==id);
         public int Capacity(BusinessNode n)=>n.Kind==BuildingKind.Warehouse?Settings.WarehouseCapacity*n.Level:n.Kind==BuildingKind.Sales?32:8*n.Level;
@@ -72,6 +80,7 @@ namespace AssemblyZero.Domain.EP04
             if(Settings.IsHardware)TickHardware();
             foreach(var resource in State.Resources)if(State.Tick%Settings.RegenerationTicks==0&&resource.Stock<resource.Capacity)resource.Stock++;
             foreach(var n in State.Nodes.ToArray())Process(n);
+            if(State.Tick%UtilizationWindow==0)foreach(var n in State.Nodes){n.BusyPrev=n.BusyTicks;n.BusyTicks=0;}
             foreach(var r in State.Routes)Transport(r);
             foreach(var n in State.Nodes)Send(n);
             foreach(var v in State.Vehicles)TickVehicle(v);
@@ -94,38 +103,78 @@ namespace AssemblyZero.Domain.EP04
                 if(n.Factory==2&&!State.Complete){State.Complete=true;Log("目标达成：第二工厂完成首次销售！可继续自由经营。");}
                 return;
             }
-            if(n.Kind==BuildingKind.Warehouse){n.Status="仓储 "+n.Output.Count+"/"+Capacity(n);return;}
-            var recipe=Settings.Recipe(n.RecipeId);if(recipe==null){n.Status="请选择配方";return;}
+            if(n.Kind==BuildingKind.Warehouse){n.RunState=NodeState.Idle;n.Status="仓储 "+n.Output.Count+"/"+Capacity(n);return;}
+            var recipe=Settings.Recipe(n.RecipeId);if(recipe==null){n.RunState=NodeState.Idle;n.Status="请选择配方";return;}
             if(n.Batch.Count>0)
             {
                 if(n.WorkRemaining>0)n.WorkRemaining--;
-                n.Status="加工中";
+                n.Status="加工中";n.RunState=NodeState.Working;n.BusyTicks++;
                 if(n.WorkRemaining>0)return;
-                if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";return;}
-                var product=Create(n.Factory,recipe.Output);
-                if(Settings.IsHardware){product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=recipe.SpecId;product.SpecVersion=recipe.SpecVersion;}
-                State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;n.Output.Add(product);
-                if(Settings.IsHardware&&State.Hardware.FirstProductTick==0&&(product.Material==HardwareCatalog.Standard||product.Material==HardwareCatalog.Quiet))
-                {
-                    State.Hardware.FirstProductTick=State.Tick;Log("首款产品下线！星铸 S1 已完成装配、检测和包装；入库后可在订单页预留交付。");
-                }
+                if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";n.RunState=NodeState.Blocked;n.BusyTicks--;return;}
+                n.Output.Add(Finish(n,recipe));
             }
             if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe))
             {
                 var c=new WorldCommand{Kind=n.PendingRemove?CommandKind.Remove:CommandKind.Recipe,Node=n.Id,Recipe=n.PendingRecipe};
-                var result=Edit(n,c);if(!result.Success)n.Status=result.Message;return;
+                n.RunState=NodeState.Idle;var result=Edit(n,c);if(!result.Success)n.Status=result.Message;return;
             }
-            if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";return;}
+            if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";n.RunState=NodeState.Blocked;return;}
+            if(unlinked.Contains(n.Id))
+            {
+                var missing=recipe.Inputs.First(i=>!State.Routes.Any(r=>r.To==n.Id&&r.Material==i.Material));
+                n.RunState=NodeState.Disconnected;n.Status="未连通 "+EconomySettings.MaterialName(missing.Material)+"：缺供应方或通道";return;
+            }
             foreach(var input in recipe.Inputs)
-                if(n.Input.Count(i=>i.Material==input.Material&&i.ReservedOrder==0)<input.Quantity){n.Status="缺少 "+EconomySettings.MaterialName(input.Material);return;}
-            if(Settings.IsHardware&&!Pay(recipe.ProcessingFee)){n.Status="加工资金不足";return;}
+                if(n.Input.Count(i=>i.Material==input.Material&&i.ReservedOrder==0)<input.Quantity){n.RunState=NodeState.Starved;n.Status="缺少 "+EconomySettings.MaterialName(input.Material);return;}
+            if(Settings.IsHardware&&!Pay(recipe.ProcessingFee)){n.Status="加工资金不足";n.RunState=NodeState.NoFunds;return;}
             n.BatchFee=Settings.IsHardware?recipe.ProcessingFee:0;
             foreach(var input in recipe.Inputs)for(var i=0;i<input.Quantity;i++){var item=n.Input.First(g=>g.Material==input.Material&&g.ReservedOrder==0);n.Input.Remove(item);n.Batch.Add(item);}
-            n.WorkTotal=n.WorkRemaining=Math.Max(1,recipe.Seconds*60*100/Settings.UpgradePercent[n.Level-1]);n.Status="加工中";
+            n.WorkTotal=n.WorkRemaining=Math.Max(1,recipe.Seconds*60*100/Settings.UpgradePercent[n.Level-1]);n.Status="加工中";n.RunState=NodeState.Working;n.BusyTicks++;
+        }
+        private Goods Finish(BusinessNode n,ProductRule recipe)
+        {
+            var output=recipe.Output;var spec=recipe.SpecId;var flawed=false;
+            if(Settings.IsHardware)
+            {
+                // Inspection reveals flaws hidden at assembly; rework keeps the original specification.
+                if(recipe.Machine==BuildingKind.Tester&&recipe.Byproduct!=0&&n.Batch.Any(g=>g.Flawed)){output=recipe.Byproduct;spec=n.Batch[0].SpecId;}
+                if(recipe.Machine==BuildingKind.Rework){spec=n.Batch.First(g=>g.Material==HardwareCatalog.Defect).SpecId;if(spec==HardwareCatalog.QuietSpec)output=recipe.Byproduct;}
+                flawed=recipe.FlawPermille>0&&Roll(FlawPermille(n,recipe));
+            }
+            var product=Create(n.Factory,output);
+            if(Settings.IsHardware){product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=spec;product.SpecVersion=recipe.SpecVersion;product.Flawed=flawed;}
+            State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;
+            if(Settings.IsHardware&&output==HardwareCatalog.Defect)Log("检测发现次品：可返修、做成丐版，或在市场页卖给翻新商");
+            if(Settings.IsHardware&&State.Hardware.FirstProductTick==0&&(output==HardwareCatalog.Standard||output==HardwareCatalog.Quiet))
+            {
+                State.Hardware.FirstProductTick=State.Tick;Log("首款产品下线！星铸 S1 已完成装配、检测和包装；入库后自动分配给订单。");
+            }
+            return product;
+        }
+        // Rejects start only after the first contract so the opening line always succeeds.
+        public int FlawPermille(BusinessNode n,ProductRule recipe)
+        {
+            if(!Settings.IsHardware||recipe.FlawPermille<=0||State.Hardware.Settlements.Count==0)return 0;
+            var levelPercent=n.Level>=3?30:n.Level==2?60:100;
+            return recipe.FlawPermille*levelPercent/100+(CurrentEvent?.FlawPermille??0);
+        }
+        public const int UtilizationWindow=600;
+        public int Utilization(BusinessNode n)
+        {
+            var elapsed=(int)(State.Tick%UtilizationWindow);
+            return State.Tick<UtilizationWindow?n.BusyTicks*100/Math.Max(1,elapsed):Math.Min(100,n.BusyPrev*100/UtilizationWindow);
+        }
+        public float RouteLoad(BusinessRoute r)=>Math.Min(1f,r.Cargo.Count*512f/Math.Max(512,r.Length));
+        // A busy machine is a bottleneck when another machine of the same factory waits for material.
+        public BusinessNode Bottleneck(int factory)
+        {
+            var nodes=State.Nodes.Where(n=>n.Factory==factory&&Settings.Recipe(n.RecipeId)!=null).ToArray();
+            if(!nodes.Any(n=>n.RunState==NodeState.Starved))return null;
+            return nodes.Where(n=>Utilization(n)>=85).OrderByDescending(Utilization).ThenBy(n=>n.Id).FirstOrDefault();
         }
         private bool CanReceive(BusinessNode n,int material)
         {
-            if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe))return false;
+            if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe)||unlinked.Contains(n.Id))return false;
             if(n.Kind==BuildingKind.Warehouse)return n.Output.Count<Capacity(n)&&n.Output.Count(i=>i.Material==material)<Capacity(n)/4;
             if(n.Kind==BuildingKind.Sales)return n.Input.Count<Capacity(n);
             return n.Input.Count(i=>i.Material==material)<Capacity(n);

@@ -23,7 +23,8 @@ namespace AssemblyZero.Domain.EP04
         public override int GetHashCode() => (X*397 ^ Z)*31 ^ H;
         public static int Distance(GridPoint a, GridPoint b) => Math.Abs(a.X-b.X)+Math.Abs(a.Z-b.Z)+Math.Abs(a.H-b.H);
     }
-    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging }
+    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging, Rework }
+    public enum NodeState { Idle, Working, Starved, Blocked, NoFunds, Disconnected }
     public enum VehicleRole { Pickup, Collector, Hauler }
     public enum VehiclePhase { Idle, Travelling, Gathering, Unloading, WaitingFunds, WaitingStock }
     public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost,
@@ -31,7 +32,7 @@ namespace AssemblyZero.Domain.EP04
     [Serializable] public sealed class Goods
     {
         public int Id, Origin, Material;
-        public int ReservedOrder, SpecVersion; public string SpecId=""; public long MaterialCost, ProcessingCost, FreightCost; public bool Gift;
+        public int ReservedOrder, SpecVersion; public string SpecId=""; public long MaterialCost, ProcessingCost, FreightCost; public bool Gift, Flawed;
         public long Cost => MaterialCost+ProcessingCost+FreightCost;
         public Goods() { }
         public Goods(int id,int origin,int material) { Id=id;Origin=origin;Material=material; }
@@ -42,6 +43,10 @@ namespace AssemblyZero.Domain.EP04
         public BuildingKind Machine;
         public RecipeInput[] Inputs;
         public int ProcessingFee; public string SpecId=""; public int SpecVersion=1;
+        // Secondary output: inspection rejects (testers) or the quiet variant of a rework result.
+        public int Byproduct;
+        // Hidden flaw chance in permille at L1; revealed by the next inspection step.
+        public int FlawPermille;
     }
     [Serializable] public sealed class EconomySettings
     {
@@ -73,6 +78,7 @@ namespace AssemblyZero.Domain.EP04
         public bool PendingRemove;
         public long NextSend; public int WorkRemaining, WorkTotal;
         public int BatchFee;
+        public NodeState RunState; public int BusyTicks, BusyPrev;
         public List<Goods> Input=new List<Goods>(), Output=new List<Goods>(), Batch=new List<Goods>();
         public List<SupplyPolicy> Policies=new List<SupplyPolicy>();
         public GridPoint Center => new GridPoint(X,Z);

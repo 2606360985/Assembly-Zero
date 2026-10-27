@@ -42,8 +42,9 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_QuietShortageOpensCorrectPurchasableMaterial()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;game.SelectedNode=3;
-            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=3,Recipe="quiet-gpu"}).Success);
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            var built=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.GPUAssembly,X=20,Z=8});Assert.IsTrue(built.Success,built.Message);game.SelectedNode=built.Entity;
+            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=built.Entity,Recipe="quiet-gpu"}).Success);
             game.SetDrawer("设备");yield return null;
             game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="采购缺料").onClick.Invoke();yield return null;
             Assert.AreEqual("采购",game.Drawer);
@@ -94,9 +95,9 @@ namespace AssemblyZero.Tests
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=point,buttons=1});yield return null;yield return null;
                 InputSystem.QueueStateEvent(mouse,new MouseState{position=point});yield return null;
                 var hits=new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current){position=point},hits);
-                Assert.AreEqual(7,game.World.State.Nodes.Count,game.Message+" pointer="+point+" screen="+Screen.width+"x"+Screen.height+" UI="+string.Join(",",hits.Select(h=>h.gameObject.name)));
+                Assert.AreEqual(4,game.World.State.Nodes.Count,game.Message+" pointer="+point+" screen="+Screen.width+"x"+Screen.height+" UI="+string.Join(",",hits.Select(h=>h.gameObject.name)));
                 game.BeginBuild(BuildingKind.Manufacturer);InputSystem.QueueStateEvent(mouse,new MouseState{position=new Vector2(Screen.width*.5f,Screen.height-20)});yield return null;yield return null;
-                InputSystem.QueueStateEvent(mouse,new MouseState{position=new Vector2(Screen.width*.5f,Screen.height-20),buttons=1});yield return null;yield return null;Assert.AreEqual(7,game.World.State.Nodes.Count,"HUD click must not build");
+                InputSystem.QueueStateEvent(mouse,new MouseState{position=new Vector2(Screen.width*.5f,Screen.height-20),buttons=1});yield return null;yield return null;Assert.AreEqual(4,game.World.State.Nodes.Count,"HUD click must not build");
                 game.Placing=null;game.TogglePause();var tick=game.World.State.Tick;yield return null;yield return null;Assert.AreEqual(tick,game.World.State.Tick);game.World.AssertConserved();
             }
             finally{InputSystem.RemoveDevice(mouse);}
@@ -115,12 +116,26 @@ namespace AssemblyZero.Tests
             }
             finally{InputSystem.RemoveDevice(keyboard);}
         }
-        [UnityTest] public IEnumerator Hardware_GuideSelectsFirstOrderAndMissingSupplies()
+        [UnityTest] public IEnumerator Hardware_GuideAcceptsFirstOrderThenAsksForTheMissingMachines()
         {
             yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;game.Hud.FollowGuide();Assert.AreEqual("订单",game.Drawer);Assert.AreEqual(1,game.SelectedOrder);
-            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单").onClick.Invoke();yield return null;game.Hud.FollowGuide();yield return null;
-            Assert.AreEqual("采购",game.Drawer);Assert.IsTrue(game.Hud.GetComponentsInChildren<TMPro.TMP_Text>().Any(t=>t.text.Contains("标准散热器 ×6")));
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单").onClick.Invoke();yield return null;Assert.AreEqual(HardwareOrderPhase.Active,game.World.State.Hardware.Orders[0].Phase);
+            Assert.IsTrue(game.View.GetComponentsInChildren<Transform>().Any(t=>t.name=="Suggested slot GPUAssembly"),"The empty assembly slot must be marked on the floor");
+            game.Hud.FollowGuide();yield return null;Assert.AreEqual(BuildingKind.GPUAssembly,game.Placing);
             Assert.IsTrue(game.View.GetComponentsInChildren<MeshFilter>().Any(f=>f.sharedMesh!=null&&f.sharedMesh.name=="Hardware beveled casing"),"Technology equipment should have finished casings.");
+        }
+        [UnityTest] public IEnumerator Hardware_SpeedCycleOrderBoardMarketAndSettlementToast()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            var speed=game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="速度 1×");
+            foreach(var expected in new[]{2,4,8,1}){speed.onClick.Invoke();Assert.AreEqual(expected,game.Speed);}
+            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);HardwareWalkthrough.BuildChain(game.World);
+            for(var i=0;i<240*60&&game.World.State.Hardware.Settlements.Count==0;i++)game.World.Tick();Assert.AreEqual(1,game.World.State.Hardware.Settlements.Count);
+            game.World.Tick();yield return null;yield return null;
+            Assert.IsTrue(game.Hud.transform.Find("Hardware HUD/Settlement toast").gameObject.activeSelf,"Automatic delivery must announce the settlement");
+            game.SetDrawer("订单");yield return null;Assert.Greater(game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().Count(b=>b.name=="接单"),1,"The offer board opens after the first contract");
+            game.SetDrawer("市场");yield return null;Assert.IsTrue(game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().Any(b=>b.name.StartsWith("现货卖出")));
+            game.World.AssertConserved();
         }
     }
 }

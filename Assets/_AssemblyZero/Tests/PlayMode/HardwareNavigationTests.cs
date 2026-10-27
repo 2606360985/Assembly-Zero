@@ -76,7 +76,7 @@ namespace AssemblyZero.Tests
             for(var direction=0;direction<8;direction++)
             {
                 var before=game.CameraFocus;var right=Vector3.ProjectOnPlane(game.ViewCamera.transform.right,Vector3.up).normalized;game.PanView(new Vector2(50,0));Assert.Less(Vector3.Dot(game.CameraFocus-before,right),0);
-                game.FocusFactory();var f=game.World.Factory(1);var n=game.World.State.Nodes.First(x=>x.Kind==BuildingKind.GPUAssembly);
+                game.FocusFactory();var f=game.World.Factory(1);var n=game.World.State.Nodes.First(x=>x.Kind==BuildingKind.BoardAssembly);
                 var world=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);var ray=game.ViewCamera.ScreenPointToRay(game.ViewCamera.WorldToScreenPoint(world));Assert.IsTrue(new Plane(Vector3.up,Vector3.zero).Raycast(ray,out var distance));Assert.Less(Vector3.Distance(world,ray.GetPoint(distance)),.001f);
                 game.RotateViewStep(1);yield return new WaitForSecondsRealtime(.28f);
             }
@@ -112,27 +112,28 @@ namespace AssemblyZero.Tests
         [UnityTest] public IEnumerator TutorialFollowsRealOrderAndClearsAfterDelivery()
         {
             yield return Open();game.Paused=true;yield return null;Assert.AreEqual("nav:订单",game.Hud.CurrentGuideTarget);
-            game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:接单",game.Hud.CurrentGuideTarget);
-            game.SelectedOrder=3;yield return null;Assert.AreEqual("drawer:order:1",game.Hud.CurrentGuideTarget);game.Hud.FollowGuide();Action("接单").onClick.Invoke();yield return null;
-            Assert.AreEqual("nav:采购",game.Hud.CurrentGuideTarget);game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:purchase",game.Hud.CurrentGuideTarget);
-            Action("支付并采购").onClick.Invoke();yield return null;Assert.AreEqual("progress",game.Hud.CurrentGuideTarget);Assert.AreEqual("arrival",HardwareGuide.Evaluate(game.World).Key);
-            for(var i=0;i<850*60;i++)game.World.Tick();game.Hud.Refresh();yield return null;Assert.AreEqual("nav:订单",game.Hud.CurrentGuideTarget);
-            game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:预留合格库存",game.Hud.CurrentGuideTarget);Action("预留合格库存").onClick.Invoke();yield return null;Assert.AreEqual("drawer:整单交付",game.Hud.CurrentGuideTarget);
-            Action("整单交付").onClick.Invoke();yield return null;Assert.IsTrue(game.Hud.TutorialComplete);Assert.AreEqual("",game.Hud.CurrentGuideTarget);Assert.IsFalse(game.Hud.transform.Find("Hardware HUD").GetComponentsInChildren<Transform>().Any(t=>t.name=="Tutorial highlight"&&t.gameObject.activeInHierarchy));game.World.AssertConserved();
+            game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:accept:1",game.Hud.CurrentGuideTarget);
+            Action("接单").onClick.Invoke();yield return null;Assert.AreEqual("build:GPUAssembly",game.Hud.CurrentGuideTarget);
+            game.Hud.FollowGuide();yield return null;Assert.AreEqual(BuildingKind.GPUAssembly,game.Placing);Assert.AreEqual("progress",game.Hud.CurrentGuideTarget);
+            foreach(var slot in game.World.Settings.Hardware.Slots)Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=slot.Kind,X=slot.X,Z=slot.Z}).Success);
+            game.Placing=null;game.Hud.Refresh();yield return null;Assert.AreNotEqual("build",HardwareGuide.Evaluate(game.World).Key);
+            for(var i=0;i<240*60&&game.World.State.Hardware.Settlements.Count==0;i++)game.World.Tick();game.Hud.Refresh();yield return null;Assert.IsTrue(game.Hud.TutorialComplete);Assert.AreEqual("",game.Hud.CurrentGuideTarget);Assert.IsFalse(game.Hud.transform.Find("Hardware HUD").GetComponentsInChildren<Transform>().Any(t=>t.name=="Tutorial highlight"&&t.gameObject.activeInHierarchy));game.World.AssertConserved();
         }
         [UnityTest] public IEnumerator TutorialTogglePersistsAndDrawerRebinds()
         {
-            yield return Open();game.Hud.FollowGuide();yield return null;game.Hud.RebuildDrawer();yield return null;Assert.AreEqual("drawer:接单",game.Hud.CurrentGuideTarget);
+            yield return Open();game.Hud.FollowGuide();yield return null;game.Hud.RebuildDrawer();yield return null;Assert.AreEqual("drawer:accept:1",game.Hud.CurrentGuideTarget);
             game.Hud.ToggleTutorial();yield return null;Assert.AreEqual("",game.Hud.CurrentGuideTarget);Assert.AreEqual(0,PlayerPrefs.GetInt(HardwareHud.TutorialPreference));
             yield return OpenWithoutEnabling();Assert.IsFalse(game.Hud.TutorialEnabled);game.Hud.ToggleTutorial();yield return null;Assert.AreEqual("nav:订单",game.Hud.CurrentGuideTarget);
         }
         [UnityTest] public IEnumerator SelfMadeSupplyAndMiningGuideDoNotRepeatDispatch()
         {
             yield return Open();game.Paused=true;
-            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);
+            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);HardwareWalkthrough.BuildChain(game.World);
+            for(var i=0;i<240*60&&game.World.State.Hardware.Settlements.Count==0;i++)game.World.Tick();
+            var second=game.World.State.Hardware.Orders.Single(o=>o.Template==2);Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=second.Id}).Success);
             Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Manufacturer,X=20,Z=24}).Success);
             game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:purchase",game.Hud.CurrentGuideTarget);
-            Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text.Contains("铝材 ×12")));
+            Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text.Contains("铝材 ×14")));
             Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Processor,X=12,Z=24}).Success);
             game.Hud.FollowGuide();yield return null;Assert.AreEqual("drawer:mining",game.Hud.CurrentGuideTarget);
             Action("规划循环采集铝原料").onClick.Invoke();yield return null;Assert.AreEqual("progress",game.Hud.CurrentGuideTarget);Assert.IsTrue(game.Truck.Loop);

@@ -17,7 +17,7 @@ namespace AssemblyZero.Unity.EP04
     // Shared by world cargo, station previews and HUD. IDs are never inferred from ranges.
     public static class HardwareVisualCatalog
     {
-        public static readonly Color Cyan=new Color(.05f,.72f,.82f),Ivory=new Color(.83f,.9f,.94f),Graphite=new Color(.09f,.14f,.2f);
+        public static readonly Color Cyan=new Color(.05f,.72f,.82f),Ivory=new Color(.83f,.9f,.94f),Graphite=new Color(.09f,.14f,.2f),Reject=new Color(.86f,.22f,.18f),Kraft=new Color(.68f,.5f,.3f);
         private static readonly Dictionary<int,HardwareProductStyle> Styles=new Dictionary<int,HardwareProductStyle>
         {
             {HardwareCatalog.Ore,new HardwareProductStyle(HardwareProductForm.Ore,"AL","矿石",new Color(.49f,.57f,.62f))},
@@ -35,7 +35,9 @@ namespace AssemblyZero.Unity.EP04
             {HardwareCatalog.Tested,new HardwareProductStyle(HardwareProductForm.Card,"S1 / QC","检测合格",Cyan,false,true)},
             {HardwareCatalog.QuietTested,new HardwareProductStyle(HardwareProductForm.Card,"Q / QC","检测合格",Ivory,true,true)},
             {HardwareCatalog.Standard,new HardwareProductStyle(HardwareProductForm.Retail,"S1 STANDARD","包装成品",Cyan,false,true)},
-            {HardwareCatalog.Quiet,new HardwareProductStyle(HardwareProductForm.Retail,"S1 QUIET","包装成品",Ivory,true,true)}
+            {HardwareCatalog.Quiet,new HardwareProductStyle(HardwareProductForm.Retail,"S1 QUIET","包装成品",Ivory,true,true)},
+            {HardwareCatalog.Defect,new HardwareProductStyle(HardwareProductForm.Card,"NG","检测次品",Reject)},
+            {HardwareCatalog.Budget,new HardwareProductStyle(HardwareProductForm.Retail,"S1 LITE","丐版简装",Kraft,false,true)}
         };
         public static HardwareProductStyle Get(int material)=>Styles.TryGetValue(material,out var value)?value:Styles[HardwareCatalog.Carton];
         public static string Caption(int material){var s=Get(material);return "<color=#"+ColorUtility.ToHtmlStringRGB(s.Color)+">[ "+s.Mark+" ]</color> · "+s.Stage;}

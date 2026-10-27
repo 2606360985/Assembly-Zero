@@ -42,7 +42,8 @@ namespace AssemblyZero.Domain.EP04
                 foreach(var p in r.Points)
                 {
                     // Explicit shared source/output and shared destination/input manifolds.
-                    if(r.From==from.Id&&GridPoint.Distance(p,start)<=1||r.To==to.Id&&GridPoint.Distance(p,end)<=1)continue;
+                    // The source fan-out is wider so a hub warehouse can feed duplicated machines.
+                    if(r.From==from.Id&&GridPoint.Distance(p,start)<=2||r.To==to.Id&&GridPoint.Distance(p,end)<=1)continue;
                     obstacles.Add(p);
                 }
             // Reserve other machines' docking tiles, including their vertical shafts.

@@ -24,12 +24,12 @@ namespace AssemblyZero.Unity.EP04
         private void BuildConveyorRoute(BusinessRoute route,Vector3[] path,Vector3[] raw)
         {
             var line=new GameObject("Conveyor "+route.Id).transform;line.SetParent(root,false);
-            void Surface(string name,float left,float right,float bottom,float top,Color color)
+            MeshRenderer Surface(string name,float left,float right,float bottom,float top,Color color)
             {
                 var mesh=FactoryConveyorGeometry.CreateMesh(path,left,right,bottom,top,"Hardware "+route.Id+" "+name);routeMeshes.Add(mesh);
-                var obj=new GameObject(name,typeof(MeshFilter),typeof(MeshRenderer));obj.transform.SetParent(line,false);obj.GetComponent<MeshFilter>().sharedMesh=mesh;obj.GetComponent<MeshRenderer>().sharedMaterial=Paint(color);
+                var obj=new GameObject(name,typeof(MeshFilter),typeof(MeshRenderer));obj.transform.SetParent(line,false);obj.GetComponent<MeshFilter>().sharedMesh=mesh;var renderer=obj.GetComponent<MeshRenderer>();renderer.sharedMaterial=Paint(color);return renderer;
             }
-            Surface("Continuous belt bed",-.27f,.27f,-.16f,0,dark);
+            beds[route.Id]=Surface("Continuous belt bed",-.27f,.27f,-.16f,0,dark);
             Surface("Continuous left guard",-.31f,-.27f,-.03f,.08f,steel);
             Surface("Continuous right guard",.27f,.31f,-.03f,.08f,steel);
             for(var i=1;i<raw.Length;i++)

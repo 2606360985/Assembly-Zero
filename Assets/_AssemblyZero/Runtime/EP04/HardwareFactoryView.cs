@@ -28,6 +28,10 @@ namespace AssemblyZero.Unity.EP04
         private readonly Dictionary<int,Transform> inputPieces=new Dictionary<int,Transform>();
         private readonly Dictionary<int,Transform> actions=new Dictionary<int,Transform>();
         private readonly Dictionary<int,Vector3> actionOrigins=new Dictionary<int,Vector3>();
+        private readonly Dictionary<int,Transform> utilizationBars=new Dictionary<int,Transform>();
+        private readonly Dictionary<int,MeshRenderer> beds=new Dictionary<int,MeshRenderer>();
+        private static readonly Color red=new Color(.9f,.24f,.2f),yellow=new Color(.96f,.78f,.24f),violet=new Color(.62f,.42f,.88f),grey=new Color(.5f,.55f,.6f);
+        private static readonly Color jammed=new Color(.55f,.16f,.12f),busy=new Color(.42f,.27f,.08f);
         public Transform TruckVisual=>truck;
         public void Initialize(HardwareGame g)
         {
@@ -53,7 +57,7 @@ namespace AssemblyZero.Unity.EP04
                 foreach(var r in game.World.State.Routes)if(r.Factory==game.Factory){key=key*31+r.Id;key=key*31+r.Material;key=key*31+r.Length;}}
             if(!worldChanged&&builtFactory==game.Factory&&geometryKey==key&&root!=null)return;
             builtFactory=game.Factory;geometryKey=key;ClearCargo();ClearRouteMeshes();
-            if(root!=null){root.gameObject.SetActive(false);Destroy(root.gameObject);}root=new GameObject("Factory machinery").transform;root.SetParent(transform);labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();inputPieces.Clear();actions.Clear();actionOrigins.Clear();
+            if(root!=null){root.gameObject.SetActive(false);Destroy(root.gameObject);}root=new GameObject("Factory machinery").transform;root.SetParent(transform);labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();inputPieces.Clear();actions.Clear();actionOrigins.Clear();utilizationBars.Clear();beds.Clear();
             var f=game.World.Factory(game.Factory);
             foreach(var n in game.World.State.Nodes.Where(n=>n.Factory==game.Factory))
             {
@@ -67,9 +71,25 @@ namespace AssemblyZero.Unity.EP04
                     inputPieces[n.Id]=Product(recipe!=null&&recipe.Inputs.Length>0?recipe.Inputs[0].Material:HardwareCatalog.Board,station);inputPieces[n.Id].localPosition=workpieces[n.Id].localPosition;
                     workpieces[n.Id].gameObject.SetActive(n.Output.Count>0);inputPieces[n.Id].gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
                 }
-                lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.3f,1.3f),new Vector3(.2f,.35f,.2f),n.Batch.Count>0?green:amber,station);
+                lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.5f,1.3f),new Vector3(.32f,.5f,.32f),StateColor(n.RunState),station);
                 Cube("Input dock",new Vector3(-2.4f,0,0),new Vector3(.5f,.4f,.65f),green,station);Cube("Output dock",new Vector3(2.4f,0,0),new Vector3(.5f,.4f,.65f),amber,station);
-                labels[n.Id]=Label(game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name,pos+Vector3.up*3.8f,root,.6f);
+                if(game.Config.Economy.Recipe(n.RecipeId)!=null)
+                {
+                    // Utilization gauge above the machine; a full red bar marks the bottleneck.
+                    var gauge=new GameObject("Utilization gauge").transform;gauge.SetParent(root,false);gauge.position=pos+Vector3.up*3.2f;
+                    Cube("Utilization track",Vector3.zero,new Vector3(2.6f,.14f,.3f),dark,gauge);
+                    utilizationBars[n.Id]=Cube("Utilization fill",new Vector3(0,.04f,0),new Vector3(.05f,.16f,.32f),green,gauge);
+                }
+                labels[n.Id]=Label(game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name,pos+Vector3.up*4.1f,root,.6f);
+            }
+            var factory=game.World.Factory(game.Factory);
+            if(game.Config.Economy.Hardware.Slots!=null)foreach(var slot in game.Config.Economy.Hardware.Slots)
+            {
+                if(game.World.State.Nodes.Any(n=>n.Factory==game.Factory&&n.Kind==slot.Kind)||game.World.PlacementError(game.Factory,slot.X,slot.Z)!=null)continue;
+                var center=Local(factory,new GridPoint(slot.X,slot.Z))-Vector3.up*.52f;var frame=new GameObject("Suggested slot "+slot.Kind).transform;frame.SetParent(root,false);frame.position=center;
+                foreach(var side in new[]{-1.8f,1.8f}){Cube("Slot edge",new Vector3(side,0,0),new Vector3(.12f,.05f,3.72f),cyan,frame);Cube("Slot edge",new Vector3(0,0,side),new Vector3(3.72f,.05f,.12f),cyan,frame);}
+                Cube("Slot arrow",new Vector3(1.2f,0,0),new Vector3(.9f,.05f,.18f),cyan,frame);
+                Label("推荐位 · "+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==slot.Kind).Name,center+Vector3.up*1.4f,frame,.5f).color=new Color(.02f,.48f,.57f);
             }
             foreach(var r in game.World.State.Routes.Where(r=>r.Factory==game.Factory))
             {
@@ -82,7 +102,7 @@ namespace AssemblyZero.Unity.EP04
         {
             var ivory=new Color(.79f,.85f,.88f);var blue=new Color(.12f,.4f,.56f);var teal=new Color(.12f,.52f,.57f);
             var coral=new Color(.5f,.26f,.19f);var violet=new Color(.3f,.39f,.56f);
-            var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):green;
+            var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):n.Kind==BuildingKind.Rework?coral:green;
             Cube("Brick deck",new Vector3(0,.48f,0),new Vector3(3.1f,.24f,3.1f),color,station);
             for(var i=0;i<n.Level;i++)Cube("Level brick",new Vector3(-1+i*.45f,.7f,-1.4f),new Vector3(.3f,.18f,.2f),ivory,station);
             switch(n.Kind)
@@ -135,6 +155,13 @@ namespace AssemblyZero.Unity.EP04
                     Cube("Sealing bar",new Vector3(0,2.05f,.5f),new Vector3(2.6f,.3f,.6f),color,station);
                     Cube("Tape cassette",new Vector3(0,2.4f,.5f),new Vector3(.7f,.5f,.6f),blue,station);
                     for(var i=0;i<2;i++)Cube("Empty carton",new Vector3(-.9f,1.1f+i*.45f,-.8f),new Vector3(.65f,.4f,.7f),amber,station);
+                    break;
+                case BuildingKind.Rework:
+                    Cube("Rework bench",new Vector3(0,.85f,0),new Vector3(2.9f,.25f,2.5f),ivory,station);
+                    Cube("Reject bin",new Vector3(-.9f,1.2f,-.7f),new Vector3(.8f,.5f,.7f),new Color(.86f,.22f,.18f),station);
+                    Cube("Microscope column",new Vector3(.6f,1.6f,.6f),new Vector3(.25f,1.3f,.25f),steel,station);
+                    Cube("Microscope head",new Vector3(.6f,2.2f,.25f),new Vector3(.45f,.3f,.7f),dark,station);
+                    Cube("Solder iron",new Vector3(.2f,1.4f,-.2f),new Vector3(.12f,.6f,.12f),amber,station);
                     break;
                 case BuildingKind.Sales:
                     foreach(var x in new[]{-1.2f,1.2f})Cube("Dispatch post",new Vector3(x,1.5f,.7f),new Vector3(.25f,1.8f,.25f),green,station);
@@ -220,17 +247,29 @@ namespace AssemblyZero.Unity.EP04
             var resource=w.State.Resources[0];oreLabel.text="北岭铝矿 / 自动采集\n储量 "+resource.Stock+" / "+resource.Capacity;
             var visibleRocks=resource.Capacity>0?Mathf.CeilToInt(oreRocks.Count*resource.Stock/(float)resource.Capacity):0;
             for(var i=0;i<oreRocks.Count;i++)oreRocks[i].gameObject.SetActive(i<visibleRocks);
+            var bottleneck=w.Bottleneck(game.Factory)?.Id??0;
             foreach(var pair in labels)
             {
-                var n=w.Node(pair.Key);if(n==null)continue;var selected=game.SelectedNode==n.Id;
-                pair.Value.gameObject.SetActive(selected||game.ViewCamera.orthographicSize<29);
-                var name=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name;
-                pair.Value.text=name+(selected||game.ViewCamera.orthographicSize<20?"\n"+n.Status:"");pair.Value.color=selected?new Color(.02f,.48f,.57f):new Color(.13f,.22f,.28f);
-                lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Paint(n.Batch.Count>0?green:amber);
+                var n=w.Node(pair.Key);if(n==null)continue;var selected=game.SelectedNode==n.Id;var production=utilizationBars.TryGetValue(n.Id,out var bar);
+                pair.Value.gameObject.SetActive(selected||n.Id==bottleneck||game.ViewCamera.orthographicSize<29);
+                var name=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name;var utilization=production?w.Utilization(n):0;
+                var line=production?"\n"+utilization+"% · "+HardwareHud.StateLabel(n.RunState):"";
+                pair.Value.text=(n.Id==bottleneck?"<color=#D93A2B>【瓶颈】</color>":"")+name+(selected||game.ViewCamera.orthographicSize<22?line:"")+(selected&&n.RunState!=NodeState.Working?"\n"+n.Status:"");
+                pair.Value.color=selected?new Color(.02f,.48f,.57f):new Color(.13f,.22f,.28f);
+                lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Paint(StateColor(n.RunState));
+                if(production)
+                {
+                    var u=Mathf.Clamp01(utilization/100f);bar.localScale=new Vector3(Mathf.Max(.05f,2.5f*u),.16f,.32f);bar.localPosition=new Vector3(-1.25f+1.25f*u,.04f,0);
+                    bar.GetComponent<Renderer>().sharedMaterial=Paint(n.Id==bottleneck?red:u>=.5f?green:yellow);
+                }
                 if(workpieces.TryGetValue(n.Id,out var piece))piece.gameObject.SetActive(n.Output.Count>0);
                 if(inputPieces.TryGetValue(n.Id,out var input))input.gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
             }
+            // Backed-up belts turn amber then red so queues read at a glance.
+            foreach(var r in w.State.Routes)
+                if(beds.TryGetValue(r.Id,out var bed)){var load=w.RouteLoad(r);bed.sharedMaterial=Paint(load>=.85f?jammed:load>=.6f?busy:dark);}
         }
+        private Color StateColor(NodeState s)=>s==NodeState.Working?green:s==NodeState.Starved?yellow:s==NodeState.Blocked?red:s==NodeState.NoFunds?violet:s==NodeState.Disconnected?grey:amber;
         private static float CargoHeight(int material)
         {
             var style=HardwareVisualCatalog.Get(material);

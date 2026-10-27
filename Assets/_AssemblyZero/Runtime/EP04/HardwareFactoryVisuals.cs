@@ -138,7 +138,7 @@ namespace AssemblyZero.Unity.EP04
             Cube("Service cable tray",new Vector3(-1.48f,.55f,0),new Vector3(.09f,.08f,2.5f),steel,station);
             for(var i=0;i<4;i++)Cube("Vent slot",new Vector3(-.8f+i*.3f,.25f,-1.61f),new Vector3(.17f,.22f,.025f),steel,station);
             foreach(var x in new[]{-1.3f,1.3f})foreach(var z in new[]{-1.3f,1.3f})Shape("Deck bolt",new Vector3(x,.69f,z),new Vector3(.1f,.035f,.1f),steel,station,PrimitiveType.Cylinder);
-            var actionName=n.Kind==BuildingKind.BoardAssembly?"Pick head":n.Kind==BuildingKind.GPUAssembly?"Robot tool":n.Kind==BuildingKind.Tester?"Scan strip":n.Kind==BuildingKind.Packaging?"Sealing bar":n.Kind==BuildingKind.Manufacturer?"Press die":"";
+            var actionName=n.Kind==BuildingKind.BoardAssembly?"Pick head":n.Kind==BuildingKind.GPUAssembly?"Robot tool":n.Kind==BuildingKind.Tester?"Scan strip":n.Kind==BuildingKind.Packaging?"Sealing bar":n.Kind==BuildingKind.Manufacturer?"Press die":n.Kind==BuildingKind.Rework?"Solder iron":"";
             foreach(Transform child in station)if(child.name==actionName){actions[n.Id]=child;actionOrigins[n.Id]=child.localPosition;break;}
         }
         private Transform BuildProduct(int material,Transform parent)
@@ -171,7 +171,7 @@ namespace AssemblyZero.Unity.EP04
             var s=HardwareVisualCatalog.Get(material);var pcb=new Color(.035f,.32f,.2f);var gold=new Color(.82f,.62f,.24f);
             if(s.Form==HardwareProductForm.Retail)
             {
-                Case("Branded retail box",new Vector3(0,.12f,0),new Vector3(.94f,.3f,.5f),s.Quiet?ivory:dark,t);
+                Case("Branded retail box",new Vector3(0,.12f,0),new Vector3(.94f,.3f,.5f),material==HardwareCatalog.Budget?s.Color:s.Quiet?ivory:dark,t);
                 Cube("SKU band",new Vector3(-.3f,.275f,0),new Vector3(.13f,.02f,.48f),s.Quiet?cyan:amber,t);
                 Cube("GPU printed silhouette",new Vector3(.1f,.279f,0),new Vector3(.48f,.02f,.28f),s.Quiet?dark:steel,t);
                 Cube("QC seal",new Vector3(.35f,.286f,.13f),new Vector3(.09f,.02f,.09f),green,t);return;
@@ -193,7 +193,8 @@ namespace AssemblyZero.Unity.EP04
                     for(var i=0;i<8;i++)Cube("Cooling fin",new Vector3(-.35f+i*.1f,.13f,.224f),new Vector3(.025f,.13f,.035f),steel,t);
                     var count=s.Quiet?3:2;for(var i=0;i<count;i++)Fan(new Vector3((i-(count-1)*.5f)*(s.Quiet?.28f:.43f),s.Quiet?.31f:.25f,0),s.Quiet?.24f:.34f,t);
                     Cube("SKU light strip",new Vector3(0,.16f,-.235f),new Vector3(.62f,.035f,.018f),s.Color,t);
-                    Cube(s.Qualified?"QC passed badge":"Pending inspection badge",new Vector3(.41f,.29f,.18f),new Vector3(.07f,.02f,.07f),s.Qualified?green:amber,t);
+                    var reject=material==HardwareCatalog.Defect;
+                    Cube(reject?"Reject tag":s.Qualified?"QC passed badge":"Pending inspection badge",new Vector3(.41f,.29f,.18f),reject?new Vector3(.16f,.03f,.16f):new Vector3(.07f,.02f,.07f),reject?s.Color:s.Qualified?green:amber,t);
                     Cube("IO bracket",new Vector3(-.48f,.1f,0),new Vector3(.035f,.25f,.5f),steel,t);
                 }
                 return;

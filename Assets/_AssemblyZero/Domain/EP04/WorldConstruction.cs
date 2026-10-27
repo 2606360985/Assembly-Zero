@@ -84,7 +84,7 @@ namespace AssemblyZero.Domain.EP04
             if(c.Kind==CommandKind.Remove){var refund=n.Investment*3/4;State.Money+=refund;State.Expenses-=refund;if(Settings.IsHardware)Cash(refund,"设备回收");}
             n.PendingRemove=false;n.PendingRecipe="";Revision++;return Ok(c.Kind==CommandKind.Remove?"已拆除并回收库存，返还 75% 费用":"改建完成",n.Id);
         }
-        private bool Produces(BusinessNode n,int material)=>n.Kind==BuildingKind.Warehouse?(Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material&&(m.Price>0||m.Id==HardwareCatalog.Ore||m.Finished)):material>=8&&material<=10||n.Output.Any(i=>i.Material==material)):Settings.Recipe(n.RecipeId)?.Output==material;
+        private bool Produces(BusinessNode n,int material)=>n.Kind==BuildingKind.Warehouse?(Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material&&(m.Price>0||m.Id==HardwareCatalog.Ore||m.Finished)):material>=8&&material<=10||n.Output.Any(i=>i.Material==material)):Settings.Recipe(n.RecipeId) is ProductRule r&&(r.Output==material||r.Byproduct!=0&&r.Byproduct==material);
         private IEnumerable<int> Needs(BusinessNode n)
         {
             if(n.Kind==BuildingKind.Warehouse)return Settings.IsHardware?Settings.Hardware.Materials.Where(m=>m.Finished).Select(m=>m.Id):Array.Empty<int>();

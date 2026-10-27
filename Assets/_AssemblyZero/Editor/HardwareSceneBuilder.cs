@@ -58,7 +58,7 @@ namespace AssemblyZero.Unity.Editor
                 PlayerSettings.SplashScreen.show=false;
                 // Conservative graphics baseline for this build only; restore project settings afterwards.
                 PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64,false);PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,new[]{GraphicsDeviceType.Direct3D11});AssetDatabase.SaveAssets();
-                var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath,EP04SceneBuilder.ScenePath},locationPathName="Builds/Hardware/AssemblyZeroHardware.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.Development});
+                var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions{scenes=new[]{ScenePath},locationPathName="Builds/Hardware/AssemblyZeroHardware.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.Development});
                 File.WriteAllText("Reports/Hardware/Build.txt","Result: "+report.summary.result+"\nErrors: "+report.summary.totalErrors+"\nWarnings: "+report.summary.totalWarnings+"\nTime: "+report.summary.totalTime+"\n"+string.Join("\n",report.steps.SelectMany(s=>s.messages).Where(m=>m.type!=LogType.Log).Select(m=>m.type+": "+m.content)));
                 if(report.summary.result!=UnityEditor.Build.Reporting.BuildResult.Succeeded)throw new InvalidOperationException("Hardware build failed");
             }
@@ -77,6 +77,21 @@ namespace AssemblyZero.Unity.Editor
                 if(failures.Count>0)throw new AggregateException("Build finished but project settings restoration needs attention",failures);
             }
         }
-        public static void Walkthrough(){Directory.CreateDirectory("Reports/Hardware");File.WriteAllText("Reports/Hardware/Walkthrough.txt",HardwareWalkthrough.Run(false)+"\n"+HardwareWalkthrough.Run(true)+"\n"+HardwareWalkthrough.RunMake()+"\n"+HardwareWalkthrough.RunRecovery());}
+        public static void Walkthrough(){Directory.CreateDirectory("Reports/Hardware/PlayabilityP0P1");File.WriteAllText("Reports/Hardware/PlayabilityP0P1/Walkthrough.txt",string.Join("\n",HardwareWalkthrough.RunOpening(),HardwareWalkthrough.RunExpansion(),HardwareWalkthrough.RunMarket(),HardwareWalkthrough.RunMake(),HardwareWalkthrough.RunRecovery()));}
+        // Rewrites only the economy data in Economy.asset; the scene, fonts, materials and layouts are untouched.
+        [MenuItem("Tools/Assembly Zero/Refresh Hardware Economy")]
+        public static void RefreshEconomy()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode)throw new InvalidOperationException("Exit Play mode before refreshing the economy.");
+            var config=AssetDatabase.LoadAssetAtPath<EP04Config>(Root+"/Economy.asset");if(config==null)throw new InvalidOperationException("Missing "+Root+"/Economy.asset");
+            Undo.RecordObject(config,"Refresh Hardware Economy");config.Economy=HardwareCatalog.Create();EditorUtility.SetDirty(config);
+            var font=AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(Root+"/Chinese SDF.asset");
+            if(font!=null)
+            {
+                var texts=string.Concat(Directory.GetFiles("Assets/_AssemblyZero/Runtime/EP04","Hardware*.cs").Select(File.ReadAllText))+string.Concat(Directory.GetFiles("Assets/_AssemblyZero/Domain/EP04","Hardware*.cs").Select(File.ReadAllText));
+                font.TryAddCharacters(new string(texts.Distinct().ToArray()),out _);EditorUtility.SetDirty(font);
+            }
+            AssetDatabase.SaveAssets();Debug.Log("Hardware economy refreshed to content version "+HardwareCatalog.ContentVersion+". Scene and layouts were not regenerated.");
+        }
     }
 }
