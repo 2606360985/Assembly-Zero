@@ -193,6 +193,15 @@ namespace AssemblyZero.Tests
             Assert.Throws<ArgumentException>(()=>new WorldSimulation(HardwareCatalog.Create(),new WorldSimulation(new EconomySettings()).State));
             Assert.Throws<ArgumentException>(()=>new WorldSimulation(new EconomySettings(),New().State));
         }
+        [Test] public void Hardware_StatsRecordMinuteBucketsCappedAndSaved()
+        {
+            var w=Opened();Run(w,61);var stats=w.State.Hardware.Stats;Assert.IsNotEmpty(stats);
+            Assert.IsTrue(stats.All(s=>s.Tick%WorldSimulation.StatsInterval==0));Assert.AreEqual(3,stats.Last().Cards);Assert.AreEqual(w.State.Revenue,stats.Last().Revenue);
+            Assert.IsTrue(stats.Zip(stats.Skip(1),(a,b)=>b.Revenue>=a.Revenue&&b.Expenses>=a.Expenses).All(x=>x));
+            var restored=new WorldSimulation(w.Settings,JsonUtility.FromJson<WorldState>(Save(w)));Assert.AreEqual(stats.Count,restored.State.Hardware.Stats.Count);
+            for(var i=0;i<WorldSimulation.StatsCapacity+5;i++)for(var t=0;t<WorldSimulation.StatsInterval;t++)w.Tick();
+            Assert.AreEqual(WorldSimulation.StatsCapacity,stats.Count);w.AssertConserved();
+        }
         [Test] public void Hardware_SeedChangesTheMarketButNotTheOpening()
         {
             var a=new WorldSimulation(HardwareCatalog.Create(),null,11);var b=new WorldSimulation(HardwareCatalog.Create(),null,99);

@@ -11,6 +11,11 @@ foreach($a in $Assemblies){
   $listed=$r | Where-Object { $_ -match '\.cs"?$' } | ForEach-Object { $_.Trim('"').Replace('\','/') }
   $extra=Get-ChildItem $roots[$a] -Recurse -Filter *.cs | ForEach-Object { (Resolve-Path -Relative $_.FullName).Replace('\','/').Substring(2) } | Where-Object { $listed -notcontains $_ }
   $r=@($r)+@($extra | ForEach-Object { '"'+$_+'"' })
+  # References added to an asmdef after Unity's last import are borrowed from the Editor response file.
+  if($a -eq 'AssemblyZero.Unity'){
+    $urp=Get-Content 'Library/Bee/artifacts/1900b0aE.dag/AssemblyZero.Unity.Editor.rsp' | Where-Object { $_ -match '^-r:.*RenderPipelines\.(Core|Universal)\.Runtime' -and $r -notcontains $_ }
+    $r=@($r)+@($urp)
+  }
   $r | Set-Content "$s/$a.rsp"
   $out=& "$EditorData/netcorerun/netcorerun.exe" "$EditorData/DotNetSdkRoslyn/csc.dll" "@$s/$a.rsp"
   $out | Select-String -Pattern 'error CS' | Select-Object -First 40 | ForEach-Object { $_.Line }

@@ -45,6 +45,14 @@ namespace AssemblyZero.Domain.EP04
             State.Money-=(int)paid;State.Expenses+=paid;State.Hardware.Penalties+=(int)paid;Cash(-paid,category);return paid;
         }
         private void AdjustReputation(int delta){State.Hardware.Reputation=Math.Max(0,Math.Min(100,State.Hardware.Reputation+delta));}
+        public const int StatsInterval=3600, StatsCapacity=120;
+        private void RecordStats()
+        {
+            var h=State.Hardware;if(h.Stats==null)h.Stats=new List<StatsBucket>();
+            var core=Settings.Hardware.Materials.First(m=>m.Id==HardwareCatalog.Core).Price;
+            h.Stats.Add(new StatsBucket{Tick=State.Tick,Revenue=State.Revenue,Expenses=State.Expenses,Penalties=h.Penalties,Cards=h.Settlements.Sum(s=>s.Quantity),CorePricePercent=core>0?PurchasePrice(HardwareCatalog.Core)*100/core:100,Reputation=h.Reputation});
+            if(h.Stats.Count>StatsCapacity)h.Stats.RemoveRange(0,h.Stats.Count-StatsCapacity);
+        }
         private void TickHardware()
         {
             var h=State.Hardware;
@@ -55,6 +63,7 @@ namespace AssemblyZero.Domain.EP04
             }
             if(State.Tick%18000==0)h.SpotRemaining=Settings.Hardware.SpotCapacity;
             h.Cash.RemoveAll(c=>c.Tick<=State.Tick-18000);
+            if(State.Tick%StatsInterval==0)RecordStats();
             TickMarket();
             foreach(var order in h.Orders.Where(o=>o.Phase==HardwareOrderPhase.Active||o.Phase==HardwareOrderPhase.Ready).ToArray())
                 if(State.Tick>order.HardDeadline)Expire(order);

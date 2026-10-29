@@ -7,6 +7,8 @@ namespace AssemblyZero.Unity.EP04
     public sealed partial class HardwareGame
     {
         public const float OrbitDuration=.25f;
+        // Close macro framing: machines read ~1.9x larger than the old 25-unit overview.
+        public const float DefaultZoom=13,MinZoom=8,MaxZoom=40,ZoomStep=2f;
         private static readonly Vector3 CameraOffset=new Vector3(26,42,-29);
         private float cameraYaw,orbitFrom,orbitTarget,orbitTime=OrbitDuration;
         private bool cameraFocused=true;
@@ -48,7 +50,7 @@ namespace AssemblyZero.Unity.EP04
         }
         public void ZoomView(float scroll)
         {
-            if(CanNavigate)ViewCamera.orthographicSize=Mathf.Clamp(ViewCamera.orthographicSize-scroll*.0225f,12,40);
+            if(CanNavigate)ViewCamera.orthographicSize=Mathf.Clamp(ViewCamera.orthographicSize-scroll*ZoomStep*ViewCamera.orthographicSize/25,MinZoom,MaxZoom);
         }
         public void RotateViewStep(int direction)
         {

@@ -40,6 +40,8 @@ namespace AssemblyZero.Domain.EP04
         public int Order,Quantity; public long Tick,Income,MaterialCost,ProcessingCost,FreightCost; public long Margin=>Income-MaterialCost-ProcessingCost-FreightCost;
         public DeliveryGrade Grade; public int ReputationDelta; public long Adjustment; public string Name;
     }
+    // Cumulative snapshot taken once per simulated minute; charts plot differences between buckets.
+    [Serializable] public sealed class StatsBucket { public long Tick,Revenue,Expenses; public int Penalties,Cards,CorePricePercent,Reputation; }
     [Serializable] public sealed class MarketState { public int Current=-1, Next=-1; public long PhaseEnds; }
     [Serializable] public sealed class HardwareState
     {
@@ -47,6 +49,7 @@ namespace AssemblyZero.Domain.EP04
         public List<HardwareOrder> Orders=new List<HardwareOrder>(); public List<SupplierStock> Stock=new List<SupplierStock>();
         public List<PurchaseDelivery> Deliveries=new List<PurchaseDelivery>(); public List<Settlement> Settlements=new List<Settlement>();
         public List<CashEntry> Cash=new List<CashEntry>();
+        public List<StatsBucket> Stats=new List<StatsBucket>();
         public long FirstProductTick, NextOfferRefresh;
         public int Rng=0x5EED1234, Reputation, Penalties, ScriptedDone;
         public MarketState Market=new MarketState();

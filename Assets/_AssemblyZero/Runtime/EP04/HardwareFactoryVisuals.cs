@@ -134,7 +134,7 @@ namespace AssemblyZero.Unity.EP04
         {
             foreach(var f in station.GetComponentsInChildren<MeshFilter>())if(f.name=="Base"||f.name=="Brick deck"||f.name=="Smelter body")f.sharedMesh=BevelMesh();
             Case("Control console",new Vector3(1.25f,.85f,-1.25f),new Vector3(.45f,.7f,.35f),ivory,station);
-            Cube("OLED status screen",new Vector3(1.25f,1.02f,-1.44f),new Vector3(.31f,.27f,.025f),cyan,station);
+            Cube("OLED status screen",new Vector3(1.25f,1.02f,-1.44f),new Vector3(.31f,.27f,.025f),cyan,station).GetComponent<Renderer>().sharedMaterial=Glow(cyan);
             Cube("Service cable tray",new Vector3(-1.48f,.55f,0),new Vector3(.09f,.08f,2.5f),steel,station);
             for(var i=0;i<4;i++)Cube("Vent slot",new Vector3(-.8f+i*.3f,.25f,-1.61f),new Vector3(.17f,.22f,.025f),steel,station);
             foreach(var x in new[]{-1.3f,1.3f})foreach(var z in new[]{-1.3f,1.3f})Shape("Deck bolt",new Vector3(x,.69f,z),new Vector3(.1f,.035f,.1f),steel,station,PrimitiveType.Cylinder);
@@ -172,7 +172,8 @@ namespace AssemblyZero.Unity.EP04
             if(s.Form==HardwareProductForm.Retail)
             {
                 Case("Branded retail box",new Vector3(0,.12f,0),new Vector3(.94f,.3f,.5f),material==HardwareCatalog.Budget?s.Color:s.Quiet?ivory:dark,t);
-                Cube("SKU band",new Vector3(-.3f,.275f,0),new Vector3(.13f,.02f,.48f),s.Quiet?cyan:amber,t);
+                Cube("SKU band",new Vector3(-.3f,.275f,0),new Vector3(.16f,.025f,.5f),s.Quiet?cyan:amber,t).GetComponent<Renderer>().sharedMaterial=Glow(s.Quiet?cyan:amber);
+                Cube("Front SKU band",new Vector3(0,.12f,-.255f),new Vector3(.94f,.08f,.012f),s.Quiet?cyan:amber,t);
                 Cube("GPU printed silhouette",new Vector3(.1f,.279f,0),new Vector3(.48f,.02f,.28f),s.Quiet?dark:steel,t);
                 Cube("QC seal",new Vector3(.35f,.286f,.13f),new Vector3(.09f,.02f,.09f),green,t);return;
             }
@@ -191,8 +192,10 @@ namespace AssemblyZero.Unity.EP04
                 {
                     Case("Cooling shroud",new Vector3(0,s.Quiet?.18f:.15f,0),new Vector3(.91f,s.Quiet?.23f:.18f,.43f),s.Quiet?ivory:dark,t);
                     for(var i=0;i<8;i++)Cube("Cooling fin",new Vector3(-.35f+i*.1f,.13f,.224f),new Vector3(.025f,.13f,.035f),steel,t);
-                    var count=s.Quiet?3:2;for(var i=0;i<count;i++)Fan(new Vector3((i-(count-1)*.5f)*(s.Quiet?.28f:.43f),s.Quiet?.31f:.25f,0),s.Quiet?.24f:.34f,t);
-                    Cube("SKU light strip",new Vector3(0,.16f,-.235f),new Vector3(.62f,.035f,.018f),s.Color,t);
+                    // Oversized fans and a glowing brand strip keep the card readable at conveyor scale.
+                    var count=s.Quiet?3:2;for(var i=0;i<count;i++)Fan(new Vector3((i-(count-1)*.5f)*(s.Quiet?.29f:.44f),s.Quiet?.31f:.25f,0),s.Quiet?.27f:.39f,t);
+                    Cube("SKU light strip",new Vector3(0,.18f,-.24f),new Vector3(.8f,.06f,.03f),s.Color,t).GetComponent<Renderer>().sharedMaterial=Glow(s.Color);
+                    Cube("Backplate edge",new Vector3(0,.03f,.24f),new Vector3(.92f,.04f,.02f),steel,t);
                     var reject=material==HardwareCatalog.Defect;
                     Cube(reject?"Reject tag":s.Qualified?"QC passed badge":"Pending inspection badge",new Vector3(.41f,.29f,.18f),reject?new Vector3(.16f,.03f,.16f):new Vector3(.07f,.02f,.07f),reject?s.Color:s.Qualified?green:amber,t);
                     Cube("IO bracket",new Vector3(-.48f,.1f,0),new Vector3(.035f,.25f,.5f),steel,t);
@@ -219,7 +222,8 @@ namespace AssemblyZero.Unity.EP04
         {
             Shape("Fan well",p,new Vector3(diameter,.018f,diameter),dark,t,PrimitiveType.Cylinder);
             for(var k=0;k<5;k++){var blade=Cube("Fan blade",p+Vector3.up*.023f,new Vector3(diameter*.7f,.018f,diameter*.12f),steel,t);blade.localRotation=Quaternion.Euler(0,k*72,0);}
-            Shape("Fan hub",p+Vector3.up*.04f,new Vector3(diameter*.23f,.024f,diameter*.23f),cyan,t,PrimitiveType.Cylinder);
+            Shape("Fan hub",p+Vector3.up*.04f,new Vector3(diameter*.23f,.024f,diameter*.23f),cyan,t,PrimitiveType.Cylinder).GetComponent<Renderer>().sharedMaterial=Glow(cyan);
+            Shape("Fan rim",p+Vector3.up*.02f,new Vector3(diameter*1.08f,.012f,diameter*1.08f),steel,t,PrimitiveType.Cylinder);
         }
         private void CombineProduct(Transform product)
         {
