@@ -5,6 +5,7 @@ using UnityEngine.UI;
 namespace AssemblyZero.Unity.EP04
 {
     // Lightweight uGUI line chart: horizontal grid, optional filled first series, polyline per series.
+    [RequireComponent(typeof(CanvasRenderer))]
     public sealed class HardwareLineChart : MaskableGraphic
     {
         public readonly List<float[]> Series=new List<float[]>();
