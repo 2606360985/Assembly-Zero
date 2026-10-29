@@ -116,6 +116,7 @@ namespace AssemblyZero.Unity.EP04
             tutorialToggle.text=TutorialEnabled?"关闭新手引导 [H]":"开启新手引导 [H]";
             menuTutorialToggle.text=TutorialEnabled?"新手引导：开 [H]":"新手引导：关 [H]";
             var complete=TutorialComplete;
+            if(TutorialEnabled&&!complete&&tutorialHint!=null)PrepareEquipmentGuide(tutorialHint);
             if(!complete)completedNotified=false;
             if(complete&&!completedNotified)
             {
@@ -127,7 +128,7 @@ namespace AssemblyZero.Unity.EP04
             if(TutorialEnabled&&!complete&&game.LastActionFailed)tutorialText.text="操作未完成："+game.Message;
             CurrentGuideTarget=key;
             guideTargets.TryGetValue(key,out var target);
-            if(target==null||!target.gameObject.activeInHierarchy||game.Paused||!TutorialEnabled||complete)
+            if(target==null||!target.gameObject.activeInHierarchy||game.Paused||ProcurementOpen||!TutorialEnabled||complete)
             {
                 guideBorder.gameObject.SetActive(false);highlighted=null;return;
             }

@@ -92,13 +92,15 @@ namespace AssemblyZero.Unity.EP04
             var c=points.Count==0?new Vector2(20,16):new Vector2(points.Average(p=>p.x),points.Average(p=>p.y));
             cameraFocus=new Vector3((f.X+c.x)*1.2f,0,(f.Z+c.y)*1.2f);ViewCamera.orthographicSize=DefaultZoom;
         }
-        public void SetDrawer(string drawer){Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
+        public void SetDrawer(string drawer){Hud.CloseEquipmentLibrary();Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
         public string PlacingRecipe="";
         public void BeginBuild(BuildingKind kind)=>BeginBuild(kind,"");
-        public void BeginBuild(BuildingKind kind,string recipe){if(Truck.Manual)return;Placing=kind;PlacingRecipe=recipe??"";Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
-        public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
+        public void BeginBuild(BuildingKind kind,string recipe){if(Truck.Manual)return;Hud.CloseEquipmentLibrary();Placing=kind;PlacingRecipe=recipe??"";Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
+        public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Hud.CloseEquipmentLibrary();Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
         private void ResetPlacement()
         {
+            Hud?.CloseProcurementOverview();
+            Hud?.CloseEquipmentLibrary();
             LastActionFailed=false;Placing=null;Moving=false;Rotation=0;Interaction=Paused?HardwareInteraction.Modal:HardwareInteraction.Browsing;View?.HideGhost();
         }
         public void ToggleDriving()
@@ -109,14 +111,33 @@ namespace AssemblyZero.Unity.EP04
         public void FocusMine(){var r=World.State.Resources[0];cameraFocus=new Vector3(r.X*1.2f,0,r.Z*1.2f);ViewCamera.orthographicSize=16;}
         public void FocusSupplier(){var h=Config.Economy.Hardware;cameraFocus=new Vector3(h.SupplierX*1.2f,0,h.SupplierZ*1.2f);ViewCamera.orthographicSize=16;}
         public void FocusTruck(){cameraFocus=new Vector3(Truck.Position.X*1.2f,0,Truck.Position.Z*1.2f);ViewCamera.orthographicSize=16;}
-        public void FocusNode(int id){var n=World.Node(id);if(n==null)return;Factory=n.Factory;SelectedNode=id;var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);Drawer="设备";View.Rebuild();Hud.RebuildDrawer();}
-        public void TogglePause(){pan=false;Paused=!Paused;Interaction=Paused?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
+        public void FocusNode(int id){var n=World.Node(id);if(n==null)return;Hud.CloseEquipmentLibrary();Factory=n.Factory;SelectedNode=id;var f=World.Factory(Factory);cameraFocus=new Vector3((f.X+n.X)*1.2f,0,(f.Z+n.Z)*1.2f);Drawer="设备";View.Rebuild();Hud.RebuildDrawer();}
+        public void TogglePause(){pan=false;Paused=!Paused;Interaction=Paused||Hud.ProcurementOpen||Hud.EquipmentLibraryOpen?HardwareInteraction.Modal:Truck.Manual?HardwareInteraction.Driving:HardwareInteraction.Browsing;Hud.ShowPause(Paused);}
         public void ChangeFactory(){ResetPlacement();if(Factory==1&&World.Factory(2).Owned){Factory=2;}else Factory=1;SelectedNode=0;FocusFactory();View.Rebuild();}
         public int HoverNode; public Vector2 HoverScreen;
         public int NodeAt(int x,int z)=>World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;
         private void HandleInput()
         {
-            var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused||TextInputFocused()){pan=false;return;}
+            var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused){pan=false;return;}
+            if(Hud.ProcurementOpen)
+            {
+                pan=false;
+                if(k.escapeKey.wasPressedThisFrame){if(Paused)TogglePause();else Hud.CloseProcurementOverview();}
+                else if(k.spaceKey.wasPressedThisFrame)TogglePause();
+                return;
+            }
+            if(Hud.EquipmentLibraryOpen||Hud.EquipmentDragging)
+            {
+                pan=false;
+                if(k.escapeKey.wasPressedThisFrame){if(Paused)TogglePause();else Hud.CloseEquipmentLibrary();}
+                else if(!TextInputFocused())
+                {
+                    if(k.spaceKey.wasPressedThisFrame)TogglePause();
+                    else if(!Paused&&!Hud.EquipmentDragging)Hud.HandleBuildShortcutKeys(k);
+                }
+                return;
+            }
+            if(TextInputFocused()){pan=false;return;}
             if(k.hKey.wasPressedThisFrame)Hud.ToggleTutorial();
             if(Showcasing)
             {
@@ -131,6 +152,7 @@ namespace AssemblyZero.Unity.EP04
             if(k.escapeKey.wasPressedThisFrame){if(Paused){TogglePause();return;}if(Placing.HasValue){Placing=null;Moving=false;}else if(Drawer!=""){Drawer="";Hud.RebuildDrawer();}else TogglePause();}
             if(Paused)return;
             if(k.spaceKey.wasPressedThisFrame){TogglePause();return;}
+            if(Hud.HandleBuildShortcutKeys(k))return;
             if(k.tabKey.wasPressedThisFrame)ToggleDriving();
             if(k.rKey.wasPressedThisFrame)Rotation=(Rotation+1)%4;
             MoveView(new Vector2((k.dKey.isPressed?1:0)-(k.aKey.isPressed?1:0),(k.wKey.isPressed?1:0)-(k.sKey.isPressed?1:0)),Time.unscaledDeltaTime);

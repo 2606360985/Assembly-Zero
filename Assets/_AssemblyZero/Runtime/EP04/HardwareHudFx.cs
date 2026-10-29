@@ -135,7 +135,7 @@ namespace AssemblyZero.Unity.EP04
         private void UpdateTooltip()
         {
             if(tooltip==null)BuildTooltip();var w=game.World;var n=w.Node(game.HoverNode);
-            var show=n!=null&&!game.Paused&&!game.Placing.HasValue;if(tooltip.gameObject.activeSelf!=show)tooltip.gameObject.SetActive(show);if(!show){tooltipNode=-1;return;}
+            var show=n!=null&&!game.Paused&&!game.Placing.HasValue&&!ProcurementOpen&&!EquipmentLibraryOpen;if(tooltip.gameObject.activeSelf!=show)tooltip.gameObject.SetActive(show);if(!show){tooltipNode=-1;return;}
             var local=ToCanvasRoot(game.HoverScreen+new Vector2(22,-18));var root=(RectTransform)canvas.transform;
             local.x=Mathf.Min(local.x,root.rect.width-tooltip.sizeDelta.x-8);local.y=Mathf.Max(local.y,tooltip.sizeDelta.y+8);tooltip.anchoredPosition=local;tooltip.SetAsLastSibling();
             if(tooltipNode==n.Id&&Time.frameCount%10!=0)return;tooltipNode=n.Id;
@@ -171,6 +171,8 @@ namespace AssemblyZero.Unity.EP04
         }
         public void SetShowcase(bool on)
         {
+            if(on)CloseProcurementOverview();
+            if(on)CloseEquipmentLibrary();
             if(on)
             {
                 hiddenForShowcase.Clear();

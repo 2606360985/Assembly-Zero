@@ -54,6 +54,91 @@ namespace AssemblyZero.Tests
             yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.SendMessage("OnApplicationFocus",true);game.Hud.SetTutorialEnabled(true);
         }
         private Button Action(string id)=>game.Hud.GetComponentsInChildren<Button>().First(b=>b.name==id);
+        [UnityTest] public IEnumerator Procurement_SelectsPurchasesAndSharesStateWithOriginalDrawer()
+        {
+            yield return Open();game.SetDrawer("采购");Action("采购总览").onClick.Invoke();yield return null;
+            Assert.IsTrue(game.Hud.ProcurementOpen);Assert.IsFalse(game.Paused);Assert.IsFalse(game.CanNavigate);
+            Assert.AreEqual(8,game.Hud.GetComponentsInChildren<Button>().Count(b=>b.name.StartsWith("Procurement material ")));
+            var materialScroll=game.Hud.transform.Find("Hardware HUD/Procurement blocker/Procurement overview/Materials table/Materials scroll").GetComponent<ScrollRect>();
+            Assert.That(materialScroll.verticalNormalizedPosition,Is.EqualTo(1).Within(.001f),"Start with the first material visible");
+            Assert.IsNotNull(materialScroll.verticalScrollbar);
+            Action("Procurement material "+HardwareCatalog.Core).onClick.Invoke();
+            var input=game.Hud.GetComponentInChildren<TMP_InputField>();input.onEndEdit.Invoke("2");
+            Action("Procurement delivery").onClick.Invoke();Action("Procurement delivery").onClick.Invoke();
+            var before=game.World.State.Money;Action("Procurement purchase").onClick.Invoke();yield return null;
+            Assert.Less(game.World.State.Money,before);Assert.IsTrue(game.Truck.PickupTask);
+            Assert.AreEqual(2,game.World.State.Hardware.Deliveries.Where(d=>d.Factory==1&&d.Method==2).Sum(d=>d.Cargo.Count(g=>g.Material==HardwareCatalog.Core)));
+            game.Hud.CloseProcurementOverview();game.Hud.Refresh();yield return null;
+            Assert.AreEqual("采购",game.Drawer);Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text.Contains("GPU 核心 ×2")));
+            game.Hud.OpenProcurementOverview();Assert.AreEqual("2",input.text);
+            var filter=game.Hud.transform.Find("Hardware HUD/Procurement blocker/Procurement overview/Materials table/Filter").GetComponentsInChildren<Button>().Single();
+            filter.onClick.Invoke();Assert.IsFalse(game.Hud.GetComponentsInChildren<Button>().Any(b=>b.name.StartsWith("Procurement material ")),"No accepted order means no purchase shortage");
+            filter.onClick.Invoke();Assert.AreEqual(8,game.Hud.GetComponentsInChildren<Button>().Count(b=>b.name.StartsWith("Procurement material ")));
+        }
+
+        [UnityTest] public IEnumerator Procurement_ClampsFillQuantityAndExplainsUnavailablePurchases()
+        {
+            yield return Open();Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);
+            game.World.State.Hardware.Orders.Single(o=>o.Id==1).Quantity=100;
+            game.SetDrawer("采购");game.Hud.OpenProcurementOverview();Action("Procurement material "+HardwareCatalog.Core).onClick.Invoke();
+            Action("填入缺口（最多 80 件）").onClick.Invoke();
+            var input=game.Hud.GetComponentInChildren<TMP_InputField>();Assert.AreEqual("80",input.text);
+            var pay=Action("Procurement purchase");Assert.IsFalse(pay.interactable);
+            Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text=="采购资金不足"));
+            game.World.State.Hardware.Stock.Single(s=>s.Material==HardwareCatalog.Core).Quantity=79;game.Hud.Refresh();
+            Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text=="供应商库存不足，等待补货"));
+            input.onEndEdit.Invoke("0");Assert.AreEqual("1",input.text);Assert.IsTrue(pay.interactable);
+            input.onEndEdit.Invoke("999");Assert.AreEqual("80",input.text);Assert.IsFalse(pay.interactable);
+            Assert.IsEmpty(game.World.State.Hardware.Deliveries);
+        }
+
+        [UnityTest] public IEnumerator Procurement_ModalBlocksWorldSupportsPauseAndEscapeFromTextInput()
+        {
+            yield return Open();game.SetDrawer("采购");game.Hud.OpenProcurementOverview();yield return null;
+            var canvas=game.Hud.GetComponentInChildren<Canvas>().transform;var blocker=canvas.Find("Procurement blocker");
+            var hits=new List<RaycastResult>();var pointer=new PointerEventData(EventSystem.current){position=new Vector2(2,2)};
+            EventSystem.current.RaycastAll(pointer,hits);Assert.AreEqual("Procurement blocker",hits[0].gameObject.name);
+            ExecuteEvents.Execute(blocker.Find("Procurement overview").gameObject,pointer,ExecuteEvents.pointerClickHandler);
+            Assert.IsTrue(game.Hud.ProcurementOpen,"Blank panel space must not dismiss the modal");
+            var start=game.CameraFocus;game.MoveView(Vector2.one,.1f);game.RotateViewStep(1);Assert.AreEqual(start,game.CameraFocus);Assert.AreEqual(0,game.TargetCameraYaw);
+            var tick=game.World.State.Tick;yield return new WaitForSecondsRealtime(.1f);Assert.Greater(game.World.State.Tick,tick,"Opening the overview must not pause production");
+            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Space));yield return null;InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+            Assert.IsTrue(game.Paused);Assert.IsTrue(game.Hud.ProcurementOpen);hits.Clear();EventSystem.current.RaycastAll(pointer,hits);Assert.AreEqual("Modal blocker",hits[0].gameObject.name);
+            game.TogglePause();var input=game.Hud.GetComponentInChildren<TMP_InputField>();input.Select();input.ActivateInputField();yield return null;
+            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Space));yield return null;InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+            Assert.IsTrue(game.Paused,"Space still opens the pause menu while editing the numeric quantity");game.TogglePause();
+            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Escape));yield return null;InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+            Assert.IsFalse(game.Hud.ProcurementOpen);Assert.AreEqual("采购",game.Drawer);Assert.IsFalse(game.Paused);
+            game.Hud.OpenProcurementOverview();ExecuteEvents.Execute(blocker.gameObject,pointer,ExecuteEvents.pointerClickHandler);Assert.IsFalse(game.Hud.ProcurementOpen);
+        }
+
+        [UnityTest] public IEnumerator Procurement_ClosesOnPageFactoryCampaignAndShowcaseChanges()
+        {
+            yield return Open();game.SetDrawer("采购");game.Hud.OpenProcurementOverview();game.SetDrawer("订单");Assert.IsFalse(game.Hud.ProcurementOpen);
+            game.SetDrawer("采购");game.Hud.OpenProcurementOverview();game.World.Factory(2).Owned=true;game.ChangeFactory();Assert.IsFalse(game.Hud.ProcurementOpen);
+            game.Hud.OpenProcurementOverview();Assert.IsTrue(game.Hud.ProcurementOpen);game.NewGame();Assert.IsFalse(game.Hud.ProcurementOpen);
+            game.SetDrawer("采购");game.Hud.OpenProcurementOverview();game.EnterShowcase();Assert.IsFalse(game.Hud.ProcurementOpen);
+            game.ExitShowcase();Assert.IsFalse(game.Hud.ProcurementOpen);
+        }
+
+        [UnityTest] public IEnumerator Procurement_LayoutFitsAllExistingUiScales()
+        {
+            yield return Open();game.SetDrawer("采购");game.Hud.OpenProcurementOverview();
+            var scaler=game.Hud.GetComponentInChildren<CanvasScaler>();var canvas=(RectTransform)scaler.transform;
+            var panel=(RectTransform)canvas.Find("Procurement blocker/Procurement overview");
+            foreach(var scale in new[]{1f,1.15f,1.3f})
+            {
+                scaler.referenceResolution=new Vector2(1920/scale,1080/scale);yield return null;yield return null;game.Hud.Refresh();Canvas.ForceUpdateCanvases();
+                var corners=new Vector3[4];panel.GetWorldCorners(corners);var min=canvas.InverseTransformPoint(corners[0]);var max=canvas.InverseTransformPoint(corners[2]);
+                Assert.GreaterOrEqual(min.x,canvas.rect.xMin);Assert.GreaterOrEqual(min.y,canvas.rect.yMin);Assert.LessOrEqual(max.x,canvas.rect.xMax);Assert.LessOrEqual(max.y,canvas.rect.yMax);
+                var columns=panel.Find("Materials table/Column headers").GetComponentsInChildren<TMP_Text>();
+                Assert.IsTrue(columns.All(c=>c.rectTransform.rect.width>0&&!c.isTextOverflowing),"Table headings must fit at "+scale);
+                var scroll=panel.Find("Materials table/Materials scroll").GetComponent<ScrollRect>();
+                scroll.verticalNormalizedPosition=0;game.Hud.Refresh();Assert.That(scroll.verticalNormalizedPosition,Is.EqualTo(0).Within(.001f));
+                Assert.IsTrue(Action("Procurement purchase").gameObject.activeInHierarchy);
+            }
+        }
+
         [UnityTest] public IEnumerator OrbitAnimatesAccumulatesAndReturnsToOrigin()
         {
             yield return Open();var center=game.CameraFocus;var original=game.ViewCamera.transform.position;var rotation=game.ViewCamera.transform.rotation;

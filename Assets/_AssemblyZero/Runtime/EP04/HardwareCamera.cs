@@ -16,7 +16,7 @@ namespace AssemblyZero.Unity.EP04
         public Vector3 CameraFocus=>cameraFocus;
         public float CameraYaw=>cameraYaw;
         public float TargetCameraYaw=>orbitTarget;
-        public bool CanNavigate=>!Paused&&cameraFocused&&!TextInputFocused();
+        public bool CanNavigate=>!Paused&&cameraFocused&&!TextInputFocused()&&Hud?.ProcurementOpen!=true&&Hud?.EquipmentLibraryOpen!=true&&Hud?.EquipmentDragging!=true;
 
         private bool TextInputFocused()
         {
