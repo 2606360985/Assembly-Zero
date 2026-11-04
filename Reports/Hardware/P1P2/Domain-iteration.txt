@@ -1,0 +1,59 @@
+PASS AssemblyZero.Domain
+﻿FAIL HardwareBusinessTests.Hardware_AllocationServesEarliestDeadlineFirst()
+  AssertionException:   Condition not reached within 240s; Warehouse:仓储 1/300 in0 out1 | BoardAssembly:缺少匹配世代/体质的 板材组件 in0 out0 | Sales:订单交付 / 有限现货回收 in0 out0 | GPUAssembly:缺少匹配世代/体质的 已装配板卡 in2 out0 | Tester:缺少匹配世代/体质的 待检显卡 in0 out0 | Packaging:缺少匹配世代/体质的 合格显卡 in1 out0 ¥786250
+  Expected: True
+  But was:  False
+
+  at AssemblyZero.Tests.HardwareBusinessTests.RunUntil (AssemblyZero.Domain.EP04.WorldSimulation w, System.Func`1[TResult] done, System.Int32 maxSeconds) [0x000c1] in <9c7d804d0a82477faac8fc0ffe641602>:0 
+  at AssemblyZero.Tests.HardwareBusinessTests.Hardware_AllocationServesEarliestDeadlineFirst () [0x000b5] in <9c7d804d0a82477faac8fc0ffe641602>:0 
+
+PASS HardwareBusinessTests.Hardware_AutomaticPickupLoadsMultipleTripsAndFinishes() 102ms
+PASS HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(False) 528ms
+PASS HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(True) 216ms
+PASS HardwareBusinessTests.Hardware_BottleneckIsTheSaturatedMachineFeedingStarvedOnes() 70ms
+PASS HardwareBusinessTests.Hardware_CancelChargesPenaltyButNeverOverdrawsCash() 3ms
+PASS HardwareBusinessTests.Hardware_DuplicatedMachinesConnectAllInputsFromTheHubWarehouse() 184ms
+PASS HardwareBusinessTests.Hardware_ExhaustedSupplierRestocks() 34ms
+PASS HardwareBusinessTests.Hardware_ExpiryChargesPenaltyAndRequotesScriptedContract() 247ms
+PASS HardwareBusinessTests.Hardware_ExteriorDestinationsAreReachableWithoutCrossingFactoryFootprints() 17ms
+PASS HardwareBusinessTests.Hardware_FirstCardWithinOneMinuteAndFirstIncomeWithinThree() 159ms
+PASS HardwareBusinessTests.Hardware_GuideWalksOpeningThenSecondContractShortage() 199ms
+PASS HardwareBusinessTests.Hardware_LateDeliveryPaysLessAndCostsReputation() 286ms
+PASS HardwareBusinessTests.Hardware_ManualDrivingIsFrozenAndRescueUnloadsAutomatically() 54ms
+PASS HardwareBusinessTests.Hardware_MarketForecastsThenChangesPricesWithoutRepricingHistory() 955ms
+PASS HardwareBusinessTests.Hardware_OfferBoardOpensWithRepairFallbackAndRotates() 786ms
+PASS HardwareBusinessTests.Hardware_OldManualSaveResumesWithAutomaticCargoRecovery() 55ms
+PASS HardwareBusinessTests.Hardware_OnTimeDeliveryPaysBasePrice() 224ms
+PASS HardwareBusinessTests.Hardware_OpeningIsAnIncompleteLineWithOneContract() 62ms
+PASS HardwareBusinessTests.Hardware_PartiallyConnectedMachineDoesNotHoardInputs() 25ms
+PASS HardwareBusinessTests.Hardware_PickupRepeatsMiningWaitsAtFullWarehouseAndStopsSafely() 174ms
+PASS HardwareBusinessTests.Hardware_PurchaseFailureIsAtomicAndFreightIsExact() 2ms
+PASS HardwareBusinessTests.Hardware_RejectsAppearOnlyAfterFirstContractAndAreDeterministic() 1138ms
+PASS HardwareBusinessTests.Hardware_ReputationAndActiveLimitGateAcceptance() 161ms
+PASS HardwareBusinessTests.Hardware_ReworkKeepsSpecificationAndBudgetPackagingUsesRejects() 592ms
+PASS HardwareBusinessTests.Hardware_SaveV4ContinuesExactlyAndOlderSavesAreRejected() 1145ms
+PASS HardwareBusinessTests.Hardware_SecondBoardAssemblyRaisesThroughput() 787ms
+PASS HardwareBusinessTests.Hardware_SeedChangesTheMarketButNotTheOpening() 2ms
+PASS HardwareBusinessTests.Hardware_SettlementMatchesAuditableCost() 158ms
+PASS HardwareBusinessTests.Hardware_SkuRecipesAreDerivedAndListedForFinalAssembly() 5ms
+PASS HardwareBusinessTests.Hardware_StatsRecordMinuteBucketsCappedAndSaved() 14764ms
+PASS HardwareBusinessTests.Hardware_TwoSkusShareOneLineWithoutMixingSpecifications() 295ms
+PASS HardwareBusinessTests.Hardware_WarehouseCapacityLeavesArrivalInTransit() 60ms
+PASS HardwareBusinessTests.Hardware_ZeroCashRecoversThroughOreAndRepairJobs() 262ms
+FAIL HardwareResearchTests.Campaign_ReachesSecondGenerationFromTheRealOpening()
+  AssertionException:   Expected string length 8 but was 5. Strings differ at index 0.
+  Expected: "research"
+  But was:  "order"
+  -----------^
+
+  at AssemblyZero.Tests.HardwareResearchTests.Campaign_ReachesSecondGenerationFromTheRealOpening () [0x001aa] in <9c7d804d0a82477faac8fc0ffe641602>:0 
+
+PASS HardwareResearchTests.Design_ClientsChooseSkusMatchingTheirNeedsAndReviews() 33ms
+PASS HardwareResearchTests.Design_CommandsValidateLaunchAndRetireSkus() 18ms
+PASS HardwareResearchTests.Design_SlotsDerivePerformanceNoiseCostAndReview() 1ms
+PASS HardwareResearchTests.Generations_AreEndlessAndScaleCostsPricesAndCoreSupply() 3837ms
+PASS HardwareResearchTests.Generations_CardsInheritTheCoreGenerationAndOrdersDemandIt() 520ms
+PASS HardwareResearchTests.Lab_ChargesRunningCostsAndAccumulatesPointsWithoutBelts() 304ms
+PASS HardwareResearchTests.Research_PrerequisitesAndUnlocksGateRecipesAndDesigns() 416ms
+PASS HardwareResearchTests.Research_StateSurvivesSaveAndContinuesExactly() 221ms
+Passed=41 Failed=2; fallback serializer, no Unity native runtime or rendering.

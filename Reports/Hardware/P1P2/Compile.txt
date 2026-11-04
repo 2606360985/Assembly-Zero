@@ -1,0 +1,5 @@
+PASS AssemblyZero.Domain
+PASS AssemblyZero.Unity
+PASS AssemblyZero.Tests
+PASS AssemblyZero.PlayModeTests
+PASS AssemblyZero.Unity.Editor

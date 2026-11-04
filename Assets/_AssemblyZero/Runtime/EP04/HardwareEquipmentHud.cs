@@ -42,6 +42,7 @@ namespace AssemblyZero.Unity.EP04
                 case BuildingKind.BoardAssembly:case BuildingKind.GPUAssembly:return "装配制造";
                 case BuildingKind.Tester:case BuildingKind.Rework:return "检测返修";
                 case BuildingKind.Packaging:case BuildingKind.Sales:return "包装交付";
+                case BuildingKind.Lab:return "研发";
                 default:return "其他";
             }
         }
@@ -57,6 +58,7 @@ namespace AssemblyZero.Unity.EP04
                 case BuildingKind.GPUAssembly:return "gpu";
                 case BuildingKind.Tester:return "order";
                 case BuildingKind.Sales:return "market";
+                case BuildingKind.Lab:return "star";
                 default:return "wrench";
             }
         }

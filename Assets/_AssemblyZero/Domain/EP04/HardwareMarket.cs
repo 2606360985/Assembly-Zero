@@ -42,21 +42,39 @@ namespace AssemblyZero.Domain.EP04
                 m.PhaseEnds=State.Tick+Settings.Hardware.CalmSeconds*60L;State.Hardware.NextOfferRefresh=State.Tick;Log("市场回归平稳；留意下一次行情预告");
             }
         }
-        public int PurchasePrice(int material)
+        public int PurchasePrice(int material,int generation=0,int coreBin=0)
         {
             var m=Settings.Hardware.Materials.FirstOrDefault(x=>x.Id==material);if(m==null)return 0;var e=CurrentEvent;
             var percent=e==null?100:material==HardwareCatalog.Core?e.CorePercent:material==HardwareCatalog.Memory?e.MemoryPercent:100;
+            if(material==HardwareCatalog.Core)return (int)Math.Min(10000000,m.Price*(long)percent/100*Scale(100,Settings.Hardware.GenCorePercent,Math.Max(1,generation==0?State.Hardware.CoreGen:generation)-1)/100*GradePercent(HardwareSku.CoreBin(coreBin))/100);
             return m.Price*percent/100;
         }
-        public int OrderPricePercent(int material)
+        // Low-noise SKUs follow the quiet/AI demand curve; everything else follows the standard curve.
+        public bool IsQuiet(string spec)=>Sku(spec)?.Cooler==HardwareCatalog.QuietHeat;
+        public int BasePrice(string spec)=>spec==HardwareCatalog.BudgetSpec?BudgetBasePrice:Sku(spec)?.BasePrice??StandardBasePrice;
+        public int OrderPricePercent(int material)=>OrderPricePercent(HardwareCatalog.Spec(material));
+        public int OrderPricePercent(string spec)
         {
-            var e=CurrentEvent;if(e==null)return 100;
-            return material==HardwareCatalog.Standard?e.StandardPricePercent:material==HardwareCatalog.Quiet?e.QuietPricePercent:100;
+            var e=CurrentEvent;if(e==null||spec==HardwareCatalog.BudgetSpec)return 100;
+            return IsQuiet(spec)?e.QuietPricePercent:e.StandardPricePercent;
         }
-        public int SpotPrice(int material)
+        public string ProductName(string spec)=>spec==HardwareCatalog.BudgetSpec?"丐版":Sku(spec)?.Short??"标准版";
+        public int SpotPrice(Goods g)
+        {
+            var price=(long)BaseSpotPrice(g.Material,g.SpecId);
+            if(g.Material==HardwareCatalog.Standard)price=price*GradePercent(g.Grade)/100;
+            if(g.Material==HardwareCatalog.Standard)price=price*SkuPricePercent(g.SpecId,g.Gen)/100;
+            if(g.Material==HardwareCatalog.Budget)price=price*GenerationValuePercent(g.Gen)/100;
+            return (int)Math.Min(10000000,price);
+        }
+        public int SpotPrice(int material)=>SpotPrice(material,HardwareCatalog.Spec(material));
+        public int SpotPrice(int material,string spec)
+            =>SpotPrice(new Goods{Material=material,SpecId=spec,Gen=Sku(spec)?.Gen??State.Hardware.CoreGen,Grade=GradeB});
+        private int BaseSpotPrice(int material,string spec)
         {
             if(material==HardwareCatalog.Ore)return 100;
-            var basePrice=material==HardwareCatalog.Standard?35000:material==HardwareCatalog.Quiet?40000:material==HardwareCatalog.Budget?22000:material==HardwareCatalog.Defect?9000:0;
+            // Retail cards resell at 35/48 of their SKU contract base, matching ¥350 for the standard card.
+            var basePrice=material==HardwareCatalog.Standard?BasePrice(spec)*35/48:material==HardwareCatalog.Budget?22000:material==HardwareCatalog.Defect?9000:0;
             return basePrice*(CurrentEvent?.SpotPercent??100)/100;
         }
     }

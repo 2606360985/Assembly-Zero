@@ -55,7 +55,7 @@ namespace AssemblyZero.Domain.EP04
 
         private sealed class Supply
         {
-            public int Material, ReservedOrder, Version, Count=1;
+            public int Material, ReservedOrder, Version, Grade, CoreBin, Gen=1, Count=1;
             public string Spec;
             public bool Transit, Projected;
         }
@@ -87,16 +87,12 @@ namespace AssemblyZero.Domain.EP04
                 // Batch inputs have already been committed. Only their one expected output is available to planning.
                 foreach(var node in nodes.Where(n=>n.Batch.Count>0))
                 {
-                    var recipe=world.Settings.Recipe(node.RecipeId);if(recipe==null)continue;
-                    var output=recipe.Output;var spec=recipe.SpecId;
-                    if(recipe.Machine==BuildingKind.Tester&&recipe.Byproduct!=0&&node.Batch.Any(g=>g.Flawed))
-                    {output=recipe.Byproduct;spec=node.Batch[0].SpecId;}
-                    if(recipe.Machine==BuildingKind.Rework)
-                    {
-                        spec=node.Batch.FirstOrDefault(g=>g.Material==HardwareCatalog.Defect)?.SpecId??spec;
-                        if(spec==HardwareCatalog.QuietSpec)output=recipe.Byproduct;
-                    }
-                    supplies.Add(new Supply{Material=output,Spec=spec,Version=recipe.SpecVersion,Projected=true});
+                    var recipe=world.Recipe(node.RecipeId);if(recipe==null)continue;
+                    var output=recipe.Output;var spec=recipe.SpecId;var version=recipe.SpecVersion;
+                    var carrier=node.Batch.FirstOrDefault(g=>HardwareCatalog.IsCard(g.Material));
+                    if(string.IsNullOrEmpty(spec)&&carrier!=null){spec=carrier.SpecId;version=carrier.SpecVersion;}
+                    if(recipe.Machine==BuildingKind.Tester&&recipe.Byproduct!=0&&node.Batch.Any(g=>g.Flawed))output=recipe.Byproduct;
+                    supplies.Add(new Supply{Material=output,Spec=spec,Version=version,Grade=recipe.Machine==BuildingKind.Packaging?carrier?.Grade??0:0,CoreBin=node.Batch.FirstOrDefault(g=>g.Material==HardwareCatalog.Core||g.Material==HardwareCatalog.AssembledBoard||HardwareCatalog.IsCard(g.Material))?.CoreBin??0,Gen=node.Batch.Max(g=>g.Gen),Projected=true});
                 }
             }
 
@@ -106,8 +102,8 @@ namespace AssemblyZero.Domain.EP04
                 {
                     if(!seen.Add(good.Id))continue;
                     // Existing flawed cards cannot cover a qualified order. Do not invent future rejects.
-                    if(good.Flawed&&(good.Material==HardwareCatalog.RawGPU||good.Material==HardwareCatalog.QuietRaw))continue;
-                    supplies.Add(new Supply{Material=good.Material,Spec=good.SpecId,Version=good.SpecVersion,
+                    if(good.Flawed&&good.Material==HardwareCatalog.RawGPU)continue;
+                    supplies.Add(new Supply{Material=good.Material,Spec=good.SpecId,Version=good.SpecVersion,Grade=good.Grade,Gen=good.Gen,CoreBin=good.CoreBin,
                         ReservedOrder=good.ReservedOrder,Transit=transit});
                 }
             }
@@ -133,14 +129,15 @@ namespace AssemblyZero.Domain.EP04
 
             private static int Count(Dictionary<int,int> counts,int material)=>counts.TryGetValue(material,out var count)?count:0;
 
-            private static bool Matches(Supply supply,int material,HardwareOrder order)
+            private bool Matches(Supply supply,int material,HardwareOrder order)
             {
                 if(supply.Material!=material)return false;
                 if(material==HardwareCatalog.Defect)return true;
-                var specific=material==HardwareCatalog.RawGPU||material==HardwareCatalog.QuietRaw||
-                    material==HardwareCatalog.Tested||material==HardwareCatalog.QuietTested||
-                    material==HardwareCatalog.Standard||material==HardwareCatalog.Quiet||material==HardwareCatalog.Budget;
-                return !specific||(supply.Spec==order.Spec&&supply.Version==order.Version);
+                var sku=world.Sku(order.Spec);
+                if(sku!=null&&(material==HardwareCatalog.Core||material==HardwareCatalog.AssembledBoard)&&
+                    (supply.Gen!=sku.Gen||sku.CoreBin!=0&&HardwareSku.CoreBin(supply.CoreBin)!=sku.CoreBin))return false;
+                // Uninspected cards may still bin high enough; already graded cards must meet the order's grade.
+                return !HardwareCatalog.IsCard(material)||(supply.Spec==order.Spec&&supply.Version==order.Version&&supply.Gen>=order.MinGen&&(supply.Grade==0||WorldSimulation.GradeSatisfies(supply.Grade,order.MinGrade)));
             }
 
             private int Take(int material,int quantity,HardwareOrder order,bool reservedOnly=false)
@@ -167,8 +164,9 @@ namespace AssemblyZero.Domain.EP04
                 quantity-=Take(material,quantity,order);
                 if(quantity<=0)return;
                 if(!path.Add(material)){Missing(material,quantity);return;}
-                var recipe=world.Settings.Recipes.FirstOrDefault(r=>r.Output==material&&r.Machine!=BuildingKind.Rework);
-                if((material==HardwareCatalog.Heat||material==HardwareCatalog.QuietHeat)&&row!=null)
+                // Final assembly is per SKU; every other material has a single non-rework recipe.
+                var recipe=material==HardwareCatalog.RawGPU?world.Recipe(HardwareSku.RecipeId(order.Spec)):world.Settings.Recipes.FirstOrDefault(r=>r.Output==material&&r.Machine!=BuildingKind.Rework);
+                if(HardwareCatalog.IsCooler(material)&&row!=null)
                 {
                     if(recipe!=null&&Makes(recipe.Id))
                     {

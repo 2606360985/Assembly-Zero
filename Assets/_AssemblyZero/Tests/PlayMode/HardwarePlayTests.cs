@@ -44,11 +44,30 @@ namespace AssemblyZero.Tests
         {
             yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
             var built=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.GPUAssembly,X=20,Z=8});Assert.IsTrue(built.Success,built.Message);game.SelectedNode=built.Entity;
-            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=built.Entity,Recipe="quiet-gpu"}).Success);
+            Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=built.Entity,Recipe=HardwareSku.RecipeId(HardwareCatalog.QuietSpec)}).Success);
             game.SetDrawer("设备");yield return null;
             game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="采购缺料").onClick.Invoke();yield return null;
             Assert.AreEqual("采购",game.Drawer);
             Assert.IsTrue(game.Hud.GetComponentsInChildren<TMPro.TMP_Text>().Any(t=>t.text.Contains("低噪散热器 ×")),"A quiet assembly shortage must select its quiet heatsink, not the non-purchasable board or standard heatsink");
+        }
+        [UnityTest] public IEnumerator Hardware_DesignerLaunchesSkuAndResearchPageStartsProjects()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            game.SetDrawer("产品");yield return null;
+            var preview=game.Hud.GetComponentsInChildren<UnityEngine.UI.RawImage>().First(r=>r.name=="SKU preview image");Assert.IsNotNull(preview.texture,"The designer renders a live card preview");
+            var before=game.World.State.Hardware.Skus.Count;
+            foreach(var caption in new[]{"核心体质","目标市场","风扇数量","卡长","背板"})game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name==caption).onClick.Invoke();
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="上市新型号").onClick.Invoke();yield return null;
+            Assert.AreEqual(before+1,game.World.State.Hardware.Skus.Count);Assert.AreEqual(3,game.World.RecipesFor(BuildingKind.GPUAssembly).Count());
+            var designed=game.World.State.Hardware.Skus.Last();Assert.AreEqual(1,designed.CoreBin);Assert.AreEqual(TargetMarket.Gaming,designed.Market);Assert.AreEqual(1,designed.Fans);Assert.AreEqual(1,designed.Length);Assert.IsTrue(designed.Backplate);
+            var key=HardwareVisualKey.Of(new Goods{Material=HardwareCatalog.RawGPU,SpecId=designed.Id,Gen=2,Grade=3},game.World);
+            Assert.AreEqual(2,HardwareVisualKey.Gen(key));Assert.AreEqual(3,HardwareVisualKey.Grade(key));Assert.AreEqual(1,HardwareVisualKey.Fans(key));Assert.IsTrue(HardwareVisualKey.Backplate(key));
+            game.World.State.Money=5000000;game.SetDrawer("研发");yield return null;
+            Assert.IsFalse(game.View.GetComponentsInChildren<Camera>(true).Any(c=>c.name=="SKU preview camera"&&c.enabled),"Leaving the product page stops the preview camera");
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="开始研发").onClick.Invoke();yield return null;
+            Assert.AreNotEqual("",game.World.State.Hardware.ResearchActive);
+            var lab=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.Lab,X=20,Z=24});Assert.IsTrue(lab.Success,lab.Message);
+            game.View.Rebuild();yield return null;game.World.AssertConserved();
         }
         [TestCase(30,1)] [TestCase(60,1)] [TestCase(120,1)] [TestCase(30,2)] [TestCase(60,2)] [TestCase(120,2)]
         public void Hardware_TruckSamplingMovesContinuouslyAcrossTickAndSegmentBoundaries(int fps,int speed)
@@ -65,14 +84,16 @@ namespace AssemblyZero.Tests
         [UnityTest] public IEnumerator Hardware_EnvironmentResetsAndProductStagesAreExplicit()
         {
             yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
-            Assert.AreEqual(HardwareProductForm.Card,HardwareVisualCatalog.Get(HardwareCatalog.QuietRaw).Form);
-            Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.QuietRaw).Quiet);Assert.IsFalse(HardwareVisualCatalog.Get(HardwareCatalog.QuietRaw).Qualified);
-            Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.QuietTested).Qualified);
+            Assert.AreEqual(HardwareProductForm.Card,HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Form);
+            Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Quiet);Assert.IsFalse(HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Qualified);
+            Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.Tested,true).Qualified);
+            var quietKey=HardwareVisualKey.Of(HardwareCatalog.Tested,game.World.Sku(HardwareCatalog.QuietSpec));
+            Assert.AreEqual(HardwareCatalog.Tested,HardwareVisualKey.Material(quietKey));Assert.IsTrue(HardwareVisualKey.Quiet(quietKey));
             var machinery=game.View.transform.Find("Factory machinery");game.View.Rebuild();Assert.AreSame(machinery,game.View.transform.Find("Factory machinery"),"A notification or exploration revision must not rebuild geometry.");
             var position=game.View.TruckVisual.position;yield return null;Assert.AreEqual(position,game.View.TruckVisual.position);
             game.BeginBuild(BuildingKind.Processor);game.Moving=true;game.NewGame();
             Assert.IsNull(game.Placing);Assert.IsFalse(game.Moving);
-            Assert.IsFalse(game.View.GetComponentsInChildren<HardwareProductView>().Any(p=>p.Material==HardwareCatalog.Standard||p.Material==HardwareCatalog.Quiet||p.Material==HardwareCatalog.Tested||p.Material==HardwareCatalog.QuietTested),"No finished goods should flash during a rebuild before the first presentation refresh.");
+            Assert.IsFalse(game.View.GetComponentsInChildren<HardwareProductView>().Any(p=>p.Material==HardwareCatalog.Standard||p.Material==HardwareCatalog.Tested),"No finished goods should flash during a rebuild before the first presentation refresh.");
             yield return null;Assert.AreEqual(1,game.View.transform.Cast<Transform>().Count(t=>t.name=="Hardware environment"));
             game.World.AssertConserved();
         }

@@ -18,6 +18,14 @@ namespace AssemblyZero.Unity.EP04
         private ProcurementOverview procurementSnapshot;
         private bool procurementOnlyMissing;
         private int procurementFactory;
+        private int purchaseGeneration,purchaseCoreBin;
+        private string CorePurchaseCaption()=>material==HardwareCatalog.Core?" · G"+(purchaseGeneration==0?game.World.State.Hardware.CoreGen:purchaseGeneration)+" / "+HardwareSku.CoreName(purchaseCoreBin==0?2:purchaseCoreBin):"";
+        private void CorePurchaseOptions(Transform parent)
+        {
+            var row=Row(Box("Core purchase options",parent,false));
+            Button(row,"核心世代",()=>{var gen=game.World.State.Hardware.CoreGen;purchaseGeneration=(purchaseGeneration==0?gen:purchaseGeneration)%gen+1;RefreshProcurementOverview();Refresh();},0,38,"purchase:generation");
+            Button(row,"核心体质 A/B/C",()=>{purchaseCoreBin=(purchaseCoreBin+1)%4;RefreshProcurementOverview();Refresh();},0,38,"purchase:core");
+        }
         private readonly Dictionary<int,ProcurementRow> procurementRows=new Dictionary<int,ProcurementRow>();
         private static readonly float[] ProcurementColumns={0,.25f,.35f,.46f,.57f,.69f,.86f,1};
 
@@ -135,6 +143,7 @@ namespace AssemblyZero.Unity.EP04
             Column(controls);controls.gameObject.AddComponent<UnityEngine.UI.ContentSizeFitter>().verticalFit=UnityEngine.UI.ContentSizeFitter.FitMode.PreferredSize;
             checkoutScroll.viewport=checkoutViewport;checkoutScroll.content=controls;
             Label(controls,"选中采购件",18,30);
+            CorePurchaseOptions(controls);
             procurementQuote=Label(controls,"",17,188);
             var quantityRow=Row(Box("Purchase quantity",controls,false));
             Button(quantityRow,"−1",()=>SetProcurementQuantity(quantity-1),54,40);
@@ -175,7 +184,7 @@ namespace AssemblyZero.Unity.EP04
         // Both purchase surfaces submit the same authoritative command and use the same pickup behavior.
         private CommandResult PurchaseSelectedMaterial()
         {
-            var result=game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery});
+            var result=game.Submit(new WorldCommand{Kind=CommandKind.Purchase,Factory=game.Factory,Material=material,Quantity=quantity,Delivery=delivery,Generation=material==HardwareCatalog.Core?purchaseGeneration:0,CoreBin=material==HardwareCatalog.Core?purchaseCoreBin:0});
             if(result.Success&&delivery==2&&game.Truck.Phase==VehiclePhase.Idle&&game.Truck.Cargo.Count==0)
                 game.Submit(new WorldCommand{Kind=CommandKind.PickupPurchase,TargetFactory=game.Factory});
             return result;
@@ -239,10 +248,11 @@ namespace AssemblyZero.Unity.EP04
             if(!procurementQuantity.isFocused)procurementQuantity.SetTextWithoutNotify(quantity.ToString());
             var config=game.Config.Economy.Hardware;
             var fee=delivery==0?config.DeliveryFee:delivery==1?config.ExpressFee:config.PickupFee;
-            var total=(long)selected.UnitPrice*quantity+fee;
+            var unitPrice=game.World.PurchasePrice(material,purchaseGeneration,purchaseCoreBin);
+            var total=(long)unitPrice*quantity+fee;
             procurementQuote.text=ProcurementCaption(material)+"\n<size=23><b>"+selected.Name+"</b></size>\n"
                 +"采购缺口 <color=#EB5545>"+selected.Shortage+"</color> · 供应商余量 "+selected.SupplierStock+"\n"
-                +"单价 "+HardwareGame.Money(selected.UnitPrice)+"\n货款 "+HardwareGame.Money((long)selected.UnitPrice*quantity)+"\n运费 "+HardwareGame.Money(fee)
+                +"单价 "+HardwareGame.Money(unitPrice)+CorePurchaseCaption()+"\n货款 "+HardwareGame.Money((long)unitPrice*quantity)+"\n运费 "+HardwareGame.Money(fee)
                 +"\n<size=22>合计 <color=#F2A33A><b>"+HardwareGame.Money(total)+"</b></color></size>";
             procurementDelivery.text=new[]{"常规配送 · "+config.DeliverySeconds+" 秒","加急配送 · "+config.ExpressSeconds+" 秒","自提 · 空闲皮卡自动装运"}[delivery];
             procurementFill.interactable=selected.Shortage>0;

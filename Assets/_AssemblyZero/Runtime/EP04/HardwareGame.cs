@@ -22,7 +22,7 @@ namespace AssemblyZero.Unity.EP04
         private int seenSettlements,seenEvent=-1,seenPenalties;
         public HardwareAudio Audio {get;private set;}
         public static readonly int[] Speeds={1,2,4,8};
-        public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v3.json");
+        public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v4.json");
         private bool verifying;
         public bool LastActionFailed {get;private set;}
         public WorldVehicle Truck=>World.State.Vehicles.First(v=>v.Role==VehicleRole.Pickup);
@@ -75,7 +75,7 @@ namespace AssemblyZero.Unity.EP04
             if(World==null)return;if(!verifying)HandleInput();
             if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<64){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
             PollBusinessEvents();
-            var production=World.State.Nodes.Where(n=>n.Factory==Factory&&Config.Economy.Recipe(n.RecipeId)!=null).ToArray();
+            var production=World.State.Nodes.Where(n=>n.Factory==Factory&&World.Recipe(n.RecipeId)!=null).ToArray();
             Audio.SetActivity(production.Length==0?0:production.Count(n=>n.RunState==NodeState.Working)/(float)production.Length,Speed,Paused);
             UpdateCamera(Time.unscaledDeltaTime);
             View.Present((float)(accumulator*60));
@@ -183,7 +183,7 @@ namespace AssemblyZero.Unity.EP04
         public bool Load()
         {
             ExitShowcase();
-            foreach(var path in new[]{SavePath,SavePath+".bak"})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
+            foreach(var path in new[]{SavePath,SavePath+".bak",Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v3.json")})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
             if(File.Exists(Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json")))Message="旧版 v2 存档与新规则不兼容，已保留原文件；请开始新战役。";
             return false;
         }

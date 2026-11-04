@@ -135,17 +135,17 @@ namespace AssemblyZero.Unity.EP04
                 // Footprint and ports are fixed by the grid; machines grow upward for a bolder silhouette.
                 var model=new GameObject("Model").transform;model.SetParent(station,false);model.localScale=new Vector3(1,ModelHeight,1);
                 BuildBlocks(n,model);DetailStation(n,model);
-                if(n.Kind!=BuildingKind.Warehouse&&n.Kind!=BuildingKind.Sales)
+                if(n.Kind!=BuildingKind.Warehouse&&n.Kind!=BuildingKind.Sales&&n.Kind!=BuildingKind.Lab)
                 {
-                    var recipe=game.Config.Economy.Recipe(n.RecipeId);
-                    workpieces[n.Id]=Product(recipe?.Output??HardwareCatalog.Board,station);workpieces[n.Id].localPosition=new Vector3(0,1.18f+.975f*(ModelHeight-1),-.7f);workpieces[n.Id].localScale=Vector3.one*1.25f;
+                    var recipe=game.World.Recipe(n.RecipeId);
+                    workpieces[n.Id]=Product(recipe==null?HardwareCatalog.Board:HardwareVisualKey.Of(recipe.Output,game.World.Sku(recipe.SpecId)),station);workpieces[n.Id].localPosition=new Vector3(0,1.18f+.975f*(ModelHeight-1),-.7f);workpieces[n.Id].localScale=Vector3.one*1.25f;
                     inputPieces[n.Id]=Product(recipe!=null&&recipe.Inputs.Length>0?recipe.Inputs[0].Material:HardwareCatalog.Board,station);inputPieces[n.Id].localPosition=workpieces[n.Id].localPosition;inputPieces[n.Id].localScale=Vector3.one*1.25f;
                     workpieces[n.Id].gameObject.SetActive(n.Output.Count>0);inputPieces[n.Id].gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
                 }
                 lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.5f*ModelHeight,1.3f),LampScale,StateColor(n.RunState),station);lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Glow(StateColor(n.RunState));
                 Cube("Input dock",new Vector3(-2.4f,0,0),new Vector3(.5f,.4f,.65f),green,station);Cube("Output dock",new Vector3(2.4f,0,0),new Vector3(.5f,.4f,.65f),amber,station);
                 var top=pos+Vector3.up*(3.2f*ModelHeight);
-                if(game.Config.Economy.Recipe(n.RecipeId)!=null)
+                if(game.World.Recipe(n.RecipeId)!=null)
                 {
                     // Utilization gauge above the machine; a full red bar marks the bottleneck.
                     var gauge=new GameObject("Utilization gauge").transform;gauge.SetParent(root,false);gauge.position=top;
@@ -178,7 +178,7 @@ namespace AssemblyZero.Unity.EP04
         {
             var ivory=new Color(.79f,.85f,.88f);var blue=new Color(.12f,.4f,.56f);var teal=new Color(.12f,.52f,.57f);
             var coral=new Color(.5f,.26f,.19f);var violet=new Color(.3f,.39f,.56f);
-            var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):n.Kind==BuildingKind.Rework?coral:green;
+            var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):n.Kind==BuildingKind.Rework?coral:n.Kind==BuildingKind.Lab?new Color(.36f,.3f,.62f):green;
             Cube("Brick deck",new Vector3(0,.48f,0),new Vector3(3.1f,.24f,3.1f),color,station);
             for(var i=0;i<n.Level;i++)Cube("Level brick",new Vector3(-1+i*.45f,.7f,-1.4f),new Vector3(.3f,.18f,.2f),ivory,station);
             switch(n.Kind)
@@ -239,6 +239,13 @@ namespace AssemblyZero.Unity.EP04
                     Cube("Microscope head",new Vector3(.6f,2.2f,.25f),new Vector3(.45f,.3f,.7f),dark,station);
                     Cube("Solder iron",new Vector3(.2f,1.4f,-.2f),new Vector3(.12f,.6f,.12f),amber,station);
                     break;
+                case BuildingKind.Lab:
+                    foreach(var x in new[]{-1f,0f,1f})Case("Server rack",new Vector3(x,1.45f,.6f),new Vector3(.7f,1.7f,.9f),dark,station);
+                    for(var i=0;i<3;i++)Cube("Rack status leds",new Vector3(i-1,1.9f,.13f),new Vector3(.5f,.06f,.03f),cyan,station).GetComponent<Renderer>().sharedMaterial=Glow(cyan);
+                    Cube("Lab bench",new Vector3(0,.95f,-.8f),new Vector3(2.7f,.2f,.9f),ivory,station);
+                    Cube("Prototype card",new Vector3(-.5f,1.1f,-.8f),new Vector3(.9f,.08f,.45f),color,station);
+                    Cube("Lab beacon",new Vector3(.8f,1.25f,-.8f),new Vector3(.25f,.5f,.25f),amber,station);
+                    break;
                 case BuildingKind.Sales:
                     foreach(var x in new[]{-1.2f,1.2f})Cube("Dispatch post",new Vector3(x,1.5f,.7f),new Vector3(.25f,1.8f,.25f),green,station);
                     Cube("Dispatch canopy",new Vector3(0,2.4f,.3f),new Vector3(3.1f,.3f,2.3f),green,station);
@@ -296,11 +303,14 @@ namespace AssemblyZero.Unity.EP04
                     var id=item.ItemId.Value;alive.Add(id);
                     if(!cargo.TryGetValue(id,out var view))
                     {
-                        view=cargoPool.TryGetValue(r.Material,out var pool)&&pool.Count>0?pool.Pop():Product(r.Material,transform);
+                        // Cards are drawn by their own SKU; other cargo shares one view per material.
+                        var good=HardwareCatalog.IsCard(r.Material)?r.Cargo.FirstOrDefault(g=>g.Id==id):null;
+                        var key=good!=null?HardwareVisualKey.Of(good,w):r.Material;
+                        view=cargoPool.TryGetValue(key,out var pool)&&pool.Count>0?pool.Pop():Product(key,transform);
                         // Keep the largest product inside the existing 512-unit cargo pitch,
                         // including the shorter visual length of a rounded centreline.
                         var scale=Mathf.Min(.85f,path.Length*512/Mathf.Max(1,r.Length-512)*.85f/.94f);view.localScale=Vector3.one*scale;
-                        view.gameObject.SetActive(true);cargo.Add(id,view);cargoMaterials.Add(id,r.Material);if(!previousCargo.ContainsKey(id))previousCargo[id]=(r.Id,item.Distance);
+                        view.gameObject.SetActive(true);cargo.Add(id,view);cargoMaterials.Add(id,key);if(!previousCargo.ContainsKey(id))previousCargo[id]=(r.Id,item.Distance);
                     }
                     var distance=previousCargo.TryGetValue(id,out var previous)&&previous.Route==r.Id?Mathf.Lerp(previous.Distance,item.Distance,Mathf.Clamp01(interpolation)):item.Distance;
                     view.position=path.Sample(distance/Mathf.Max(1,r.Length-512),out var heading)+Vector3.up*(CargoHeight(r.Material)*view.localScale.x+.01f);
@@ -365,6 +375,6 @@ namespace AssemblyZero.Unity.EP04
         }
         public void Ghost(int x,int z,int rotation,bool valid){if(ghost==null)ghost=Cube("Placement footprint",Vector3.zero,new Vector3(3.6f,.15f,3.6f),green,transform);ghost.gameObject.SetActive(true);ghost.position=Local(game.World.Factory(game.Factory),new GridPoint(x,z));ghost.rotation=Quaternion.Euler(0,-rotation*90,0);ghost.GetComponent<Renderer>().sharedMaterial=Paint(valid?green:Color.red);}
         public void HideGhost(){if(ghost!=null)ghost.gameObject.SetActive(false);}
-        private void OnDestroy(){ClearRouteMeshes();foreach(var m in colors.Values)Destroy(m);foreach(var m in glows.Values)Destroy(m);foreach(var mesh in ownedMeshes)Destroy(mesh);}
+        private void OnDestroy(){ReleasePreview();ClearRouteMeshes();foreach(var m in colors.Values)Destroy(m);foreach(var m in glows.Values)Destroy(m);foreach(var mesh in ownedMeshes)Destroy(mesh);}
     }
 }

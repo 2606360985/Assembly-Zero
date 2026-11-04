@@ -84,7 +84,7 @@ namespace AssemblyZero.Tests
                 var panel=(RectTransform)canvas.Find("Equipment backdrop/Equipment library");var panelCorners=new Vector3[4];panel.GetWorldCorners(panelCorners);
                 Assert.GreaterOrEqual(canvas.InverseTransformPoint(panelCorners[0]).y,canvas.rect.yMin);
                 Assert.LessOrEqual(canvas.InverseTransformPoint(panelCorners[2]).y,canvas.rect.yMax);
-                Assert.AreEqual(9,CardCount());Assert.IsNotNull(Card(BuildingKind.Rework));
+                Assert.AreEqual(10,CardCount());Assert.IsNotNull(Card(BuildingKind.Rework));
                 foreach(var card in panel.GetComponentsInChildren<HardwareBuildDragHandle>())
                     Assert.IsTrue(card.GetComponentsInChildren<TMP_Text>().All(t=>!t.isTextOverflowing),card.name);
                 game.Hud.CloseEquipmentLibrary();
@@ -93,14 +93,14 @@ namespace AssemblyZero.Tests
 
         [UnityTest] public IEnumerator Equipment_CategoriesSearchAndNoResultsKeepTheCatalogAccessible()
         {
-            yield return Open();Action("全部设备").onClick.Invoke();Assert.AreEqual(9,CardCount());
+            yield return Open();Action("全部设备").onClick.Invoke();Assert.AreEqual(10,CardCount());
             Action("Equipment category 材料加工").onClick.Invoke();Assert.AreEqual(2,CardCount());
             Search().text="散热";Assert.AreEqual(1,CardCount());Assert.IsNotNull(Card(BuildingKind.Manufacturer));
             Search().text="不存在的设备";Assert.AreEqual(0,CardCount());
             Assert.IsTrue(game.Hud.GetComponentsInChildren<TMP_Text>().Any(t=>t.text.Contains("没有匹配设备")));
             Search().text="";Assert.AreEqual(2,CardCount());Action("Equipment category 全部").onClick.Invoke();
             Search().text="gpu";Assert.AreEqual(1,CardCount());Assert.IsNotNull(Card(BuildingKind.GPUAssembly));
-            Search().text="";Assert.AreEqual(9,CardCount());
+            Search().text="";Assert.AreEqual(10,CardCount());
             var before=game.World.State.Nodes.Count;var money=game.World.State.Money;Card(BuildingKind.Rework).onClick.Invoke();
             Assert.AreEqual(BuildingKind.Rework,game.Placing);Assert.IsFalse(game.Hud.EquipmentLibraryOpen);
             Assert.AreEqual(before,game.World.State.Nodes.Count);Assert.AreEqual(money,game.World.State.Money);
@@ -195,7 +195,7 @@ namespace AssemblyZero.Tests
             expanded.Economy.Hardware.Buildings=expanded.Economy.Hardware.Buildings.Concat(Enumerable.Range(100,12).Select(i=>new HardwareBuilding{Kind=(BuildingKind)i,Name="扩展设备 "+i,Cost=10000})).ToArray();
             try
             {
-                game.Config=expanded;game.Hud.OpenEquipmentLibrary();Canvas.ForceUpdateCanvases();Assert.AreEqual(21,CardCount());
+                game.Config=expanded;game.Hud.OpenEquipmentLibrary();Canvas.ForceUpdateCanvases();Assert.AreEqual(22,CardCount());
                 var scroll=game.Hud.transform.Find("Hardware HUD/Equipment backdrop/Equipment library/Equipment scroll").GetComponent<ScrollRect>();
                 Assert.IsFalse(scroll.horizontal);Assert.IsTrue(scroll.vertical);Assert.Greater(scroll.content.rect.height,scroll.viewport.rect.height);
                 Assert.That(scroll.verticalNormalizedPosition,Is.EqualTo(1).Within(.001f));scroll.verticalNormalizedPosition=0;game.Hud.Refresh();Assert.That(scroll.verticalNormalizedPosition,Is.EqualTo(0).Within(.001f));

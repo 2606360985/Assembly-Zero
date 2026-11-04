@@ -15,10 +15,10 @@ namespace AssemblyZero.Tests
             world.State.Hardware.Orders.Clear();return world;
         }
 
-        private static HardwareOrder Order(WorldSimulation world,int quantity,int material=HardwareCatalog.Standard,int factory=1)
+        private static HardwareOrder Order(WorldSimulation world,int quantity,int material=HardwareCatalog.Standard,int factory=1,string spec=null)
         {
             var order=new HardwareOrder{Id=world.State.Hardware.NextOrder++,Factory=factory,Material=material,
-                Quantity=quantity,Spec=HardwareCatalog.Spec(material),Phase=HardwareOrderPhase.Active,Deadline=1000};
+                Quantity=quantity,Spec=spec??HardwareCatalog.Spec(material),Phase=HardwareOrderPhase.Active,Deadline=1000};
             world.State.Hardware.Orders.Add(order);return order;
         }
 
@@ -53,20 +53,20 @@ namespace AssemblyZero.Tests
 
         [Test] public void Overview_SharedMaterialsAreConsumedOnceAcrossStandardAndQuietOrders()
         {
-            var world=Empty();Order(world,2);Order(world,3,HardwareCatalog.Quiet);Stock(world,HardwareCatalog.Core,3);
+            var world=Empty();Order(world,2);Order(world,3,spec:HardwareCatalog.QuietSpec);Stock(world,HardwareCatalog.Core,3);
             var core=Row(world,HardwareCatalog.Core);Assert.AreEqual(5,core.Demand);Assert.AreEqual(2,core.Shortage);
             Assert.AreEqual(2,Row(world,HardwareCatalog.Heat).Shortage);Assert.AreEqual(3,Row(world,HardwareCatalog.QuietHeat).Shortage);
         }
 
         [Test] public void Overview_UsesCompatibleFinishedAndIntermediateGoodsBeforeExpandingRecipes()
         {
-            var world=Empty();var standard=Order(world,4);Order(world,2,HardwareCatalog.Quiet);
+            var world=Empty();var standard=Order(world,4);Order(world,2,spec:HardwareCatalog.QuietSpec);
             Stock(world,HardwareCatalog.Standard,1,HardwareCatalog.StandardSpec,standard.Id);
             Stock(world,HardwareCatalog.Tested,1,HardwareCatalog.StandardSpec);
             Stock(world,HardwareCatalog.RawGPU,1,HardwareCatalog.StandardSpec);
             Stock(world,HardwareCatalog.AssembledBoard,1);
-            Stock(world,HardwareCatalog.Quiet,1,HardwareCatalog.QuietSpec);
-            Stock(world,HardwareCatalog.QuietTested,1,HardwareCatalog.QuietSpec);
+            Stock(world,HardwareCatalog.Standard,1,HardwareCatalog.QuietSpec);
+            Stock(world,HardwareCatalog.Tested,1,HardwareCatalog.QuietSpec);
             Assert.AreEqual(0,Row(world,HardwareCatalog.Core).Shortage);
             Assert.AreEqual(1,Row(world,HardwareCatalog.Heat).Shortage);
             Assert.AreEqual(0,Row(world,HardwareCatalog.QuietHeat).Shortage);
@@ -87,7 +87,7 @@ namespace AssemblyZero.Tests
 
         [Test] public void Overview_AllocatesSharedBoardToEarliestDeadlineThenOrderId()
         {
-            var world=Empty();var standard=Order(world,1);var quiet=Order(world,1,HardwareCatalog.Quiet);
+            var world=Empty();var standard=Order(world,1);var quiet=Order(world,1,spec:HardwareCatalog.QuietSpec);
             standard.Deadline=200;quiet.Deadline=100;
             // A single board plus quiet downstream stock must serve the quiet order first.
             Stock(world,HardwareCatalog.AssembledBoard,1);Stock(world,HardwareCatalog.QuietHeat,1);Stock(world,HardwareCatalog.Shell,1);
@@ -125,7 +125,7 @@ namespace AssemblyZero.Tests
 
         [Test] public void Overview_ExistingCoolersBeforeSelfProductionAndExistingOreOnly()
         {
-            var world=Empty();Order(world,4);Order(world,2,HardwareCatalog.Quiet);
+            var world=Empty();Order(world,4);Order(world,2,spec:HardwareCatalog.QuietSpec);
             world.State.Nodes.Add(new BusinessNode{Id=100,Factory=1,Kind=BuildingKind.Manufacturer,RecipeId="heat"});
             world.State.Nodes.Add(new BusinessNode{Id=101,Factory=1,Kind=BuildingKind.Manufacturer,RecipeId="quiet-heat"});
             world.State.Nodes.Add(new BusinessNode{Id=102,Factory=1,Kind=BuildingKind.Processor,RecipeId="aluminum"});

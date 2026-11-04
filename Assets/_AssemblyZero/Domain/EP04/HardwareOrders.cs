@@ -30,6 +30,7 @@ namespace AssemblyZero.Domain.EP04
             {
                 // Slightly-out-of-reach offers stay visible as goals but cannot be accepted yet.
                 if(clients[i].MinReputation>State.Hardware.Reputation+PreviewReputation||e!=null&&e.BlockClient==i)continue;
+                if(clients[i].Material==HardwareCatalog.Standard&&!State.Hardware.Skus.Any(s=>FitsClient(s,clients[i])))continue;
                 weights[i]=clients[i].Weight*(e!=null&&e.BoostClient==i?4:1);total+=weights[i];
             }
             if(total==0)return -1;var roll=NextRandom(total);
@@ -38,14 +39,16 @@ namespace AssemblyZero.Domain.EP04
         }
         private HardwareOrder Generate(int index)
         {
-            var c=Settings.Hardware.Clients[index];var e=CurrentEvent;
+            var c=Settings.Hardware.Clients[index];var e=CurrentEvent;var spec=PickSku(c)??(string.IsNullOrEmpty(c.Spec)?HardwareCatalog.Spec(c.Material):c.Spec);
             var quantity=c.MinQuantity+NextRandom(Math.Max(1,c.MaxQuantity-c.MinQuantity+1));
-            if(c.Material==HardwareCatalog.Standard&&e!=null)quantity=Math.Max(1,quantity*e.StandardQuantityPercent/100);
-            var basePrice=c.Material==HardwareCatalog.Quiet?QuietBasePrice:c.Material==HardwareCatalog.Budget?BudgetBasePrice:StandardBasePrice;
-            var unit=(int)((long)basePrice*c.PricePercent/100*OrderPricePercent(c.Material)/100/100*100);
-            var product=c.Material==HardwareCatalog.Quiet?"静音版":c.Material==HardwareCatalog.Budget?"丐版":"标准版";
-            return new HardwareOrder{Id=State.Hardware.NextOrder++,Template=0,Client=index,Material=c.Material,Spec=HardwareCatalog.Spec(c.Material),Quantity=quantity,UnitPrice=unit,
-                Seconds=90+quantity*c.SecondsPerUnit,MinReputation=c.MinReputation,OfferExpires=State.Tick+Settings.Hardware.OfferLifetimeSeconds*60L,Name=c.Name+" · "+quantity+" 张"+product};
+            if(c.Material==HardwareCatalog.Standard&&!IsQuiet(spec)&&e!=null)quantity=Math.Max(1,quantity*e.StandardQuantityPercent/100);
+            var gen=Math.Max(State.Hardware.CoreGen,State.Hardware.IndustryGen);var minGen=c.Gen==2?gen:c.Gen==1?Math.Max(1,gen-1):0;
+            // A quote must be fulfillable by the chosen model; do not silently turn an old SKU into a new one.
+            if(c.Material==HardwareCatalog.Standard)minGen=Math.Min(minGen,Sku(spec)?.Gen??1);
+            var unit=(int)Math.Min(10000000,(long)BasePrice(spec)*c.PricePercent/100*OrderPricePercent(spec)/100*RequirementPercent(c.MinGrade)/100*SkuPricePercent(spec,Math.Max(1,minGen))/100/100*100);
+            return new HardwareOrder{Id=State.Hardware.NextOrder++,Template=0,Client=index,Material=c.Material,Spec=spec,Version=Sku(spec)?.Version??1,Quantity=quantity,UnitPrice=unit,MinGrade=c.MinGrade,MinGen=minGen,
+                Seconds=90+quantity*c.SecondsPerUnit,MinReputation=c.MinReputation,OfferExpires=State.Tick+Settings.Hardware.OfferLifetimeSeconds*60L,
+                Name=c.Name+" · "+quantity+" 张"+ProductName(spec)+(c.MinGrade>0?"（"+GradeRequirement(c.MinGrade)+"）":"")+(minGen>1?" · 第"+minGen+"代起":"")};
         }
     }
 }

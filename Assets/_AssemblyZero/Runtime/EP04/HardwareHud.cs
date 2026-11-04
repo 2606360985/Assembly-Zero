@@ -25,7 +25,7 @@ namespace AssemblyZero.Unity.EP04
         private readonly Dictionary<int,(UnityEngine.UI.Image Fill,TMP_Text Text)> orderRings=new Dictionary<int,(UnityEngine.UI.Image Fill,TMP_Text Text)>();
         private readonly Dictionary<string,TMP_Text> kpis=new Dictionary<string,TMP_Text>();
         private (UnityEngine.UI.Image Fill,TMP_Text Text) deviceRing;
-        public static readonly string[] Pages={"工厂","订单","产品","采购","市场","运输","报表"};
+        public static readonly string[] Pages={"工厂","订单","产品","研发","采购","市场","运输","报表"};
         private Sprite PanelSprite()
         {
             if(roundedPanel!=null)return roundedPanel;
@@ -149,10 +149,10 @@ namespace AssemblyZero.Unity.EP04
         public void FlashMarket(){flashTime=3;HardwareAudio.Play(game.World.CurrentEvent!=null?"alarm":"event",.8f);if(eventChip!=null)HardwareTween.Punch(eventChip,.1f,.4f);}
         private static string Phase(HardwareOrderPhase p)=>new[]{"可接","进行中","已配齐","已交付","已作废","已取消"}[(int)p];
         private static string Seconds(long ticks)=>Math.Max(0,ticks/60)+" 秒";
-        private string Product(int material)=>material==HardwareCatalog.Quiet?"静音版":material==HardwareCatalog.Budget?"丐版":"标准版";
         public void RebuildDrawer()
         {
             if(game.Drawer!="采购")CloseProcurementOverview();
+            if(game.Drawer!="产品"){game.View?.HideSkuPreview();designStats=null;designPreview=null;}
             ClearDrawerGuide();
             orderCards.Clear();acceptButtons.Clear();orderRings.Clear();
             foreach(Transform child in content){child.gameObject.SetActive(false);Destroy(child.gameObject);}details=null;drawer.gameObject.SetActive(game.Drawer!=""&&!game.Truck.Manual);AnimateDrawer(drawer.gameObject.activeSelf);if(!drawer.gameObject.activeSelf)return;
@@ -165,6 +165,7 @@ namespace AssemblyZero.Unity.EP04
                 var top=Row(Box("Device summary",content,false));top.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight=84;deviceRing=Ring(top,76,Good,18);
                 kpis["device-state"]=Tile(top,"bolt",Gold,"状态");kpis["device-speed"]=Tile(top,"clock",accent,"节拍");
                 DeviceActionBar();
+                Button(content,"工艺改造至最新世代 · 停机 30 秒",()=>game.Submit(new WorldCommand{Kind=CommandKind.Retool,Node=game.SelectedNode}),actionId:"device:retool");
             }
             if(game.Drawer=="报表")
             {
@@ -181,8 +182,8 @@ namespace AssemblyZero.Unity.EP04
             guideTargets["drawer:details"]=(RectTransform)details.transform;
             if(game.Drawer=="设备")
             {
-                Button(content,"采购缺料",()=>{var n=w.Node(game.SelectedNode);var r=game.Config.Economy.Recipe(n?.RecipeId);if(r!=null){var missing=r.Inputs.FirstOrDefault(i=>n.Input.Count(g=>g.Material==i.Material)<i.Quantity&&game.Config.Economy.Hardware.Materials.Any(m=>m.Id==i.Material&&m.Price>0));if(missing!=null)material=missing.Material;}game.Drawer="采购";RebuildDrawer();},actionId:"drawer:shortage");
-                Button(content,"切换配方",()=>{var n=w.Node(game.SelectedNode);if(n==null)return;var rs=game.Config.Economy.Recipes.Where(r=>r.Machine==n.Kind).ToArray();if(rs.Length>0)game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=rs[(Array.FindIndex(rs,r=>r.Id==n.RecipeId)+1)%rs.Length].Id});});
+                Button(content,"采购缺料",()=>{var n=w.Node(game.SelectedNode);var r=game.World.Recipe(n?.RecipeId);if(r!=null){var missing=r.Inputs.FirstOrDefault(i=>n.Input.Count(g=>g.Material==i.Material)<i.Quantity&&game.Config.Economy.Hardware.Materials.Any(m=>m.Id==i.Material&&m.Price>0));if(missing!=null)material=missing.Material;}game.Drawer="采购";RebuildDrawer();},actionId:"drawer:shortage");
+                Button(content,"切换配方",()=>{var n=w.Node(game.SelectedNode);if(n==null)return;var rs=game.World.RecipesFor(n.Kind).ToArray();if(rs.Length>0)game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=rs[(Array.FindIndex(rs,r=>r.Id==n.RecipeId)+1)%rs.Length].Id});});
                 Button(content,"查看上游",()=>{var route=w.State.Routes.FirstOrDefault(r=>r.To==game.SelectedNode);if(route!=null)game.SelectedNode=route.From;});
                 Button(content,"拆除：回收库存，返还投入75%",()=>game.Submit(new WorldCommand{Kind=CommandKind.Remove,Node=game.SelectedNode}));Button(content,"取消等待改建",()=>game.Submit(new WorldCommand{Kind=CommandKind.CancelChange,Node=game.SelectedNode}));
             }
@@ -198,6 +199,7 @@ namespace AssemblyZero.Unity.EP04
             if(game.Drawer=="采购")
             {
                 Button(content,"采购总览",OpenProcurementOverview,actionId:"drawer:procurement-overview");
+                CorePurchaseOptions(content);
                 Button(content,"切换采购物料",()=>{var ms=game.Config.Economy.Hardware.Materials.Where(m=>m.Price>0).Select(m=>m.Id).ToArray();material=ms[(Array.IndexOf(ms,material)+1)%ms.Length];},actionId:"drawer:material");
                 var qr=Row(Box("Quantity",content,false));Button(qr,"−1",()=>quantity=Math.Max(1,quantity-1),80,actionId:"drawer:minus");Button(qr,"+1",()=>quantity=Math.Min(80,quantity+1),80,actionId:"drawer:plus");Button(qr,"数量 6 / 8 / 12",()=>quantity=quantity==6?8:quantity==8?12:6,132);
                 Button(content,"切换：常规 / 加急 / 自提",()=>delivery=(delivery+1)%3);
@@ -205,19 +207,21 @@ namespace AssemblyZero.Unity.EP04
             }
             if(game.Drawer=="产品")
             {
-                ProductCard(content,HardwareCatalog.Standard,"双风扇 / 石墨外壳 · 基础合同价 ¥480");ProductCard(content,HardwareCatalog.Quiet,"三风扇 / 浅色外壳 · 需要口碑 20 · 合同价 ¥560");ProductCard(content,HardwareCatalog.Budget,"次品 + 包装材料 → 丐版 · 电商与翻新渠道");
-                Label(content,"板卡装配 → 显卡总装 → 检测 → 包装\n检测出的次品：返修台修复 / 丐版包装 / 市场卖给翻新商",15,60);
-                Button(content,"切换产线：标准 / 静音",()=>{var nodes=w.State.Nodes.Where(n=>n.Factory==game.Factory&&(n.Kind==BuildingKind.GPUAssembly||n.Kind==BuildingKind.Tester||n.Kind==BuildingKind.Packaging&&n.RecipeId!="budget-pack")).ToArray();var quiet=nodes.Any(n=>!n.RecipeId.StartsWith("quiet-"));foreach(var n in nodes){var id=n.Kind==BuildingKind.GPUAssembly?"gpu":n.Kind==BuildingKind.Tester?"test":"pack";game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=n.Id,Recipe=(quiet?"quiet-":"")+id});}},actionId:"drawer:recipe");
+                ProductDrawer(w);
+                ProductCard(content,HardwareCatalog.Budget,"次品 + 包装材料 → 丐版 · 电商与翻新渠道");
+                Label(content,"板卡装配 → 显卡总装（按型号）→ 检测分档 → 包装\n检测与包装通用，型号/世代/档位随卡流转",15,60);
                 Button(content,"建造丐版包装机",()=>game.BeginBuild(BuildingKind.Packaging,"budget-pack"),actionId:"drawer:budget");
                 Button(content,"建造返修台（次品 + 显存 → 待检）",()=>game.BeginBuild(BuildingKind.Rework));
             }
+            if(game.Drawer=="研发")ResearchDrawer(w);
             if(game.Drawer=="市场")
             {
-                foreach(var m in new[]{HardwareCatalog.Standard,HardwareCatalog.Quiet,HardwareCatalog.Budget,HardwareCatalog.Defect,HardwareCatalog.Ore})
+                var spots=h.Skus.Where(s=>!s.Retired).Select(s=>(HardwareCatalog.Standard,s.Id,s.Short)).Concat(new[]{HardwareCatalog.Budget,HardwareCatalog.Defect,HardwareCatalog.Ore}.Select(m=>(m,"",HardwareCatalog.Name(m))));
+                foreach(var (m,spec,name) in spots)
                 {
-                    var id=m;var sell=Row(Box("Spot "+m,content,false));
-                    Button(sell,"现货卖出 "+HardwareCatalog.Name(m)+" ×1",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=id,Quantity=1}));
-                    Button(sell,"×5",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=id,Quantity=5}),64);
+                    var id=m;var sku=spec;var sell=Row(Box("Spot "+m+spec,content,false));
+                    Button(sell,"现货卖出 "+name+" ×1",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=id,Spec=sku,Quantity=1}));
+                    Button(sell,"×5",()=>game.Submit(new WorldCommand{Kind=CommandKind.SpotSell,Factory=game.Factory,Material=id,Spec=sku,Quantity=5}),64);
                 }
             }
             if(game.Drawer=="运输")
@@ -236,9 +240,9 @@ namespace AssemblyZero.Unity.EP04
         private void OrderCard(HardwareOrder o)
         {
             var id=o.Id;var card=Column(Box("Order card "+id,content));
-            Strip(card,HardwareVisualCatalog.Get(o.Material).Color);
+            var style=HardwareVisualCatalog.Get(o.Material,game.World.IsQuiet(o.Spec));Strip(card,style.Color);
             var head=Row(Box("Order head",card,false));head.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight=48;
-            IconCell(head,HardwareIcons.ForMaterial(o.Material),HardwareVisualCatalog.Get(o.Material).Color==HardwareVisualCatalog.Graphite?ink:HardwareVisualCatalog.Get(o.Material).Color,34);
+            IconCell(head,HardwareIcons.ForMaterial(o.Material),style.Color==HardwareVisualCatalog.Graphite?ink:style.Color,34);
             Label(head,"<b>"+o.Name+"</b>\n<size=13><color=#9FB2BE>×"+o.Quantity+" · "+HardwareGame.Money(game.World.OrderValue(o))+"</color></size>",16,44,180);
             orderRings[id]=Ring(head,44,Good,12);
             var status=Label(card,"",14,o.Phase==HardwareOrderPhase.Available?60:42);
@@ -259,9 +263,10 @@ namespace AssemblyZero.Unity.EP04
             var order=game.World.State.Hardware.Orders.FirstOrDefault(o=>o.Id==hint.Order);
             if(order!=null&&order.Phase!=HardwareOrderPhase.Available&&game.Factory!=order.Factory){game.Factory=order.Factory;game.FocusFactory();game.View.Rebuild();}
             if(hint.Order>0)game.SelectedOrder=hint.Order;
-            if(hint.Key=="build"||hint.Key=="bottleneck"){game.BeginBuild(hint.Building);return;}
+            if(hint.Key=="build"||hint.Key=="bottleneck"||hint.Key=="research"&&hint.Building==BuildingKind.Lab){game.BeginBuild(hint.Building);return;}
+            if(hint.Key=="research"||hint.Key=="generation"){game.Drawer=hint.Key=="research"?"研发":"市场";RebuildDrawer();return;}
             if(hint.Node>0){game.FocusNode(hint.Node);return;}
-            if(hint.Key=="supply"){material=hint.Material;quantity=Math.Clamp(hint.Quantity,1,80);delivery=0;game.Drawer="采购";}
+            if(hint.Key=="supply"){material=hint.Material;quantity=Math.Clamp(hint.Quantity,1,80);delivery=0;purchaseGeneration=hint.Generation;purchaseCoreBin=hint.CoreBin;game.Drawer="采购";}
             else game.Drawer=hint.Key=="order"||hint.Key=="free"?"订单":hint.Key=="pickup"||hint.Key=="mining"?"运输":hint.Key=="arrival"?"采购":"产品";
             RebuildDrawer();
         }
@@ -319,22 +324,24 @@ namespace AssemblyZero.Unity.EP04
             if(details==null)return;
             if(game.Drawer=="设备")
             {
-                var n=w.Node(game.SelectedNode);if(n==null){details.text="未选择设备";return;}var recipe=game.Config.Economy.Recipe(n.RecipeId);var bottleneck=w.Bottleneck(n.Factory)?.Id==n.Id;
+                var n=w.Node(game.SelectedNode);if(n==null){details.text="未选择设备";return;}var recipe=w.Recipe(n.RecipeId);var bottleneck=w.Bottleneck(n.Factory)?.Id==n.Id;
                 var u=recipe==null?0:w.Utilization(n);
                 if(deviceRing.Fill!=null){deviceRing.Fill.fillAmount=u/100f;deviceRing.Fill.color=bottleneck?Bad:n.RunState==NodeState.Working?Good:n.RunState==NodeState.Blocked?Bad:Gold;deviceRing.Text.text=recipe==null?"—":"<b>"+u+"%</b>\n<size=11>利用率</size>";}
                 if(kpis.TryGetValue("device-state",out var stateKpi))stateKpi.text=StateLabel(n.RunState)+(bottleneck?" <color=#EB5545>瓶颈</color>":"");
                 if(kpis.TryGetValue("device-speed",out var speedKpi))speedKpi.text=recipe==null?"—":recipe.Seconds*100/game.Config.Economy.UpgradePercent[n.Level-1]/100f+"s · L"+n.Level;
-                details.text=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name+" L"+n.Level+(bottleneck?"  <color=#EB5545>【瓶颈】</color>":"")+"\n生产："+(recipe?.Name??"物流服务")+"\n状态："+StateLabel(n.RunState)+" · "+n.Status+(recipe==null?"":"\n利用率 <b>"+u+"%</b> · 周期 "+recipe.Seconds*100/game.Config.Economy.UpgradePercent[n.Level-1]/100f+"s")
+                details.text=game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name+" L"+n.Level+" · 工艺 G"+Math.Max(1,n.ProcessGen)+(bottleneck?"  <color=#EB5545>【瓶颈】</color>":"")+"\n生产："+(recipe?.Name??"物流服务")+"\n状态："+StateLabel(n.RunState)+" · "+n.Status+(recipe==null?"":"\n利用率 <b>"+u+"%</b> · 周期 "+recipe.Seconds*100/game.Config.Economy.UpgradePercent[n.Level-1]/100f+"s")
                     +(recipe!=null&&recipe.FlawPermille>0?"\n次品率 "+w.FlawPermille(n,recipe)/10f+"%（首单后生效，升级可降低）":"")+"\n"+(recipe==null?"":string.Join("\n",recipe.Inputs.Select(i=>HardwareCatalog.Name(i.Material)+" 缺 "+Math.Max(0,i.Quantity-n.Input.Count(g=>g.Material==i.Material)))))+"\n输入 "+n.Input.Count+" / 输出 "+n.Output.Count+" / 加工 "+n.WorkRemaining/60+"s"+(n.PendingRemove||n.PendingRecipe!=""?"\n改建等待当前批次完成":"")
                     +(bottleneck?"\n下游在等它：再建一台同类设备或升级，产量立刻提升。":"");
             }
             if(game.Drawer=="订单")details.text="口碑 <b>"+h.Reputation+"</b> · "+HardwareCatalog.ReputationTier(h.Reputation)+" · 进行中 "+w.ActiveOrderCount+" / "+w.Settings.Hardware.MaxActiveOrders+"\n提前（前60%时间）+15% 口碑+"+WorldSimulation.EarlyReputation+" · 准时 口碑+"+WorldSimulation.OnTimeReputation+"\n迟交 -25% 口碑"+WorldSimulation.LateReputation+" · 超期1.5倍作废：违约金10% 口碑"+WorldSimulation.ExpireReputation;
             if(game.Drawer=="采购")
             {
-                var m=game.Config.Economy.Hardware.Materials.FirstOrDefault(m=>m.Id==material&&m.Price>0);if(m==null){material=HardwareCatalog.Heat;m=game.Config.Economy.Hardware.Materials.First(m=>m.Id==material);}var config=game.Config.Economy.Hardware;var fee=delivery==0?config.DeliveryFee:delivery==1?config.ExpressFee:config.PickupFee;var price=w.PurchasePrice(material);
-                details.text="青港元件供应站\n"+HardwareVisualCatalog.Caption(material)+"\n"+m.Name+" ×"+quantity+"\n单价 "+HardwareGame.Money(price)+Trend(price,m.Price)+" · 库存 "+h.Stock.First(s=>s.Material==material).Quantity+"\n"+new[]{"常规 "+config.DeliverySeconds+"秒","加急 "+config.ExpressSeconds+"秒","自提：空闲皮卡自动装运"}[delivery]+" · 运费 "+HardwareGame.Money(fee)+"\n合计 <b>"+HardwareGame.Money((long)price*quantity+fee)+"</b>\n每 "+config.RestockSeconds+" 秒补货 · 在途/待提 "+h.Deliveries.Sum(d=>d.Cargo.Count)+" 件";
+                var m=game.Config.Economy.Hardware.Materials.FirstOrDefault(m=>m.Id==material&&m.Price>0);if(m==null){material=HardwareCatalog.Heat;m=game.Config.Economy.Hardware.Materials.First(m=>m.Id==material);}var config=game.Config.Economy.Hardware;var fee=delivery==0?config.DeliveryFee:delivery==1?config.ExpressFee:config.PickupFee;var price=w.PurchasePrice(material,purchaseGeneration,purchaseCoreBin);
+                details.text="青港元件供应站\n"+HardwareVisualCatalog.Caption(material)+"\n"+m.Name+" ×"+quantity+CorePurchaseCaption()+"\n单价 "+HardwareGame.Money(price)+Trend(price,m.Price)+" · 库存 "+h.Stock.First(s=>s.Material==material).Quantity+"\n"+new[]{"常规 "+config.DeliverySeconds+"秒","加急 "+config.ExpressSeconds+"秒","自提：空闲皮卡自动装运"}[delivery]+" · 运费 "+HardwareGame.Money(fee)+"\n合计 <b>"+HardwareGame.Money((long)price*quantity+fee)+"</b>\n每 "+config.RestockSeconds+" 秒补货 · 在途/待提 "+h.Deliveries.Sum(d=>d.Cargo.Count)+" 件";
             }
-            if(game.Drawer=="产品")details.text="星铸 S1 产品线\n当前仓库：标准 "+Stock(HardwareCatalog.Standard)+" · 静音 "+Stock(HardwareCatalog.Quiet)+" · 丐版 "+Stock(HardwareCatalog.Budget)+" · 次品 "+Stock(HardwareCatalog.Defect)+"\n切换配方会等待当前批次完成";
+            if(game.Drawer=="产品")details.text="星铸产品线 · "+h.Skus.Count(s=>!s.Retired)+" 个在售型号 · 当前核心第 "+h.CoreGen+" 代\n当前仓库：零售显卡 "+Stock(HardwareCatalog.Standard)+" · 丐版 "+Stock(HardwareCatalog.Budget)+" · 次品 "+Stock(HardwareCatalog.Defect)+"\n切换配方会等待当前批次完成";
+            if(game.Drawer=="研发")details.text=ResearchSummary(w);
+            if(game.Drawer=="产品")RefreshDesigner(w);
             if(game.Drawer=="市场")
             {
                 if(kpis.TryGetValue("core",out var core))core.text=HardwareGame.Money(w.PurchasePrice(HardwareCatalog.Core))+"<size=14>"+Trend(w.PurchasePrice(HardwareCatalog.Core),18000)+"</size>";
@@ -344,8 +351,8 @@ namespace AssemblyZero.Unity.EP04
                 var e=w.CurrentEvent;var f=w.ForecastEvent;
                 details.text=(e!=null?"<color=#F2A33A><b>「"+e.Name+"」</b>剩 "+w.MarketSecondsLeft+" 秒</color>\n"+e.Detail:f!=null?"<color=#E8D27A>预告「"+f.Name+"」"+w.MarketSecondsLeft+" 秒后到来</color>\n"+f.Detail+"\n现在囤料或转产正是时候。":w.OfferBoardOpen?"行情平稳 · 下次变化约 "+w.MarketSecondsLeft+" 秒后":"交付首单后，市场行情开始波动。")
                     +"\n\n采购价：GPU核心 "+HardwareGame.Money(w.PurchasePrice(HardwareCatalog.Core))+Trend(w.PurchasePrice(HardwareCatalog.Core),18000)+" · 显存包 "+HardwareGame.Money(w.PurchasePrice(HardwareCatalog.Memory))+Trend(w.PurchasePrice(HardwareCatalog.Memory),6000)
-                    +"\n合同单价：标准 "+w.OrderPricePercent(HardwareCatalog.Standard)+"% · 静音 "+w.OrderPricePercent(HardwareCatalog.Quiet)+"%"
-                    +"\n现货价：标准 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Standard))+" · 静音 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Quiet))+" · 丐版 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Budget))+" · 次品 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Defect))
+                    +"\n合同单价：标准系 "+w.OrderPricePercent(HardwareCatalog.StandardSpec)+"% · 静音系 "+w.OrderPricePercent(HardwareCatalog.QuietSpec)+"%"
+                    +"\n现货价："+string.Join(" · ",h.Skus.Where(s=>!s.Retired).Select(s=>s.Short+" "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Standard,s.Id))))+" · 丐版 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Budget))+" · 次品 "+HardwareGame.Money(w.SpotPrice(HardwareCatalog.Defect))
                     +"\n成交额度 "+h.SpotRemaining+" 件 / 5分钟 · 仅卖未分配库存";
             }
             if(game.Drawer=="运输")details.text="<color=#16B8D1>自动物流 / PICKUP 01</color>\n"+v.Status+"\n载货 "+v.Cargo.Count+" / "+game.Config.Economy.VehicleCapacity+" · 送往 "+v.TargetFactory+"号厂\n任务："+(v.PickupTask?"取回采购":v.Loop?"循环采集":"单次 / 待命")+"\n采满 → 返厂 → 卸货 → 再采集；仓满或矿空会等待\n待自提 "+h.Deliveries.Where(d=>d.Method==2&&d.Factory==game.Factory).Sum(d=>d.Cargo.Count)+" 件";

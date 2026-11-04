@@ -139,7 +139,7 @@ namespace AssemblyZero.Unity.EP04
             var local=ToCanvasRoot(game.HoverScreen+new Vector2(22,-18));var root=(RectTransform)canvas.transform;
             local.x=Mathf.Min(local.x,root.rect.width-tooltip.sizeDelta.x-8);local.y=Mathf.Max(local.y,tooltip.sizeDelta.y+8);tooltip.anchoredPosition=local;tooltip.SetAsLastSibling();
             if(tooltipNode==n.Id&&Time.frameCount%10!=0)return;tooltipNode=n.Id;
-            var recipe=game.Config.Economy.Recipe(n.RecipeId);var u=recipe==null?0:w.Utilization(n);var bottleneck=w.Bottleneck(n.Factory)?.Id==n.Id;
+            var recipe=w.Recipe(n.RecipeId);var u=recipe==null?0:w.Utilization(n);var bottleneck=w.Bottleneck(n.Factory)?.Id==n.Id;
             tooltipRing.Fill.fillAmount=u/100f;tooltipRing.Fill.color=bottleneck?Bad:n.RunState==NodeState.Working?Good:n.RunState==NodeState.Blocked?Bad:Gold;tooltipRing.Text.text=recipe==null?"—":"<b>"+u+"%</b>";
             tooltipTitle.text="<b>"+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==n.Kind).Name+"</b> L"+n.Level+(bottleneck?" <color=#EB5545>瓶颈</color>":"");
             tooltipBody.text=StateLabel(n.RunState)+(recipe==null?"":"  "+recipe.Seconds*100/game.Config.Economy.UpgradePercent[n.Level-1]/100f+"s/件")+"\n"

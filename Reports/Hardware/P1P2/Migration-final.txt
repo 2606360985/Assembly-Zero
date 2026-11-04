@@ -1,0 +1,3 @@
+PASS AssemblyZero.Domain
+﻿PASS HardwareIterationTests.Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership() 607ms
+Passed=1 Failed=0; fallback serializer, no Unity native runtime or rendering.

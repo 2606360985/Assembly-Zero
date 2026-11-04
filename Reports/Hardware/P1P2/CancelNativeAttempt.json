@@ -1,0 +1,12 @@
+{
+  "success": false,
+  "command": "unity command cancel_tests",
+  "data": null,
+  "errors": [
+    {
+      "code": "EDITOR_TIMEOUT",
+      "message": "Pipeline command 'cancel_tests' timed out after 10000ms"
+    }
+  ],
+  "warnings": []
+}

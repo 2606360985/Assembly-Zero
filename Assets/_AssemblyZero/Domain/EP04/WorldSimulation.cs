@@ -16,16 +16,19 @@ namespace AssemblyZero.Domain.EP04
         private readonly Dictionary<int,BusinessNode> nodeIndex=new Dictionary<int,BusinessNode>();
         private readonly Dictionary<int,List<BusinessRoute>> outgoing=new Dictionary<int,List<BusinessRoute>>();
         private bool logisticsDirty;
-        public const int HardwareSaveVersion=3;
+        private readonly Dictionary<string,ProductRule> skuRecipes=new Dictionary<string,ProductRule>();
+        public const int HardwareSaveVersion=4;
         public WorldSimulation(EconomySettings settings,WorldState restored=null,int seed=0)
         {
             Settings=settings??throw new ArgumentNullException(nameof(settings));
             State=restored??NewState();
+            var legacyProductClock=restored!=null&&State.Hardware?.ContentVersion<3;
+            if(restored!=null&&Settings.IsHardware)MigrateHardwareProducts();
             if(restored==null&&Settings.IsHardware&&seed!=0)State.Hardware.Rng=seed;
             if(State.Version!=(Settings.IsHardware?HardwareSaveVersion:1))throw new ArgumentException("存档版本与战役不匹配");
             if(Settings.IsHardware&&(State.Hardware==null||State.Hardware.ContentId!=Settings.Hardware.Id||State.Hardware.ContentVersion!=Settings.Hardware.Version))throw new ArgumentException("显卡配置版本不匹配");
             foreach(var route in State.Routes)route.Initialize();
-            Index();
+            RefreshSkus();Index();
             if(restored==null&&Settings.IsHardware)InitializeHardware();
             if(restored!=null&&Settings.IsHardware)
             {
@@ -36,7 +39,7 @@ namespace AssemblyZero.Domain.EP04
                     v.Manual=false;v.Speed=v.Throttle=v.Steer=0;v.WorkTicks=0;v.Loop=false;v.PickupTask=false;
                     Travel(v,Factory(v.TargetFactory)?.Dock??Factory(1).Dock,2);
                 }
-                if(State.Hardware.FirstProductTick==0&&(FinishedStock(1).Any(g=>g.Material==HardwareCatalog.Standard||g.Material==HardwareCatalog.Quiet)||State.Hardware.Settlements.Count>0))
+                if(legacyProductClock&&State.Hardware.FirstProductTick==0&&(FinishedStock(1).Any(g=>g.Material==HardwareCatalog.Standard)||State.Hardware.Settlements.Count>0))
                     State.Hardware.FirstProductTick=Math.Max(1,State.Tick);
             }
             AssertConserved();
@@ -44,7 +47,11 @@ namespace AssemblyZero.Domain.EP04
         private WorldState NewState()
         {
             var s=new WorldState{Money=Settings.StartingMoney};
-            if(Settings.IsHardware){s.Version=HardwareSaveVersion;s.Hardware=new HardwareState{ContentVersion=Settings.Hardware.Version,SpotRemaining=Settings.Hardware.SpotCapacity,Reputation=Settings.Hardware.StartingReputation};s.Unlocked=3;}
+            if(Settings.IsHardware)
+            {
+                s.Version=HardwareSaveVersion;s.Hardware=new HardwareState{ContentVersion=Settings.Hardware.Version,SpotRemaining=Settings.Hardware.SpotCapacity,Reputation=Settings.Hardware.StartingReputation};s.Unlocked=3;
+                foreach(var sku in Settings.Hardware.Skus??Array.Empty<SkuDefinition>()){var copy=sku.Clone();copy.Score=HardwareSku.Score(copy);s.Hardware.Skus.Add(copy);}
+            }
             s.Factories.Add(new FactorySite{Id=1,X=4,Z=4,Owned=true,Discovered=true});
             s.Factories.Add(new FactorySite{Id=2,X=70,Z=48});
             s.Resources.Add(new ResourceSite{Id=1,Material=8,X=10,Z=39,Discovered=true});
@@ -61,7 +68,25 @@ namespace AssemblyZero.Domain.EP04
             // A machine missing any input route would only hoard the inputs it can reach.
             unlinked.Clear();
             if(Settings.IsHardware)foreach(var n in State.Nodes)
-                if(Settings.Recipe(n.RecipeId) is ProductRule recipe&&recipe.Inputs.Any(i=>!State.Routes.Any(r=>r.To==n.Id&&r.Material==i.Material)))unlinked.Add(n.Id);
+                if(Recipe(n.RecipeId) is ProductRule recipe&&recipe.Inputs.Any(i=>!State.Routes.Any(r=>r.To==n.Id&&r.Material==i.Material)))unlinked.Add(n.Id);
+        }
+        // Static recipes come from the economy; SKU assembly recipes are derived from the campaign's SKU list.
+        public ProductRule Recipe(string id)
+        {
+            if(string.IsNullOrEmpty(id))return null;
+            if(Settings.IsHardware&&HardwareSku.IsSkuRecipe(id))return skuRecipes.TryGetValue(id,out var r)?r:null;
+            return Settings.Recipe(id);
+        }
+        public IEnumerable<ProductRule> RecipesFor(BuildingKind kind)
+        {
+            foreach(var r in Settings.Recipes)if(r.Machine==kind&&(!Settings.IsHardware||RecipeUnlocked(r)))yield return r;
+            if(Settings.IsHardware&&kind==BuildingKind.GPUAssembly)foreach(var s in State.Hardware.Skus)if(!s.Retired)yield return skuRecipes[HardwareSku.RecipeId(s.Id)];
+        }
+        public SkuDefinition Sku(string id)=>Settings.IsHardware&&!string.IsNullOrEmpty(id)?State.Hardware.Skus.FirstOrDefault(s=>s.Id==id):null;
+        private void RefreshSkus()
+        {
+            skuRecipes.Clear();if(!Settings.IsHardware)return;
+            foreach(var s in State.Hardware.Skus)skuRecipes[HardwareSku.RecipeId(s.Id)]=HardwareSku.Assembly(s);
         }
         private readonly HashSet<int> unlinked=new HashSet<int>();
         public bool Unlinked(BusinessNode n)=>unlinked.Contains(n.Id);
@@ -104,7 +129,9 @@ namespace AssemblyZero.Domain.EP04
                 return;
             }
             if(n.Kind==BuildingKind.Warehouse){n.RunState=NodeState.Idle;n.Status="仓储 "+n.Output.Count+"/"+Capacity(n);return;}
-            var recipe=Settings.Recipe(n.RecipeId);if(recipe==null){n.RunState=NodeState.Idle;n.Status="请选择配方";return;}
+            if(n.Kind==BuildingKind.Lab){if(Settings.IsHardware)ProcessLab(n);return;}
+            if(Settings.IsHardware&&TickRetooling(n))return;
+            var recipe=Recipe(n.RecipeId);if(recipe==null){n.RunState=NodeState.Idle;n.Status="请选择配方";return;}
             if(n.Batch.Count>0)
             {
                 if(n.WorkRemaining>0)n.WorkRemaining--;
@@ -112,6 +139,8 @@ namespace AssemblyZero.Domain.EP04
                 if(n.WorkRemaining>0)return;
                 if(n.Output.Count>=OutputCapacity(n)){n.Status="输出堵塞";n.RunState=NodeState.Blocked;n.BusyTicks--;return;}
                 n.Output.Add(Finish(n,recipe));
+                if(Settings.IsHardware&&n.Kind==BuildingKind.BoardAssembly)RecoverUnusedBoards(n.Factory);
+                if(Settings.IsHardware&&n.RetoolGen!=0)return;
             }
             if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe))
             {
@@ -124,28 +153,40 @@ namespace AssemblyZero.Domain.EP04
                 var missing=recipe.Inputs.First(i=>!State.Routes.Any(r=>r.To==n.Id&&r.Material==i.Material));
                 n.RunState=NodeState.Disconnected;n.Status="未连通 "+EconomySettings.MaterialName(missing.Material)+"：缺供应方或通道";return;
             }
+            if(Settings.IsHardware&&n.Kind==BuildingKind.GPUAssembly&&Sku(recipe.SpecId) is SkuDefinition design&&design.Gen>Math.Max(1,n.ProcessGen))
+            {n.RunState=NodeState.Disconnected;n.Status="需要 G"+design.Gen+" 工艺改造";return;}
             foreach(var input in recipe.Inputs)
-                if(n.Input.Count(i=>i.Material==input.Material&&i.ReservedOrder==0)<input.Quantity){n.RunState=NodeState.Starved;n.Status="缺少 "+EconomySettings.MaterialName(input.Material);return;}
+                if(n.Input.Count(i=>i.Material==input.Material&&i.ReservedOrder==0&&AcceptsGoods(n,i))<input.Quantity){n.RunState=NodeState.Starved;n.Status="缺少匹配世代/体质的 "+EconomySettings.MaterialName(input.Material);return;}
             if(Settings.IsHardware&&!Pay(recipe.ProcessingFee)){n.Status="加工资金不足";n.RunState=NodeState.NoFunds;return;}
             n.BatchFee=Settings.IsHardware?recipe.ProcessingFee:0;
-            foreach(var input in recipe.Inputs)for(var i=0;i<input.Quantity;i++){var item=n.Input.First(g=>g.Material==input.Material&&g.ReservedOrder==0);n.Input.Remove(item);n.Batch.Add(item);}
+            foreach(var input in recipe.Inputs)for(var i=0;i<input.Quantity;i++){var item=n.Input.First(g=>g.Material==input.Material&&g.ReservedOrder==0&&AcceptsGoods(n,g));n.Input.Remove(item);n.Batch.Add(item);}
             n.WorkTotal=n.WorkRemaining=Math.Max(1,recipe.Seconds*60*100/Settings.UpgradePercent[n.Level-1]);n.Status="加工中";n.RunState=NodeState.Working;n.BusyTicks++;
         }
         private Goods Finish(BusinessNode n,ProductRule recipe)
         {
-            var output=recipe.Output;var spec=recipe.SpecId;var flawed=false;
+            var output=recipe.Output;var spec=recipe.SpecId;var version=recipe.SpecVersion;var flawed=false;
             if(Settings.IsHardware)
             {
-                // Inspection reveals flaws hidden at assembly; rework keeps the original specification.
-                if(recipe.Machine==BuildingKind.Tester&&recipe.Byproduct!=0&&n.Batch.Any(g=>g.Flawed)){output=recipe.Byproduct;spec=n.Batch[0].SpecId;}
-                if(recipe.Machine==BuildingKind.Rework){spec=n.Batch.First(g=>g.Material==HardwareCatalog.Defect).SpecId;if(spec==HardwareCatalog.QuietSpec)output=recipe.Byproduct;}
+                // Stations without their own SKU (inspection, packaging, rework) keep the processed card's specification.
+                var carrier=n.Batch.FirstOrDefault(g=>HardwareCatalog.IsCard(g.Material));
+                if(string.IsNullOrEmpty(spec)&&carrier!=null){spec=carrier.SpecId;version=carrier.SpecVersion;}
+                // Inspection reveals flaws hidden at assembly.
+                if(recipe.Machine==BuildingKind.Tester&&recipe.Byproduct!=0&&n.Batch.Any(g=>g.Flawed))output=recipe.Byproduct;
                 flawed=recipe.FlawPermille>0&&Roll(FlawPermille(n,recipe));
             }
             var product=Create(n.Factory,output);
-            if(Settings.IsHardware){product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=spec;product.SpecVersion=recipe.SpecVersion;product.Flawed=flawed;}
+            if(Settings.IsHardware)
+            {
+                product.MaterialCost=n.Batch.Sum(g=>g.MaterialCost);product.ProcessingCost=n.Batch.Sum(g=>g.ProcessingCost)+n.BatchFee;product.FreightCost=n.Batch.Sum(g=>g.FreightCost);
+                product.Gift=n.Batch.All(g=>g.Gift);product.SpecId=spec;product.SpecVersion=version;product.Flawed=flawed;product.Gen=n.Batch.Count>0?n.Batch.Max(g=>g.Gen):1;
+                product.CoreBin=n.Batch.FirstOrDefault(g=>g.Material==HardwareCatalog.Core||g.Material==HardwareCatalog.AssembledBoard||HardwareCatalog.IsCard(g.Material))?.CoreBin??0;
+                // Packaging keeps the bin; a passing inspection assigns a fresh one; rework returns an ungraded card.
+                product.Grade=recipe.Machine==BuildingKind.Rework?0:n.Batch.FirstOrDefault(g=>HardwareCatalog.IsCard(g.Material))?.Grade??0;
+                if(recipe.Machine==BuildingKind.Tester&&output==recipe.Output)product.Grade=RollGrade(n,product.Gen);
+            }
             State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;
             if(Settings.IsHardware&&output==HardwareCatalog.Defect)Log("检测发现次品：可返修、做成丐版，或在市场页卖给翻新商");
-            if(Settings.IsHardware&&State.Hardware.FirstProductTick==0&&(output==HardwareCatalog.Standard||output==HardwareCatalog.Quiet))
+            if(Settings.IsHardware&&State.Hardware.FirstProductTick==0&&output==HardwareCatalog.Standard)
             {
                 State.Hardware.FirstProductTick=State.Tick;Log("首款产品下线！星铸 S1 已完成装配、检测和包装；入库后自动分配给订单。");
             }
@@ -168,13 +209,13 @@ namespace AssemblyZero.Domain.EP04
         // A busy machine is a bottleneck when another machine of the same factory waits for material.
         public BusinessNode Bottleneck(int factory)
         {
-            var nodes=State.Nodes.Where(n=>n.Factory==factory&&Settings.Recipe(n.RecipeId)!=null).ToArray();
+            var nodes=State.Nodes.Where(n=>n.Factory==factory&&Recipe(n.RecipeId)!=null).ToArray();
             if(!nodes.Any(n=>n.RunState==NodeState.Starved))return null;
             return nodes.Where(n=>Utilization(n)>=85).OrderByDescending(Utilization).ThenBy(n=>n.Id).FirstOrDefault();
         }
         private bool CanReceive(BusinessNode n,int material)
         {
-            if(n.PendingRemove||!string.IsNullOrEmpty(n.PendingRecipe)||unlinked.Contains(n.Id))return false;
+            if(n.PendingRemove||n.RetoolGen!=0||!string.IsNullOrEmpty(n.PendingRecipe)||unlinked.Contains(n.Id))return false;
             if(n.Kind==BuildingKind.Warehouse)return n.Output.Count<Capacity(n)&&n.Output.Count(i=>i.Material==material)<Capacity(n)/4;
             if(n.Kind==BuildingKind.Sales)return n.Input.Count<Capacity(n);
             return n.Input.Count(i=>i.Material==material)<Capacity(n);
@@ -185,10 +226,14 @@ namespace AssemblyZero.Domain.EP04
             if(CanReceive(target,r.Material))
             {
                 r.Backend.QueryCandidates(new BeltAccessPort(new LaneId(0),r.Length-512,r.Length),candidates);
-                if(candidates.Count>0&&r.Backend.TryTake(candidates[0].Handle,out var moved))
+                var candidate=candidates.Count>0?r.Cargo.First(g=>g.Id==candidates[0].Handle.ItemId.Value):null;
+                var fallback=State.Nodes.FirstOrDefault(n=>n.Factory==target.Factory&&n.Kind==BuildingKind.Warehouse&&CanReceive(n,r.Material));
+                if(candidate!=null&&(AcceptsGoods(target,candidate)||fallback!=null)&&r.Backend.TryTake(candidates[0].Handle,out var moved))
                 {
                     var item=r.Cargo.First(g=>g.Id==moved.Handle.ItemId.Value);r.Cargo.Remove(item);
-                    (target.Kind==BuildingKind.Warehouse?target.Output:target.Input).Add(item);
+                    // A route may already contain old boards when its consumer changes model.
+                    var destination=AcceptsGoods(target,item)?target:fallback;
+                    (destination.Kind==BuildingKind.Warehouse?destination.Output:destination.Input).Add(item);
                 }
             }
         }
@@ -200,8 +245,10 @@ namespace AssemblyZero.Domain.EP04
             for(var k=0;k<choices.Count;k++)
             {
                 var index=(n.Cursor+k)%choices.Count;var r=choices[index];var target=Node(r.To);if(!CanReceive(target,r.Material))continue;
-                var item=n.Output.FirstOrDefault(g=>g.Material==r.Material&&g.ReservedOrder==0);if(item==null)continue;
+                var item=n.Output.FirstOrDefault(g=>g.Material==r.Material&&g.ReservedOrder==0&&AcceptsGoods(target,g));if(item==null)continue;
                 var score=target.Policy(r.Material)?.Priority??0;
+                if(Settings.IsHardware&&target.Kind==BuildingKind.Warehouse)score-=100;
+                if(Settings.IsHardware&&r.Material==HardwareCatalog.Tested&&Recipe(target.RecipeId)?.OnlyGrade>0)score+=100;
                 if(target.Kind==BuildingKind.Sales)
                 {
                     var reserve=n.Policy(r.Material)?.Reserve??0;

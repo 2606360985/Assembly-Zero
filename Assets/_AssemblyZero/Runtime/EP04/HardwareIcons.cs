@@ -75,6 +75,6 @@ namespace AssemblyZero.Unity.EP04
                 default:return "box";
             }
         }
-        public static string ForPage(string page)=>page=="工厂"?"factory":page=="订单"?"order":page=="产品"?"gpu":page=="采购"?"cart":page=="市场"?"market":page=="运输"?"truck":page=="报表"?"report":"dot";
+        public static string ForPage(string page)=>page=="工厂"?"factory":page=="订单"?"order":page=="产品"?"gpu":page=="研发"?"chip":page=="采购"?"cart":page=="市场"?"market":page=="运输"?"truck":page=="报表"?"report":"dot";
     }
 }

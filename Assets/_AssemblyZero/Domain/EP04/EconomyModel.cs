@@ -23,16 +23,18 @@ namespace AssemblyZero.Domain.EP04
         public override int GetHashCode() => (X*397 ^ Z)*31 ^ H;
         public static int Distance(GridPoint a, GridPoint b) => Math.Abs(a.X-b.X)+Math.Abs(a.Z-b.Z)+Math.Abs(a.H-b.H);
     }
-    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging, Rework }
+    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging, Rework, Lab }
     public enum NodeState { Idle, Working, Starved, Blocked, NoFunds, Disconnected }
     public enum VehicleRole { Pickup, Collector, Hauler }
     public enum VehiclePhase { Idle, Travelling, Gathering, Unloading, WaitingFunds, WaitingStock }
     public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost,
-        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle, PickupPurchase }
+        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle, PickupPurchase, StartResearch, DesignSku, RetireSku, Retool }
     [Serializable] public sealed class Goods
     {
         public int Id, Origin, Material;
         public int ReservedOrder, SpecVersion; public string SpecId=""; public long MaterialCost, ProcessingCost, FreightCost; public bool Gift, Flawed;
+        // Gen follows the GPU core into every card; Grade is 0 until a tester bins the card (1=A, 2=B, 3=C).
+        public int Gen=1, Grade, CoreBin;
         public long Cost => MaterialCost+ProcessingCost+FreightCost;
         public Goods() { }
         public Goods(int id,int origin,int material) { Id=id;Origin=origin;Material=material; }
@@ -47,6 +49,7 @@ namespace AssemblyZero.Domain.EP04
         public int Byproduct;
         // Hidden flaw chance in permille at L1; revealed by the next inspection step.
         public int FlawPermille;
+        public int OnlyGrade;
     }
     [Serializable] public sealed class EconomySettings
     {
@@ -79,6 +82,7 @@ namespace AssemblyZero.Domain.EP04
         public long NextSend; public int WorkRemaining, WorkTotal;
         public int BatchFee;
         public NodeState RunState; public int BusyTicks, BusyPrev;
+        public int ProcessGen=1, RetoolGen, RetoolRemaining;
         public List<Goods> Input=new List<Goods>(), Output=new List<Goods>(), Batch=new List<Goods>();
         public List<SupplyPolicy> Policies=new List<SupplyPolicy>();
         public GridPoint Center => new GridPoint(X,Z);
@@ -135,8 +139,11 @@ namespace AssemblyZero.Domain.EP04
     public sealed class WorldCommand
     {
         public CommandKind Kind;public int Factory=1,Node,X,Z,Rotation,Vehicle=1,Resource,TargetFactory=1,Material=8,Supplier,Priority,Reserve;
-        public BuildingKind Building;public string Recipe="";public bool Flag;
+        public BuildingKind Building;public string Recipe="",Spec="";public bool Flag;
         public int Order, Quantity, Delivery; public double Throttle,Steer;
+        // SKU design fields (DesignSku); Name is the model name shown to clients.
+        public int Memory=1, Cooler=HardwareCatalog.Heat, Shell, Price, Generation, CoreBin, Fans, Length;
+        public bool Backplate; public TargetMarket Market; public string Name="";
     }
     public readonly struct CommandResult
     {

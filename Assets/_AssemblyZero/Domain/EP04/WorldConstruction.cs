@@ -8,7 +8,7 @@ namespace AssemblyZero.Domain.EP04
     {
         private CommandResult Execute(WorldCommand c)
         {
-            switch(c.Kind){case CommandKind.AcceptOrder:case CommandKind.ReserveOrder:case CommandKind.ReleaseOrder:case CommandKind.DeliverOrder:case CommandKind.CancelOrder:case CommandKind.Purchase:case CommandKind.SpotSell:case CommandKind.TakeControl:case CommandKind.ReleaseControl:case CommandKind.Drive:case CommandKind.Interact:case CommandKind.RecoverVehicle:case CommandKind.RightVehicle:return Settings.IsHardware?HardwareCommand(c):Fail("该命令仅适用于显卡战役");}
+            switch(c.Kind){case CommandKind.AcceptOrder:case CommandKind.ReserveOrder:case CommandKind.ReleaseOrder:case CommandKind.DeliverOrder:case CommandKind.CancelOrder:case CommandKind.Purchase:case CommandKind.SpotSell:case CommandKind.TakeControl:case CommandKind.ReleaseControl:case CommandKind.Drive:case CommandKind.Interact:case CommandKind.RecoverVehicle:case CommandKind.RightVehicle:case CommandKind.StartResearch:case CommandKind.DesignSku:case CommandKind.RetireSku:case CommandKind.Retool:return Settings.IsHardware?HardwareCommand(c):Fail("该命令仅适用于显卡战役");}
             if(c.Kind==CommandKind.Build)return Build(c);
             if(c.Kind==CommandKind.BuyFactory)
             {
@@ -17,6 +17,7 @@ namespace AssemblyZero.Domain.EP04
             }
             switch(c.Kind){case CommandKind.Explore:case CommandKind.Collect:case CommandKind.Return:case CommandKind.Transfer:case CommandKind.HireCollector:case CommandKind.HireHauler:case CommandKind.Station:case CommandKind.Boost:case CommandKind.PickupPurchase:return VehicleCommand(c);}
             var n=Node(c.Node);if(n==null)return Fail("未选择有效节点");
+            if(n.RetoolGen!=0)return Fail("设备正在等待或执行工艺改造");
             if(c.Kind==CommandKind.CancelChange){n.PendingRemove=false;n.PendingRecipe="";return Ok("已取消待完成改建");}
             if(c.Kind==CommandKind.Upgrade)
             {
@@ -37,7 +38,8 @@ namespace AssemblyZero.Domain.EP04
             }
             if(c.Kind==CommandKind.Recipe)
             {
-                var recipe=Settings.Recipe(c.Recipe);if(recipe==null||recipe.Machine!=n.Kind||recipe.Level>n.Level||recipe.Level>State.Unlocked)return Fail("配方与机器类型、等级或解锁不符");
+                var recipe=Recipe(c.Recipe);if(recipe==null||recipe.Machine!=n.Kind||recipe.Level>n.Level||recipe.Level>State.Unlocked)return Fail("配方与机器类型、等级或解锁不符");
+                if(Settings.IsHardware&&(!RecipeUnlocked(recipe)||Sku(HardwareSku.SkuOf(c.Recipe))?.Retired==true))return Fail("配方未研发或型号已下架");
             }
             if((c.Kind==CommandKind.Remove||c.Kind==CommandKind.Recipe)&&n.Batch.Count>0)
             {
@@ -60,8 +62,9 @@ namespace AssemblyZero.Domain.EP04
             var cost=free?0:Settings.Cost(c.Building);if(State.Money<cost)return Fail("建造资金不足");
             if(Settings.IsHardware&&!Settings.Hardware.Buildings.Any(b=>b.Kind==c.Building))return Fail("未知建筑");
             var recipe=Settings.IsHardware?(string.IsNullOrEmpty(c.Recipe)?Settings.Hardware.Buildings.First(b=>b.Kind==c.Building).Recipe:c.Recipe):c.Building==BuildingKind.Manufacturer?"kit":c.Building==BuildingKind.Processor?"shell":"";
-            if(Settings.IsHardware&&!string.IsNullOrEmpty(recipe)&&Settings.Recipe(recipe)?.Machine!=c.Building)return Fail("配方与设备不匹配");
-            var n=new BusinessNode{Id=State.NextNode,Factory=c.Factory,X=c.X,Z=c.Z,Rotation=((c.Rotation%4)+4)%4,Kind=c.Building,RecipeId=recipe,Investment=cost};
+            if(Settings.IsHardware&&!string.IsNullOrEmpty(recipe)&&Recipe(recipe)?.Machine!=c.Building)return Fail("配方与设备不匹配");
+            if(Settings.IsHardware&&!string.IsNullOrEmpty(recipe)&&(!RecipeUnlocked(Recipe(recipe))||Sku(HardwareSku.SkuOf(recipe))?.Retired==true))return Fail("配方未研发或型号已下架");
+            var n=new BusinessNode{Id=State.NextNode,Factory=c.Factory,X=c.X,Z=c.Z,Rotation=((c.Rotation%4)+4)%4,Kind=c.Building,RecipeId=recipe,Investment=cost,ProcessGen=Settings.IsHardware?State.Hardware.CoreGen:1};
             var proposed=new List<BusinessNode>(State.Nodes){n};
             var result=CommitNetwork(proposed,new List<BusinessRoute>(),null,true);if(!result.Success)return result;
             State.NextNode++;Pay(cost);State.Built=true;
@@ -82,14 +85,14 @@ namespace AssemblyZero.Domain.EP04
             var result=CommitNetwork(proposed,affected,recover,false);
             if(!result.Success){n.X=oldX;n.Z=oldZ;n.Rotation=oldRotation;n.RecipeId=oldRecipe;return result;}
             if(c.Kind==CommandKind.Remove){var refund=n.Investment*3/4;State.Money+=refund;State.Expenses-=refund;if(Settings.IsHardware)Cash(refund,"设备回收");}
-            n.PendingRemove=false;n.PendingRecipe="";Revision++;return Ok(c.Kind==CommandKind.Remove?"已拆除并回收库存，返还 75% 费用":"改建完成",n.Id);
+            n.PendingRemove=false;n.PendingRecipe="";if(Settings.IsHardware&&n.Kind==BuildingKind.GPUAssembly)RecoverUnusedBoards(n.Factory);Revision++;return Ok(c.Kind==CommandKind.Remove?"已拆除并回收库存，返还 75% 费用":"改建完成",n.Id);
         }
-        private bool Produces(BusinessNode n,int material)=>n.Kind==BuildingKind.Warehouse?(Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material&&(m.Price>0||m.Id==HardwareCatalog.Ore||m.Finished)):material>=8&&material<=10||n.Output.Any(i=>i.Material==material)):Settings.Recipe(n.RecipeId) is ProductRule r&&(r.Output==material||r.Byproduct!=0&&r.Byproduct==material);
+        private bool Produces(BusinessNode n,int material)=>n.Kind==BuildingKind.Warehouse?(Settings.IsHardware?Settings.Hardware.Materials.Any(m=>m.Id==material&&(m.Price>0||m.Id==HardwareCatalog.Ore||m.Finished||m.Id==HardwareCatalog.AssembledBoard&&n.Output.Any(g=>g.Material==material))):material>=8&&material<=10||n.Output.Any(i=>i.Material==material)):Recipe(n.RecipeId) is ProductRule r&&(r.Output==material||r.Byproduct!=0&&r.Byproduct==material);
         private IEnumerable<int> Needs(BusinessNode n)
         {
             if(n.Kind==BuildingKind.Warehouse)return Settings.IsHardware?Settings.Hardware.Materials.Where(m=>m.Finished).Select(m=>m.Id):Array.Empty<int>();
             if(n.Kind==BuildingKind.Sales)return Settings.IsHardware?Array.Empty<int>():new[]{17,18,19};
-            return Settings.Recipe(n.RecipeId)?.Inputs.Select(i=>i.Material)??Array.Empty<int>();
+            return Recipe(n.RecipeId)?.Inputs.Select(i=>i.Material)??Array.Empty<int>();
         }
         private CommandResult CommitNetwork(List<BusinessNode> proposed,List<BusinessRoute> removed,BusinessNode recover,bool allowDisconnected)
         {

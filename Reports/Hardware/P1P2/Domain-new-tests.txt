@@ -1,0 +1,29 @@
+PASS AssemblyZero.Domain
+﻿PASS HardwareIterationTests.CorePurchase_QuotesAndCarriesChosenGenerationAndBin() 467ms
+PASS HardwareIterationTests.Demand_DoesNotInventImpossibleAiOffersOrUseRetiredSkus() 112ms
+FAIL HardwareIterationTests.GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration()
+  AssertionException:   Expected: True
+  But was:  False
+
+  at AssemblyZero.Tests.HardwareIterationTests.GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration () [0x001fd] in <b55bae02668d4f0094500b5fdb06e461>:0 
+
+FAIL HardwareIterationTests.IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice()
+  AssertionException:   Expected string length 18397 but was 18399. Strings differ at index 752.
+  Expected: "...veries":[],"FirstProductTick":0,"GenLaunchTick":0,"Industr..."
+  But was:  "...veries":[],"FirstProductTick":240,"GenLaunchTick":0,"Indus..."
+  --------------------------------------------^
+
+  at AssemblyZero.Tests.HardwareIterationTests.IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice () [0x00119] in <b55bae02668d4f0094500b5fdb06e461>:0 
+
+PASS HardwareIterationTests.LateGenerations_StayPositiveAndBoundedWithoutAddingMaterialIds() 2ms
+FAIL HardwareIterationTests.NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers()
+  AssertionException:   Expected: not null
+  But was:  null
+
+  at AssemblyZero.Tests.HardwareIterationTests.NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers () [0x0024f] in <b55bae02668d4f0094500b5fdb06e461>:0 
+
+PASS HardwareIterationTests.Procurement_DoesNotOffsetNewPremiumCoreDemandWithOldOrWrongBinStock() 26ms
+PASS HardwareIterationTests.Retooling_WaitsForBatchStopsProductionAndResumesExactlyAcrossSave() 239ms
+PASS HardwareIterationTests.Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership() 32ms
+PASS HardwareResearchTests.Generations_CardsInheritTheCoreGenerationAndOrdersDemandIt() 510ms
+Passed=7 Failed=3; fallback serializer, no Unity native runtime or rendering.

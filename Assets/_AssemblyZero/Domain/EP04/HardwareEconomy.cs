@@ -34,6 +34,13 @@ namespace AssemblyZero.Domain.EP04
             var m=Settings.Hardware.Materials.First(x=>x.Id==material);if(m.Price>0)return PurchasePrice(material);
             var r=Settings.Recipes.FirstOrDefault(x=>x.Output==material);return r==null?0:r.ProcessingFee+r.Inputs.Sum(i=>ReplacementCost(i.Material)*i.Quantity);
         }
+        // Full purchase-and-processing cost of one packaged card of a SKU at current prices.
+        public long SkuReplacementCost(SkuDefinition s)
+        {
+            var assembly=HardwareSku.Assembly(s);
+            return assembly.ProcessingFee+assembly.Inputs.Sum(i=>ReplacementCost(i.Material)*i.Quantity)+Settings.Recipe("test").ProcessingFee+Settings.Recipe("pack").ProcessingFee+ReplacementCost(HardwareCatalog.Carton)
+                +PurchasePrice(HardwareCatalog.Core,s.Gen,s.CoreBin)-PurchasePrice(HardwareCatalog.Core);
+        }
         public int ActiveOrderCount=>State.Hardware.Orders.Count(o=>o.Phase==HardwareOrderPhase.Active||o.Phase==HardwareOrderPhase.Ready);
         public long OrderValue(HardwareOrder o)=>(long)o.Quantity*o.UnitPrice;
         private void Cash(long amount,string category){State.Hardware.Cash.Add(new CashEntry{Tick=State.Tick,Amount=amount,Category=category});}
@@ -56,6 +63,7 @@ namespace AssemblyZero.Domain.EP04
         private void TickHardware()
         {
             var h=State.Hardware;
+            TickGenerations();
             if(State.Tick%(Settings.Hardware.RestockSeconds*60)==0)foreach(var stock in h.Stock)
             {
                 var full=Settings.Hardware.Materials.First(m=>m.Id==stock.Material).Stock;
@@ -94,7 +102,8 @@ namespace AssemblyZero.Domain.EP04
         private void Reserve(HardwareOrder order)
         {
             var count=ReservedCount(order.Id);
-            foreach(var g in FinishedStock(order.Factory).Where(g=>g.ReservedOrder==0&&Matches(g,order)).OrderBy(g=>g.Id).Take(Math.Max(0,order.Quantity-count)))g.ReservedOrder=order.Id;
+            // Use the lowest acceptable grade first so A cards stay free for orders that demand them.
+            foreach(var g in FinishedStock(order.Factory).Where(g=>g.ReservedOrder==0&&Matches(g,order)).OrderByDescending(g=>g.Grade).ThenBy(g=>g.Id).Take(Math.Max(0,order.Quantity-count)))g.ReservedOrder=order.Id;
             order.Phase=ReservedCount(order.Id)>=order.Quantity?HardwareOrderPhase.Ready:HardwareOrderPhase.Active;
         }
         public DeliveryGrade GradeAt(HardwareOrder o,long tick)=>tick<=o.BonusDeadline?DeliveryGrade.Early:tick<=o.Deadline?DeliveryGrade.OnTime:DeliveryGrade.Late;
@@ -127,6 +136,10 @@ namespace AssemblyZero.Domain.EP04
             {
                 case CommandKind.Purchase:return Purchase(c);
                 case CommandKind.SpotSell:return SpotSell(c);
+                case CommandKind.StartResearch:return StartResearch(c);
+                case CommandKind.DesignSku:return DesignSku(c);
+                case CommandKind.RetireSku:return RetireSku(c);
+                case CommandKind.Retool:return Retool(c);
                 case CommandKind.TakeControl:case CommandKind.ReleaseControl:case CommandKind.Drive:case CommandKind.Interact:case CommandKind.RecoverVehicle:case CommandKind.RightVehicle:return DrivingCommand(c);
             }
             var order=State.Hardware.Orders.FirstOrDefault(o=>o.Id==c.Order);if(order==null)return Fail("订单不存在");
@@ -152,7 +165,7 @@ namespace AssemblyZero.Domain.EP04
             if(c.Kind==CommandKind.DeliverOrder){Reserve(order);return Deliver(order);}
             return Fail("未知订单操作");
         }
-        private static bool Matches(Goods g,HardwareOrder o)=>g.Material==o.Material&&g.SpecId==o.Spec&&g.SpecVersion==o.Version;
+        public static bool Matches(Goods g,HardwareOrder o)=>g.Material==o.Material&&g.SpecId==o.Spec&&g.SpecVersion==o.Version&&GradeSatisfies(g.Grade,o.MinGrade)&&g.Gen>=o.MinGen;
         // Failed scripted contracts are quoted again so the opening progression cannot dead-end.
         private void OfferRetry(HardwareOrder failed)
         {
@@ -165,22 +178,25 @@ namespace AssemblyZero.Domain.EP04
         {
             var h=Settings.Hardware;var stock=State.Hardware.Stock.FirstOrDefault(s=>s.Material==c.Material);
             if(stock==null||c.Quantity<=0||c.Quantity>80||c.Delivery<0||c.Delivery>2||Factory(c.Factory)?.Owned!=true)return Fail("无效采购参数");
+            var generation=c.Generation==0?State.Hardware.CoreGen:c.Generation;
+            if(generation<1||generation>State.Hardware.CoreGen||c.CoreBin<0||c.CoreBin>3)return Fail("核心世代或体质未解锁");
             if(stock.Quantity<c.Quantity)return Fail("供应商库存不足，等待补货");
-            var price=PurchasePrice(c.Material);var fee=c.Delivery==0?h.DeliveryFee:c.Delivery==1?h.ExpressFee:h.PickupFee;
+            var price=PurchasePrice(c.Material,generation,c.CoreBin);var fee=c.Delivery==0?h.DeliveryFee:c.Delivery==1?h.ExpressFee:h.PickupFee;
             var cost=checked(price*c.Quantity+fee);if(!Pay(cost))return Fail("采购资金不足");
             stock.Quantity-=c.Quantity;var d=new PurchaseDelivery{Id=State.Hardware.NextPurchase++,Factory=c.Factory,Method=c.Delivery,DueTick=State.Tick+60*(c.Delivery==0?h.DeliverySeconds:c.Delivery==1?h.ExpressSeconds:0)};
-            for(var i=0;i<c.Quantity;i++){var g=Create(0,c.Material);g.MaterialCost=price;g.FreightCost=fee/c.Quantity+(i<fee%c.Quantity?1:0);d.Cargo.Add(g);}
+            for(var i=0;i<c.Quantity;i++){var g=Create(0,c.Material);g.Gen=c.Material==HardwareCatalog.Core?generation:1;g.CoreBin=c.Material==HardwareCatalog.Core?HardwareSku.CoreBin(c.CoreBin):0;g.MaterialCost=price;g.FreightCost=fee/c.Quantity+(i<fee%c.Quantity?1:0);d.Cargo.Add(g);}
             State.Hardware.Deliveries.Add(d);return Ok(c.Delivery==2?"已支付；货物在采购站等待自提":"已采购；到货时间 "+(d.DueTick-State.Tick)/60+" 秒",d.Id);
         }
         private CommandResult SpotSell(WorldCommand c)
         {
             if(!State.Nodes.Any(n=>n.Factory==c.Factory&&n.Kind==BuildingKind.Sales))return Fail("需要交付站");
             if(c.Quantity<=0||c.Quantity>State.Hardware.SpotRemaining)return Fail("现货成交额度不足，每 5 分钟恢复");
-            var price=SpotPrice(c.Material);if(price<=0)return Fail("现货市场只收成品、丐版、次品或铝原料");
-            var goods=FinishedStock(c.Factory).Where(g=>g.Material==c.Material&&g.ReservedOrder==0).OrderBy(g=>g.Id).Take(c.Quantity).ToArray();if(goods.Length<c.Quantity)return Fail("仓库中未分配库存不足");
-            if((long)State.Money+(long)price*c.Quantity>int.MaxValue)return Fail("账户上限");
+            if(SpotPrice(c.Material,string.IsNullOrEmpty(c.Spec)?HardwareCatalog.Spec(c.Material):c.Spec)<=0)return Fail("现货市场只收成品、丐版、次品或铝原料");
+            // An empty Spec sells any SKU of the material; each card is priced by its own SKU.
+            var goods=FinishedStock(c.Factory).Where(g=>g.Material==c.Material&&g.ReservedOrder==0&&(string.IsNullOrEmpty(c.Spec)||g.SpecId==c.Spec)).OrderByDescending(g=>g.Grade).ThenBy(g=>g.Id).Take(c.Quantity).ToArray();if(goods.Length<c.Quantity)return Fail("仓库中未分配库存不足");
+            var income=goods.Sum(g=>(long)SpotPrice(g));if(State.Money+income>int.MaxValue)return Fail("账户上限");
             foreach(var n in State.Nodes.Where(n=>n.Factory==c.Factory&&n.Kind==BuildingKind.Warehouse))n.Output.RemoveAll(g=>goods.Contains(g));
-            State.Sold+=goods.Length;State.Hardware.SpotRemaining-=goods.Length;Earn(price*goods.Length,"现货成交");return Ok("现货成交 "+goods.Length+" 件，收入 ¥"+(price*goods.Length/100m));
+            State.Sold+=goods.Length;State.Hardware.SpotRemaining-=goods.Length;Earn((int)income,"现货成交");return Ok("现货成交 "+goods.Length+" 件，收入 ¥"+(income/100m));
         }
         private void ValidateHardware(List<Goods> all)
         {

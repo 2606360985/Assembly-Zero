@@ -138,16 +138,18 @@ namespace AssemblyZero.Unity.EP04
             Cube("Service cable tray",new Vector3(-1.48f,.55f,0),new Vector3(.09f,.08f,2.5f),steel,station);
             for(var i=0;i<4;i++)Cube("Vent slot",new Vector3(-.8f+i*.3f,.25f,-1.61f),new Vector3(.17f,.22f,.025f),steel,station);
             foreach(var x in new[]{-1.3f,1.3f})foreach(var z in new[]{-1.3f,1.3f})Shape("Deck bolt",new Vector3(x,.69f,z),new Vector3(.1f,.035f,.1f),steel,station,PrimitiveType.Cylinder);
-            var actionName=n.Kind==BuildingKind.BoardAssembly?"Pick head":n.Kind==BuildingKind.GPUAssembly?"Robot tool":n.Kind==BuildingKind.Tester?"Scan strip":n.Kind==BuildingKind.Packaging?"Sealing bar":n.Kind==BuildingKind.Manufacturer?"Press die":n.Kind==BuildingKind.Rework?"Solder iron":"";
+            var actionName=n.Kind==BuildingKind.BoardAssembly?"Pick head":n.Kind==BuildingKind.GPUAssembly?"Robot tool":n.Kind==BuildingKind.Tester?"Scan strip":n.Kind==BuildingKind.Packaging?"Sealing bar":n.Kind==BuildingKind.Manufacturer?"Press die":n.Kind==BuildingKind.Rework?"Solder iron":n.Kind==BuildingKind.Lab?"Lab beacon":"";
             foreach(Transform child in station)if(child.name==actionName){actions[n.Id]=child;actionOrigins[n.Id]=child.localPosition;break;}
         }
-        private Transform BuildProduct(int material,Transform parent)
+        // Visual keys pack the material in the low byte and SKU appearance bits above it.
+        private Transform BuildProduct(int key,Transform parent)
         {
-            if(!prototypes.TryGetValue(material,out var template))
+            var material=HardwareVisualKey.Material(key);
+            if(!prototypes.TryGetValue(key,out var template))
             {
-                template=new GameObject("Product template "+material).transform;template.SetParent(transform,false);
-                template.gameObject.AddComponent<HardwareProductView>().Material=material;
-                CreateProductGeometry(material,template);CombineProduct(template);template.gameObject.SetActive(false);prototypes.Add(material,template);
+                template=new GameObject("Product template "+key).transform;template.SetParent(transform,false);
+                var view=template.gameObject.AddComponent<HardwareProductView>();view.Material=material;view.Key=key;
+                CreateProductGeometry(key,template);CombineProduct(template);template.gameObject.SetActive(false);prototypes.Add(key,template);
             }
             var copy=Instantiate(template,parent,false);copy.name="Cargo "+HardwareCatalog.Name(material);copy.gameObject.SetActive(true);return copy;
         }
@@ -156,19 +158,23 @@ namespace AssemblyZero.Unity.EP04
             var gallery=new GameObject("Product visual acceptance gallery").transform;gallery.SetParent(transform,false);
             gallery.position=new Vector3(62,.25f,101);
             var right=game.ViewCamera.transform.right;right.y=0;right.Normalize();var back=Vector3.Cross(right,Vector3.up);
-            var rows=new[]{new[]{HardwareCatalog.Board,HardwareCatalog.AssembledBoard,HardwareCatalog.RawGPU,HardwareCatalog.Tested,HardwareCatalog.Standard},new[]{HardwareCatalog.Heat,HardwareCatalog.QuietHeat,HardwareCatalog.QuietRaw,HardwareCatalog.QuietTested,HardwareCatalog.Quiet}};
+            var quiet=game.World.Sku(HardwareCatalog.QuietSpec);
+            int Q(int m)=>quiet!=null?HardwareVisualKey.Of(m,quiet):m;
+            var rows=new[]{new[]{HardwareCatalog.Board,HardwareCatalog.AssembledBoard,HardwareCatalog.RawGPU,HardwareCatalog.Tested,HardwareCatalog.Standard},new[]{HardwareCatalog.Heat,HardwareCatalog.QuietHeat,Q(HardwareCatalog.RawGPU),Q(HardwareCatalog.Tested),Q(HardwareCatalog.Standard)}};
             for(var row=0;row<2;row++)for(var i=0;i<5;i++)
             {
                 var p=right*((i-2)*4.3f)+back*(row==0?3.4f:-3.4f);
                 Case("Product display plinth",p,new Vector3(3.5f,.18f,2.5f),ivory,gallery);
                 var sample=BuildProduct(rows[row][i],gallery);sample.localPosition=p+Vector3.up*.3f;sample.localScale=Vector3.one*3;
-                Label(HardwareCatalog.Name(rows[row][i]),p-back*1.8f+Vector3.up*.5f,gallery,.22f);
+                Label(HardwareCatalog.Name(HardwareVisualKey.Material(rows[row][i])),p-back*1.8f+Vector3.up*.5f,gallery,.22f);
             }
             return gallery;
         }
-        private void CreateProductGeometry(int material,Transform t)
+        private void CreateProductGeometry(int key,Transform t)
         {
-            var s=HardwareVisualCatalog.Get(material);var pcb=new Color(.035f,.32f,.2f);var gold=new Color(.82f,.62f,.24f);
+            var material=HardwareVisualKey.Material(key);
+            var s=HardwareVisualCatalog.Get(material,HardwareVisualKey.Quiet(key));var pcb=new Color(.035f,.32f,.2f);var gold=new Color(.82f,.62f,.24f);
+            if(CreateCardGeometry(key,s,t))return;
             if(s.Form==HardwareProductForm.Retail)
             {
                 Case("Branded retail box",new Vector3(0,.12f,0),new Vector3(.94f,.3f,.5f),material==HardwareCatalog.Budget?s.Color:s.Quiet?ivory:dark,t);

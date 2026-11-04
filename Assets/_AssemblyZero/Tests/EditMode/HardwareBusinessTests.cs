@@ -128,23 +128,45 @@ namespace AssemblyZero.Tests
         [Test] public void Hardware_RejectsAppearOnlyAfterFirstContractAndAreDeterministic()
         {
             var w=New();Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1});BuildChain(w);Run(w,90);
-            var gpu0=w.State.Nodes.First(n=>n.Kind==BuildingKind.GPUAssembly);Assert.AreEqual(0,w.FlawPermille(gpu0,w.Settings.Recipe("gpu")));
+            var gpu0=w.State.Nodes.First(n=>n.Kind==BuildingKind.GPUAssembly);Assert.AreEqual(0,w.FlawPermille(gpu0,w.Recipe(HardwareSku.RecipeId(HardwareCatalog.StandardSpec))));
             Assert.IsFalse(All(w).Any(g=>g.Material==HardwareCatalog.Defect||g.Flawed),"The opening contract never produces rejects");
             WorldSimulation Play(){var x=Opened();Buy(x,HardwareCatalog.Heat,9);Run(x,240);return x;}
             var a=Play();var b=Play();Assert.AreEqual(Save(a),Save(b));
-            var gpu=a.State.Nodes.First(n=>n.Kind==BuildingKind.GPUAssembly);Assert.AreEqual(100,a.FlawPermille(gpu,a.Settings.Recipe("gpu")));
+            var gpu=a.State.Nodes.First(n=>n.Kind==BuildingKind.GPUAssembly);Assert.AreEqual(100,a.FlawPermille(gpu,a.Recipe(HardwareSku.RecipeId(HardwareCatalog.StandardSpec))));
             Assert.IsTrue(All(a).Where(g=>g.Material==HardwareCatalog.Defect).All(g=>g.SpecId==HardwareCatalog.StandardSpec));
-            gpu.Level=3;Assert.AreEqual(30,a.FlawPermille(gpu,a.Settings.Recipe("gpu")));
+            gpu.Level=3;Assert.AreEqual(30,a.FlawPermille(gpu,a.Recipe(HardwareSku.RecipeId(HardwareCatalog.StandardSpec))));
         }
         [Test] public void Hardware_ReworkKeepsSpecificationAndBudgetPackagingUsesRejects()
         {
             var w=Opened();var injected=new[]{Inject(w,HardwareCatalog.Defect,HardwareCatalog.StandardSpec).Id,Inject(w,HardwareCatalog.Defect,HardwareCatalog.QuietSpec).Id};
             Build(w,BuildingKind.Rework,20,24);Buy(w,HardwareCatalog.Memory,4,1);Run(w,60);
-            Assert.IsFalse(All(w).Any(g=>injected.Contains(g.Id)),"Injected rejects must be consumed by rework");Assert.IsTrue(All(w).Any(g=>g.Material==HardwareCatalog.QuietRaw&&g.SpecId==HardwareCatalog.QuietSpec));
+            Assert.IsFalse(All(w).Any(g=>injected.Contains(g.Id)),"Injected rejects must be consumed by rework");Assert.IsTrue(All(w).Any(g=>g.Material==HardwareCatalog.RawGPU&&g.SpecId==HardwareCatalog.QuietSpec));
             var v=Opened();Inject(v,HardwareCatalog.Defect,HardwareCatalog.StandardSpec);Inject(v,HardwareCatalog.Defect,HardwareCatalog.StandardSpec);
             Build(v,BuildingKind.Packaging,20,24,"budget-pack");Buy(v,HardwareCatalog.Carton,4,1);Run(v,60);
             Assert.AreEqual(2,v.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Budget&&g.SpecId==HardwareCatalog.BudgetSpec),string.Join(" | ",v.State.Nodes.Select(n=>n.Kind+":"+n.RecipeId+":"+n.Status)));
             Assert.IsTrue(Do(v,new WorldCommand{Kind=CommandKind.SpotSell,Material=HardwareCatalog.Budget,Quantity=2}).Success);v.AssertConserved();
+        }
+        [Test] public void Hardware_TwoSkusShareOneLineWithoutMixingSpecifications()
+        {
+            var w=New();BuildChain(w);Build(w,BuildingKind.GPUAssembly,20,24,HardwareSku.RecipeId(HardwareCatalog.QuietSpec));Buy(w,HardwareCatalog.QuietHeat,4,1);
+            RunUntil(w,()=>w.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Standard&&g.SpecId==HardwareCatalog.QuietSpec)>=2,400);
+            var cards=w.FinishedStock(1).Where(g=>g.Material==HardwareCatalog.Standard).ToArray();
+            Assert.IsTrue(cards.Any(g=>g.SpecId==HardwareCatalog.StandardSpec));Assert.IsTrue(cards.All(g=>g.Gen==1&&g.SpecVersion==1));
+            Assert.IsTrue(cards.Where(g=>g.SpecId==HardwareCatalog.QuietSpec).All(g=>g.ProcessingCost==300+250+100+50));
+            Assert.IsTrue(cards.Where(g=>g.SpecId==HardwareCatalog.StandardSpec).All(g=>g.ProcessingCost==300+200+100+50));
+            Assert.Greater(w.SpotPrice(HardwareCatalog.Standard,HardwareCatalog.QuietSpec),w.SpotPrice(HardwareCatalog.Standard,HardwareCatalog.StandardSpec));
+            var sold=cards.Where(g=>g.SpecId==HardwareCatalog.QuietSpec).OrderByDescending(g=>g.Grade).ThenBy(g=>g.Id).First();var cash=w.State.Money;
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.SpotSell,Material=HardwareCatalog.Standard,Spec=HardwareCatalog.QuietSpec,Quantity=1}).Success);
+            Assert.AreEqual(cash+56000*35/48*WorldSimulation.GradePercent(sold.Grade)/100,w.State.Money);w.AssertConserved();
+        }
+        [Test] public void Hardware_SkuRecipesAreDerivedAndListedForFinalAssembly()
+        {
+            var w=New();var quiet=w.Recipe(HardwareSku.RecipeId(HardwareCatalog.QuietSpec));
+            Assert.AreEqual(14,quiet.Seconds);Assert.AreEqual(250,quiet.ProcessingFee);Assert.AreEqual(HardwareCatalog.QuietSpec,quiet.SpecId);
+            CollectionAssert.AreEquivalent(new[]{HardwareCatalog.AssembledBoard,HardwareCatalog.QuietHeat,HardwareCatalog.Shell},quiet.Inputs.Select(i=>i.Material).ToArray());
+            Assert.AreEqual(2,w.RecipesFor(BuildingKind.GPUAssembly).Count());Assert.IsNull(w.Recipe("sku:unknown"));
+            var big=new SkuDefinition{Id="x",Name="x",Memory=4,Cooler=HardwareCatalog.TowerHeat};var r=HardwareSku.Assembly(big);
+            Assert.AreEqual(12+3+3,r.Seconds);Assert.AreEqual(3,r.Inputs.Single(i=>i.Material==HardwareCatalog.Memory).Quantity);
         }
         [Test] public void Hardware_MarketForecastsThenChangesPricesWithoutRepricingHistory()
         {
@@ -155,7 +177,7 @@ namespace AssemblyZero.Tests
             Assert.AreEqual(27000,w.PurchasePrice(HardwareCatalog.Core));Assert.AreEqual(6000,w.PurchasePrice(HardwareCatalog.Memory));
             var cash=w.State.Money;Buy(w,HardwareCatalog.Core,1);Assert.AreEqual(cash-27000-w.Settings.Hardware.DeliveryFee,w.State.Money);
             Assert.AreEqual(history,JsonUtility.ToJson(w.State.Hardware.Settlements[0]));
-            Assert.AreEqual(130,w.OrderPricePercent(HardwareCatalog.Standard));Assert.AreEqual(100,w.OrderPricePercent(HardwareCatalog.Quiet));
+            Assert.AreEqual(130,w.OrderPricePercent(HardwareCatalog.Standard));Assert.AreEqual(100,w.OrderPricePercent(HardwareCatalog.QuietSpec));
             Run(w,w.Settings.Hardware.EventSeconds);Assert.IsNull(w.CurrentEvent);Assert.AreNotEqual(0,m.Next);
         }
         [Test] public void Hardware_SecondBoardAssemblyRaisesThroughput()
@@ -185,11 +207,12 @@ namespace AssemblyZero.Tests
             Build(w,BuildingKind.Manufacturer,20,24);hint=HardwareGuide.Evaluate(w);Assert.AreEqual(HardwareCatalog.Aluminum,hint.Material);Assert.AreEqual(14,hint.Quantity);
             Build(w,BuildingKind.Processor,12,24);Assert.AreEqual("mining",HardwareGuide.Evaluate(w).Key);
         }
-        [Test] public void Hardware_SaveV3ContinuesExactlyAndOlderSavesAreRejected()
+        [Test] public void Hardware_SaveV4ContinuesExactlyAndOlderSavesAreRejected()
         {
             var a=Opened();Do(a,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=Order(a,2).Id});Buy(a,HardwareCatalog.Heat,7);Run(a,30);
             var b=new WorldSimulation(a.Settings,JsonUtility.FromJson<WorldState>(Save(a)));Run(a,300);Run(b,300);Assert.AreEqual(Save(a),Save(b));
-            var old=JsonUtility.FromJson<WorldState>(Save(New()));old.Version=2;Assert.Throws<ArgumentException>(()=>new WorldSimulation(HardwareCatalog.Create(),old));
+            var old=JsonUtility.FromJson<WorldState>(Save(New()));old.Version=3;Assert.Throws<ArgumentException>(()=>new WorldSimulation(HardwareCatalog.Create(),old));
+            old.Version=WorldSimulation.HardwareSaveVersion;old.Hardware.ContentVersion=2;Assert.Throws<ArgumentException>(()=>new WorldSimulation(HardwareCatalog.Create(),old));
             Assert.Throws<ArgumentException>(()=>new WorldSimulation(HardwareCatalog.Create(),new WorldSimulation(new EconomySettings()).State));
             Assert.Throws<ArgumentException>(()=>new WorldSimulation(new EconomySettings(),New().State));
         }
