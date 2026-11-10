@@ -31,6 +31,10 @@ namespace AssemblyZero.Unity.EP04
         [Min(.1f)] public float ImpulseDuration = 1.2f;
         [Min(.1f)] public float TruckRadius = 1.1f;
         [Range(0,5)] public float TruckStrength = 1.2f;
+        [Tooltip("节点成功落地时推开雾的范围，使用世界单位。")]
+        [Min(.1f)] public float PlacementRadius = 2.4f;
+        [Range(0,5)] public float PlacementStrength = 1.9f;
+        [Range(.1f,3)] public float PlacementDuration = .75f;
     }
 
     /// <summary>Presentation-only world-space advection. No authoritative state or save data.</summary>
@@ -40,7 +44,7 @@ namespace AssemblyZero.Unity.EP04
         private const int MaxImpulses = 16, MaxMovements = 64, MaxVortices = 48;
         private const float FixedStep = 1f / 60;
         [StructLayout(LayoutKind.Sequential)]
-        private struct Impulse { public Vector2 Position; public float Radius,Strength,Age,Duration; public Vector2 Padding; }
+        private struct Impulse { public Vector2 Position; public float Radius,Strength,Age,Duration,Placement,Padding; }
         [StructLayout(LayoutKind.Sequential)]
         private struct Movement { public Vector2 Start,End; public float Radius,Strength,Speed,Dragged; }
         [StructLayout(LayoutKind.Sequential)]
@@ -131,6 +135,31 @@ namespace AssemblyZero.Unity.EP04
             if(!IsReady||game.Paused||!Contains(worldPosition)||!float.IsFinite(radius)||!float.IsFinite(strength)||radius<=0||strength<=0)return;
             if(impulses.Count==MaxImpulses)impulses.RemoveAt(0);
             impulses.Add(new Impulse{Position=new Vector2(worldPosition.x,worldPosition.z),Radius=radius,Strength=strength,Duration=Mathf.Max(.1f,Settings.ImpulseDuration)});
+        }
+        /// <summary>A newly placed body displaces fog outward and rolls it around its perimeter.</summary>
+        public void AddPlacementImpact(Vector3 worldPosition)
+        {
+            if(!IsReady||game.Paused||!Contains(worldPosition)||Settings.PlacementStrength<=0)return;
+            var radius=Mathf.Max(.1f,Settings.PlacementRadius);
+            var strength=Settings.PlacementStrength;
+            var scale=Mathf.Clamp(Settings.VortexRadiusScale,.5f,4);
+            var center=new Vector2(worldPosition.x,worldPosition.z);
+            if(impulses.Count==MaxImpulses)impulses.RemoveAt(0);
+            impulses.Add(new Impulse{Position=center,Radius=radius,Strength=strength,Duration=Mathf.Max(.1f,Settings.PlacementDuration),Placement=1});
+            for(var i=0;i<8;i++)
+            {
+                var angle=i*Mathf.PI*.25f;
+                var direction=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
+                if(vortices.Count==MaxVortices)vortices.RemoveAt(0);
+                vortices.Add(new Vortex
+                {
+                    Position=center+direction*radius,
+                    Drift=direction*radius*.6f,
+                    Radius=Mathf.Max(.45f,radius*.27f)*scale,
+                    Spin=(i%2==0?1:-1)*strength*Settings.WakeSwirl*3/Mathf.Sqrt(scale),
+                    Duration=Mathf.Max(.3f,Settings.WakePersistence)*(i%2==0?.7f:1.1f)
+                });
+            }
         }
         private bool Contains(Vector3 p){var a=Area;return p.x>=a.x&&p.z>=a.y&&p.x<=a.x+a.z&&p.z<=a.y+a.w;}
         /// <summary>A swept, directional brush. Call EndDragStroke when UI or another gesture interrupts it.</summary>

@@ -9,7 +9,7 @@ int _Resolution, _ImpulseCount, _MovementCount, _VortexCount;
 float _Dt, _Clock, _Recovery, _VortexRadiusScale;
 float4 _Area; // world minimum XZ, world size XZ
 float2 _Wind;
-struct Impulse { float2 position; float radius; float strength; float age; float duration; float2 padding; };
+struct Impulse { float2 position; float radius; float strength; float age; float duration; float placement; float padding; };
 struct Movement { float2 start; float2 end; float radius; float strength; float speed; float dragged; };
 struct Vortex { float2 position; float2 drift; float radius; float spin; float age; float duration; };
 StructuredBuffer<Vortex> _Vortices;
@@ -47,6 +47,16 @@ void Advect(uint3 id : SV_DispatchThreadID)
         Impulse a = _Impulses[i]; float2 delta = p - a.position;
         float distance = length(delta); float2 direction = delta / max(distance, .001);
         float life = saturate(1 - a.age / a.duration);
+        if(a.placement > .5)
+        {
+            // An expanding impact front pushes fog away from the arriving machine.
+            float front = a.radius * lerp(.4,1.6,saturate(a.age / a.duration));
+            float band = (distance-front) / max(a.radius*.35,.1);
+            float wave = exp(-band*band);
+            velocity += direction * a.radius * 5 * wave * life * a.strength;
+            clearing += (1-smoothstep(a.radius*.5,a.radius,distance)) * life * a.strength * 9;
+            continue;
+        }
         float reach = a.radius * lerp(.7, 1.5, saturate(a.age / a.duration));
         float influence = exp(-dot(delta,delta) / (reach * reach * .65));
         float swirlReach = reach * _VortexRadiusScale;

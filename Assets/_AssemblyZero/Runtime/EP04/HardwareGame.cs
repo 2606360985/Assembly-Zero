@@ -66,6 +66,12 @@ namespace AssemblyZero.Unity.EP04
         {
             command.Factory=command.Factory==0?Factory:command.Factory;World.Enqueue(command);World.FlushCommands();var r=World.LastResult;
             LastActionFailed=!r.Success;
+            if(r.Success&&(command.Kind==CommandKind.Build||command.Kind==CommandKind.Move))
+            {
+                var placed=World.Node(r.Entity);
+                var site=placed==null?null:World.Factory(placed.Factory);
+                if(site!=null)Fog?.AddPlacementImpact(new Vector3((site.X+placed.Center.X)*1.2f,0,(site.Z+placed.Center.Z)*1.2f));
+            }
             if(command.Kind!=CommandKind.Drive){Message=r.Message;Notices=Notices.Concat(new[]{Message}).Distinct().Reverse().Take(3).Reverse().ToArray();}
             if(command.Kind==CommandKind.Build&&r.Success){SelectedNode=r.Entity;Drawer="设备";HardwareAudio.Play("thud");View?.MarkBuilt(r.Entity);}
             else if(command.Kind==CommandKind.AcceptOrder&&r.Success)HardwareAudio.Play("stamp");
