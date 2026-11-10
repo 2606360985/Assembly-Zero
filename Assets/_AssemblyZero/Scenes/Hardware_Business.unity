@@ -151,8 +151,24 @@ MonoBehaviour:
   Config: {fileID: 11400000, guid: 4433fbc412372d8498082f8b2948d945, type: 2}
   Font: {fileID: 11400000, guid: b50b36b03ee126642b73a77616b4a9cc, type: 2}
   ViewCamera: {fileID: 879310060}
-  MachineVisual: {fileID: 3572880194411827300, guid: 7623babcff5252d49b5f60b05517f19a, type: 3}
-  ArmVisual: {fileID: 6765759613120093163, guid: c75c08c849180334882cef52ffc00a17, type: 3}
+  GroundFog:
+    Resolution: 768
+    Height: 1.6
+    Density: 0.55
+    Color: {r: 0.85, g: 0.9, b: 0.91, a: 1}
+    ShadowColor: {r: 0.36, g: 0.44, b: 0.46, a: 1}
+    Wind: {x: 0.18, y: 0.07}
+    Recovery: 0.05
+    ClickRadius: 1.25
+    ClickStrength: 1.5
+    DragRadius: 0.7
+    DragStrength: 1.1
+    VortexRadiusScale: 3
+    WakeSwirl: 1
+    WakePersistence: 1.8
+    ImpulseDuration: 1.2
+    TruckRadius: 0.5
+    TruckStrength: 1.2
   Interaction: 0
   SelectedNode: 0
   Factory: 1
@@ -164,6 +180,9 @@ MonoBehaviour:
   Drawer: 
   SelectedOrder: 1
   Notices: []
+  PlacingRecipe: 
+  HoverNode: 0
+  HoverScreen: {x: 0, y: 0}
 --- !u!4 &869118837
 Transform:
   m_ObjectHideFlags: 0
@@ -281,6 +300,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1600013409}
   - component: {fileID: 1600013408}
+  - component: {fileID: 1600013410}
   m_Layer: 0
   m_Name: Afternoon sun
   m_TagString: Untagged
@@ -368,6 +388,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1600013410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1600013407}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 474bcb49853aa07438625e644c072ee6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalAdditionalLightData
+  m_UsePipelineSettings: 1
+  m_AdditionalLightsShadowResolutionTier: 2
+  m_CustomShadowLayers: 0
+  m_LightCookieSize: {x: 1, y: 1}
+  m_LightCookieOffset: {x: 0, y: 0}
+  m_SoftShadowQuality: 0
+  m_RenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_ShadowRenderingLayersMask:
+    serializedVersion: 0
+    m_Bits: 1
+  m_Version: 4
+  m_LightLayerMask: 1
+  m_ShadowLayerMask: 1
+  m_RenderingLayers: 1
+  m_ShadowRenderingLayers: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

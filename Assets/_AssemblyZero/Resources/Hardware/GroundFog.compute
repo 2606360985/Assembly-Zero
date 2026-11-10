@@ -1,0 +1,95 @@
+// Independent implementation inspired by Adam Myhre's Interactive Ground Fog gist:
+// https://gist.github.com/adammyhre/192275218a61156680e1186752418a1f
+#pragma kernel Initialize
+#pragma kernel Advect
+Texture2D<float> _Source;
+SamplerState sampler_linear_clamp;
+RWTexture2D<float> _Result;
+int _Resolution, _ImpulseCount, _MovementCount, _VortexCount;
+float _Dt, _Clock, _Recovery, _VortexRadiusScale;
+float4 _Area; // world minimum XZ, world size XZ
+float2 _Wind;
+struct Impulse { float2 position; float radius; float strength; float age; float duration; float2 padding; };
+struct Movement { float2 start; float2 end; float radius; float strength; float speed; float dragged; };
+struct Vortex { float2 position; float2 drift; float radius; float spin; float age; float duration; };
+StructuredBuffer<Vortex> _Vortices;
+StructuredBuffer<Impulse> _Impulses;
+StructuredBuffer<Movement> _Movements;
+float Hash(float2 p) { return frac(sin(dot(p, float2(23.171, 91.733))) * 43758.5453); }
+float Noise(float2 p)
+{
+    float2 cell = floor(p), f = frac(p); f = f * f * (3 - 2 * f);
+    return lerp(lerp(Hash(cell), Hash(cell + float2(1,0)), f.x),
+                lerp(Hash(cell + float2(0,1)), Hash(cell + 1), f.x), f.y);
+}
+float Target(float2 world)
+{
+    float2 p = world - _Wind * _Clock;
+    return .24 + .65 * Noise(p * .26) + .28 * Noise(p * .71 + 8.3) + .16 * (Noise(p * 1.65) - .5);
+}
+[numthreads(8,8,1)]
+void Initialize(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= (uint)_Resolution)) return;
+    float2 p = _Area.xy + (id.xy + .5) / _Resolution * _Area.zw;
+    _Result[id.xy] = Target(p);
+}
+[numthreads(8,8,1)]
+void Advect(uint3 id : SV_DispatchThreadID)
+{
+    if (any(id.xy >= (uint)_Resolution)) return;
+    float2 uv = (id.xy + .5) / _Resolution;
+    float2 p = _Area.xy + uv * _Area.zw;
+    float2 velocity = _Wind + .11 * float2(sin(p.y * .31 + _Clock * .17), cos(p.x * .24 - _Clock * .13));
+    float clearing = 0, entrainment = 0, rolledDensity = 0;
+    for (int i = 0; i < _ImpulseCount; i++)
+    {
+        Impulse a = _Impulses[i]; float2 delta = p - a.position;
+        float distance = length(delta); float2 direction = delta / max(distance, .001);
+        float life = saturate(1 - a.age / a.duration);
+        float reach = a.radius * lerp(.7, 1.5, saturate(a.age / a.duration));
+        float influence = exp(-dot(delta,delta) / (reach * reach * .65));
+        float swirlReach = reach * _VortexRadiusScale;
+        float swirlInfluence = exp(-dot(delta,delta) / (swirlReach * swirlReach * .65));
+        velocity += (direction * 6 * influence + float2(-direction.y,direction.x) * 3.7 * swirlInfluence / sqrt(_VortexRadiusScale)) * life * a.strength;
+        clearing += influence * life * a.strength * 7;
+    }
+    for (int j = 0; j < _MovementCount; j++)
+    {
+        Movement m = _Movements[j]; float2 segment = m.end - m.start;
+        float f = saturate(dot(p - m.start,segment) / max(dot(segment,segment), .00001));
+        float2 delta = p - lerp(m.start,m.end,f); float distance = length(delta);
+        float2 direction = delta / max(distance,.001);
+        float influence = exp(-dot(delta,delta) / (m.radius * m.radius * 2.5));
+        float2 forward = segment / max(length(segment),.001);
+        float speed = min(m.speed,24);
+        // The brush transports fog along the stroke; a moving body parts it more gently.
+        float push = m.dragged > .5 ? .9 : .22;
+        velocity += (direction * .75 + forward * push) * speed * influence * m.strength;
+        float carve = m.dragged > .5 ? 3 + sqrt(speed) * .7 : 2 + speed * .7;
+        clearing += (1 - smoothstep(m.radius * .2,m.radius,distance)) * carve * m.strength;
+    }
+    for (int k = 0; k < _VortexCount; k++)
+    {
+        Vortex v = _Vortices[k];
+        float radius = v.radius * (1 + v.age * .16);
+        float2 delta = p - v.position; float q = dot(delta,delta) / (radius * radius);
+        if(q > 9) continue;
+        float life = pow(saturate(1 - v.age / v.duration),.7);
+        float spin = v.spin * life * exp(-q * .65) / (1 + q * .35);
+        velocity += float2(-delta.y,delta.x) * spin;
+        // A little entrained density around the rim makes the rolling edge readable.
+        float r = sqrt(q);
+        float angle = atan2(delta.y,delta.x);
+        // Entrained wisps follow the same signed angular speed as the local rolling flow.
+        // They supply contrast at sub-cloud scales where the undisturbed field is smooth.
+        float wisp = sin(angle * 2 + r * 5.2 - v.age * v.spin * 1.2);
+        rolledDensity += wisp * exp(-q * .8) * life * abs(v.spin) * .14;
+        float rim = r - 1.05;
+        entrainment += exp(-rim * rim * 10) * abs(v.spin) * life * .035;
+    }
+    float2 back = uv - velocity * _Dt / _Area.zw;
+    float density = all(back >= 0) && all(back <= 1) ? _Source.SampleLevel(sampler_linear_clamp,back,0) : Target(p);
+    density *= exp(-min(clearing,100) * _Dt);
+    _Result[id.xy] = clamp(lerp(density,Target(p),1 - exp(-_Recovery * _Dt)) + (entrainment + clamp(rolledDensity,-1.2,1.2)) * _Dt,0,1.5);
+}

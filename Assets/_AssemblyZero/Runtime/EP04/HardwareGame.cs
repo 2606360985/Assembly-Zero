@@ -14,6 +14,8 @@ namespace AssemblyZero.Unity.EP04
     public sealed partial class HardwareGame : MonoBehaviour
     {
         public EP04Config Config; public TMP_FontAsset Font; public Camera ViewCamera;
+        public GroundFogSettings GroundFog = new GroundFogSettings();
+        public HardwareGroundFog Fog {get;private set;}
         public WorldSimulation World {get;private set;} public HardwareHud Hud {get;private set;} public HardwareFactoryView View {get;private set;}
         public HardwareInteraction Interaction; public int SelectedNode,Factory=1,Speed=1; public bool Paused;
         public BuildingKind? Placing; public bool Moving; public int Rotation; public string Message="欢迎来到星铸显卡工厂：接下首单，再放置总装、检测、包装打通产线。";
@@ -43,6 +45,7 @@ namespace AssemblyZero.Unity.EP04
             Audio=gameObject.AddComponent<HardwareAudio>();Audio.Initialize();
             Hud=gameObject.AddComponent<HardwareHud>();Hud.Initialize(this);View=gameObject.AddComponent<HardwareFactoryView>();View.Initialize(this);FocusFactory();
             InitializeLens();
+            Fog=gameObject.AddComponent<HardwareGroundFog>();Fog.Initialize(this,GroundFog);
             if(verifying)StartCoroutine(VerifyPlayer());
             else if(Environment.GetCommandLineArgs().Contains("--hardware-capsule"))StartCoroutine(CapsuleCommandLine());
         }
@@ -99,6 +102,7 @@ namespace AssemblyZero.Unity.EP04
         public void BeginMove(){var n=World.Node(SelectedNode);if(n==null)return;Hud.CloseEquipmentLibrary();Placing=n.Kind;Moving=true;Rotation=n.Rotation;Drawer="";Hud.RebuildDrawer();}
         private void ResetPlacement()
         {
+            ResetFogPointer();
             Hud?.CloseProcurementOverview();
             Hud?.CloseEquipmentLibrary();
             LastActionFailed=false;Placing=null;Moving=false;Rotation=0;Interaction=Paused?HardwareInteraction.Modal:HardwareInteraction.Browsing;View?.HideGhost();
@@ -118,6 +122,7 @@ namespace AssemblyZero.Unity.EP04
         public int NodeAt(int x,int z)=>World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;
         private void HandleInput()
         {
+            GuardFogPointer();
             var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused){pan=false;return;}
             if(Hud.ProcurementOpen)
             {
@@ -160,6 +165,7 @@ namespace AssemblyZero.Unity.EP04
             if(k.eKey.wasPressedThisFrame)RotateViewStep(1);
             if(m==null)return;
             var pointer=m.position.ReadValue();var over=PointerOverUi(pointer);
+            if(over||m.rightButton.isPressed||m.middleButton.isPressed)ResetFogPointer();
             if(m.middleButton.wasPressedThisFrame||m.rightButton.wasPressedThisFrame){pan=!over;lastMouse=pointer;}
             if(pan&&(m.middleButton.isPressed||m.rightButton.isPressed)){PanView(pointer-lastMouse);lastMouse=pointer;return;}
             if(m.middleButton.wasReleasedThisFrame||m.rightButton.wasReleasedThisFrame){pan=false;return;}
@@ -168,6 +174,7 @@ namespace AssemblyZero.Unity.EP04
             var ray=ViewCamera.ScreenPointToRay(pointer);if(!new Plane(Vector3.up,Vector3.zero).Raycast(ray,out var distance))return;var hit=ray.GetPoint(distance);var f=World.Factory(Factory);
             var x=Mathf.RoundToInt(hit.x/1.2f)-f.X;var z=Mathf.RoundToInt(hit.z/1.2f)-f.Z;
             HoverNode=Placing.HasValue?0:NodeAt(x,z);HoverScreen=pointer;
+            if(!Placing.HasValue)HandleFogPointer(m,hit);
             if(Placing.HasValue)
             {
                 View.Ghost(x,z,Rotation,World.PlacementError(Factory,x,z,Moving?SelectedNode:0)==null);
