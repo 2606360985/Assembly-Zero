@@ -5,18 +5,19 @@ namespace AssemblyZero.Domain.EP04
 {
     public sealed partial class WorldSimulation
     {
+        private System.Collections.Generic.List<GridPoint> drivingTrees;
         private CommandResult DrivingCommand(WorldCommand c)
         {
-            // Retain the driving implementation and save fields while the module is frozen.
-            if(c.Kind==CommandKind.TakeControl||c.Kind==CommandKind.Drive||c.Kind==CommandKind.Interact||c.Kind==CommandKind.RightVehicle)
-                return Fail("手动驾驶暂时冻结；请在运输页规划自动采集或自提任务");
             var v=State.Vehicles.FirstOrDefault(x=>x.Id==c.Vehicle);if(v==null||v.Role!=VehicleRole.Pickup)return Fail("请选择自用货车");
             if(v.RescueTicks>0)return Fail("正在救援，货物暂不可操作");
             if(c.Kind==CommandKind.TakeControl)
             {
-                if(v.Manual||v.Phase!=VehiclePhase.Idle)return Fail("车辆正被占用");
-                if(v.Journey!=9&&GridPoint.Distance(v.Position,Factory(1).Dock)>3)return Fail("请先自动返回车库再接管");
-                v.Manual=true;v.Loop=false;v.DriveX=v.Position.X;v.DriveZ=v.Position.Z;v.Speed=0;v.Throttle=v.Steer=0;v.Status="手动驾驶";return Ok("WASD 驾驶 · E 装卸 · Tab 停靠并查看工厂");
+                if(v.Manual)return Fail("车辆已被接管");
+                if(drivingTrees==null)drivingTrees=HardwareWorldMap.Trees(HardwareWorldMap.Roads(Settings,State.Factories),State.Factories,Settings.Hardware);
+                if(Factory(c.Factory)?.Owned==true)v.TargetFactory=c.Factory;
+                if(v.Phase==VehiclePhase.Travelling&&v.PathIndex+1<v.Path.Count){var next=v.Path[v.PathIndex+1];v.Heading=Math.Atan2(next.X-v.Position.X,next.Z-v.Position.Z);}
+                v.Manual=true;v.Loop=v.PickupTask=v.TransferTask=false;v.WorkTicks=0;v.Path.Clear();v.PathIndex=v.SegmentTicks=0;v.Phase=VehiclePhase.Idle;
+                v.DriveX=v.Position.X;v.DriveZ=v.Position.Z;v.Speed=v.Throttle=v.Steer=0;v.Status="手动探索";return Ok("W/S 前进倒车 · A/D 转向 · E 装卸/采集 · Tab 结束接管");
             }
             if(c.Kind==CommandKind.ReleaseControl){if(!v.Manual)return Fail("车辆未被接管");v.Manual=false;v.Throttle=v.Steer=v.Speed=0;v.Phase=VehiclePhase.Idle;v.Journey=9;v.Status="停靠，等待玩家";return Ok("车辆已停靠");}
             if(c.Kind==CommandKind.RecoverVehicle){v.Manual=false;v.Loop=false;v.PickupTask=false;v.WorkTicks=0;v.Throttle=v.Steer=v.Speed=0;v.RescueTicks=Settings.Hardware.RescueSeconds*60;v.Status="救援返库中";return Ok("救援耗时 "+Settings.Hardware.RescueSeconds+" 秒，货物保留");}
@@ -29,14 +30,14 @@ namespace AssemblyZero.Domain.EP04
                 foreach(var f in State.Factories.Where(f=>f.Owned))if(GridPoint.Distance(v.Position,f.Dock)<=3)
                 {
                     var count=v.Cargo.Count;
-                    foreach(var g in v.Cargo.ToArray()){var n=State.Nodes.FirstOrDefault(n=>n.Factory==f.Id&&n.Kind==BuildingKind.Warehouse&&CanReceive(n,g.Material));if(n==null)continue;n.Output.Add(g);v.Cargo.Remove(g);}
+                    foreach(var g in v.Cargo.ToArray()){var n=State.Nodes.FirstOrDefault(n=>n.Factory==f.Id&&n.Kind==BuildingKind.Warehouse&&CanReceive(n,g.Material));if(n==null)continue;if(g.Material>10&&!n.Output.Any(i=>i.Material==g.Material))logisticsDirty=true;n.Output.Add(g);v.Cargo.Remove(g);}
                     return Ok(v.Cargo.Count>0?"部分卸货；等待仓库空间":"卸货完成，共 "+(count-v.Cargo.Count)+" 件");
                 }
                 var supplier=new GridPoint(Settings.Hardware.SupplierX,Settings.Hardware.SupplierZ);
                 if(GridPoint.Distance(v.Position,supplier)<=3)
                 {
                     var before=v.Cargo.Count;
-                    foreach(var d in State.Hardware.Deliveries.Where(d=>d.Method==2).OrderBy(d=>d.Id).ToArray())
+                    foreach(var d in State.Hardware.Deliveries.Where(d=>d.Method==2&&d.Factory==v.TargetFactory).OrderBy(d=>d.Id).ToArray())
                     {
                         foreach(var g in d.Cargo.Take(Settings.VehicleCapacity-v.Cargo.Count).ToArray()){d.Cargo.Remove(g);v.Cargo.Add(g);}
                         if(d.Cargo.Count==0)State.Hardware.Deliveries.Remove(d);
@@ -55,8 +56,12 @@ namespace AssemblyZero.Domain.EP04
             v.Speed+=(v.Throttle*5-v.Speed)*.06;v.Heading+=v.Steer*Math.Min(1,Math.Abs(v.Speed))*1.7/60;
             var x=v.DriveX+Math.Sin(v.Heading)*v.Speed/60;var z=v.DriveZ+Math.Cos(v.Heading)*v.Speed/60;
             var p2=new GridPoint((int)Math.Round(x),(int)Math.Round(z));
-            var blocked=GridRouting.WorldBlocked(p2)||State.Nodes.Any(n=>{var f=Factory(n.Factory);return Math.Abs(x-f.X-n.X)<2&&Math.Abs(z-f.Z-n.Z)<2;});
+            var h=Settings.Hardware;
+            var blocked=GridRouting.HardwareBlocked(p2,State.Factories)||
+                x>h.SupplierX+1&&x<h.SupplierX+8&&z>h.SupplierZ-.5&&z<h.SupplierZ+5||
+                drivingTrees!=null&&drivingTrees.Any(t=>Math.Abs(x-t.X)<.8&&Math.Abs(z-t.Z)<.8);
             if(!blocked){v.DriveX=x;v.DriveZ=z;v.Position=p2;}else v.Speed=0;
+            Discover(v.Position);
             if(Math.Abs(v.Throttle)>.01)v.WorkTicks=0;
             if(v.WorkTicks>0)
             {

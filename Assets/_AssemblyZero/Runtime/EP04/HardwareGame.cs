@@ -50,7 +50,7 @@ namespace AssemblyZero.Unity.EP04
             else if(Environment.GetCommandLineArgs().Contains("--hardware-capsule"))StartCoroutine(CapsuleCommandLine());
         }
         private static int NewSeed()=>Environment.TickCount|1;
-        public void CycleSpeed(){var i=Array.IndexOf(Speeds,Speed);Speed=Speeds[(i+1)%Speeds.Length];Hud?.Refresh();}
+        public void CycleSpeed(){if(Truck.Manual){Message="手动驾驶固定 1×，结束接管后恢复原速度";return;}var i=Array.IndexOf(Speeds,Speed);Speed=Speeds[(i+1)%Speeds.Length];Hud?.Refresh();}
         private void Notify(string message){Message=message;Notices=Notices.Concat(new[]{message}).TakeLast(3).ToArray();}
         private void SyncNotifications(){seenSettlements=World.State.Hardware.Settlements.Count;seenEvent=World.State.Hardware.Market.Current;seenFirstProduct=World.State.Hardware.FirstProductTick;seenPenalties=World.State.Hardware.Penalties;Hud?.SnapMoney();}
         // Surfaces automatic business outcomes that happen inside simulation ticks.
@@ -101,7 +101,7 @@ namespace AssemblyZero.Unity.EP04
             var c=points.Count==0?new Vector2(20,16):new Vector2(points.Average(p=>p.x),points.Average(p=>p.y));
             cameraFocus=new Vector3((f.X+c.x)*1.2f,0,(f.Z+c.y)*1.2f);ViewCamera.orthographicSize=DefaultZoom;
         }
-        public void SetDrawer(string drawer){Hud.CloseEquipmentLibrary();Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
+        public void SetDrawer(string drawer){if(Truck.Manual)ToggleDriving();Hud.CloseEquipmentLibrary();Placing=null;Moving=false;Drawer=Drawer==drawer?"":drawer;Hud.RebuildDrawer();}
         public string PlacingRecipe="";
         public void BeginBuild(BuildingKind kind)=>BeginBuild(kind,"");
         public void BeginBuild(BuildingKind kind,string recipe){if(Truck.Manual)return;Hud.CloseEquipmentLibrary();Placing=kind;PlacingRecipe=recipe??"";Moving=false;Rotation=0;Drawer="";Interaction=HardwareInteraction.Placing;Hud.RebuildDrawer();}
@@ -115,7 +115,13 @@ namespace AssemblyZero.Unity.EP04
         }
         public void ToggleDriving()
         {
-            SetDrawer("运输");
+            if(Paused||Showcasing)return;
+            var release=Truck.Manual;
+            if(!Submit(new WorldCommand{Kind=release?CommandKind.ReleaseControl:CommandKind.TakeControl}).Success)return;
+            ResetPlacement();Drawer="";SelectedNode=HoverNode=0;pan=false;
+            if(release){Speed=drivingPreviousSpeed;Interaction=HardwareInteraction.Browsing;}
+            else{drivingPreviousSpeed=Speed;Speed=1;Interaction=HardwareInteraction.Driving;FocusTruck();}
+            Hud.RebuildDrawer();Hud.Refresh();
         }
         public void FocusLogistics(){FocusMine();}
         public void FocusMine(){var r=World.State.Resources[0];cameraFocus=new Vector3(r.X*1.2f,0,r.Z*1.2f);ViewCamera.orthographicSize=16;}
@@ -129,6 +135,7 @@ namespace AssemblyZero.Unity.EP04
         private void HandleInput()
         {
             GuardFogPointer();
+            if(Truck.Manual){HandleDrivingInput();return;}
             var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused){pan=false;return;}
             if(Hud.ProcurementOpen)
             {

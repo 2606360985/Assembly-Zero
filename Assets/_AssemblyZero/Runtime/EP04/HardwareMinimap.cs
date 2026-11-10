@@ -16,6 +16,10 @@ namespace AssemblyZero.Unity.EP04
         private Rect cachedRect;
         private readonly List<UIVertex> background=new List<UIVertex>();
         private readonly Vector2[] corners=new Vector2[4];
+        private GridPoint routeStart,routeTarget;
+        private WorldSimulation routeWorld;
+        private List<GridPoint> guidance;
+        private HashSet<GridPoint> roadCells;
         private readonly Color road=new Color(.25f,.34f,.39f),cyan=new Color(.09f,.8f,.9f);
         public void Initialize(HardwareGame value){game=value;raycastTarget=true;SetVerticesDirty();}
         public static Vector3 MapToWorld(Vector2 uv)=>new Vector3(Mathf.Clamp01(uv.x)*(GridRouting.WorldWidth-1)*1.2f,0,Mathf.Clamp01(uv.y)*(GridRouting.WorldDepth-1)*1.2f);
@@ -66,12 +70,7 @@ namespace AssemblyZero.Unity.EP04
                 cachedWorld=w;cachedState=state;cachedRect=rectTransform.rect;
                 RectShape(vh,cachedRect.center,cachedRect.size,new Color(.035f,.07f,.1f));
                 var h=game.Config.Economy.Hardware;var supplier=new GridPoint(h.SupplierX,h.SupplierZ);
-                var cells=new HashSet<GridPoint>();
-                foreach(var f in w.State.Factories)foreach(var dest in new[]{supplier,new GridPoint(h.OreX,h.OreZ)})
-                {
-                    var route=GridRouting.HardwarePath(f.Dock,dest,w.State.Factories);if(route==null)continue;
-                    foreach(var cell in route)cells.Add(cell);
-                }
+                var cells=roadCells=HardwareWorldMap.Roads(game.Config.Economy,w.State.Factories);
                 foreach(var p in cells)RectShape(vh,Point(p.X,p.Z),new Vector2(cachedRect.width/(GridRouting.WorldWidth-1)*1.2f,cachedRect.height/(GridRouting.WorldDepth-1)*1.2f),road);
                 foreach(var f in w.State.Factories)
                 {
@@ -80,10 +79,23 @@ namespace AssemblyZero.Unity.EP04
                 }
                 foreach(var resource in w.State.Resources)if(resource.Discovered)RectShape(vh,Point(resource.X,resource.Z),new Vector2(7,7),new Color(.85f,.65f,.29f));
                 RectShape(vh,Point(h.SupplierX,h.SupplierZ),new Vector2(7,7),new Color(.61f,.69f,.95f));
+                foreach(var p in HardwareWorldMap.Landmarks)RectShape(vh,Point(p.X,p.Z),new Vector2(5,5),new Color(.38f,.76f,.48f));
                 background.Clear();vh.GetUIVertexStream(background);
             }
             else vh.AddUIVertexTriangleStream(background);
             var truck=game.Truck;RectShape(vh,Point(truck.Position.X,truck.Position.Z),new Vector2(5,5),Color.white);
+            if(truck.Manual)
+            {
+                var target=game.ExplorationTarget;var gold=new Color(.98f,.72f,.24f);
+                if(routeWorld!=w||!routeStart.Equals(truck.Position)||!routeTarget.Equals(target))
+                {routeWorld=w;routeStart=truck.Position;routeTarget=target;guidance=GridRouting.RoadPath(routeStart,routeTarget,roadCells,w.State.Factories);}
+                if(guidance!=null)for(var i=1;i<guidance.Count;i++)Line(vh,Point(guidance[i-1].X,guidance[i-1].Z),Point(guidance[i].X,guidance[i].Z),gold,2);
+                var marker=Point(target.X,target.Z);var size=8+Mathf.Sin(Time.unscaledTime*4)*2;
+                Line(vh,marker+Vector2.up*size,marker+Vector2.right*size,gold,2);Line(vh,marker+Vector2.right*size,marker-Vector2.up*size,gold,2);
+                Line(vh,marker-Vector2.up*size,marker-Vector2.right*size,gold,2);Line(vh,marker-Vector2.right*size,marker+Vector2.up*size,gold,2);
+                var position=Point((float)truck.DriveX,(float)truck.DriveZ);var direction=new Vector2((float)System.Math.Sin(truck.Heading),(float)System.Math.Cos(truck.Heading));
+                Line(vh,position,position+direction*10,Color.white,3);RectShape(vh,position,new Vector2(6,6),Color.white);
+            }
             var plane=new Plane(Vector3.up,Vector3.zero);var valid=true;
             for(var i=0;i<4;i++)
             {

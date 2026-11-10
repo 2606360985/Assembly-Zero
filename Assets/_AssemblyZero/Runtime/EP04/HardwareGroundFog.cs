@@ -16,6 +16,8 @@ namespace AssemblyZero.Unity.EP04
         [Range(128,1024)] public int Resolution = 768;
         [Min(.1f)] public float Height = 1.6f;
         [Range(0,2)] public float Density = .55f;
+        [Tooltip("厂内雾量保留比例：0.3 表示比厂外降低 70%。")]
+        [Range(0,1)] public float FactoryDensityMultiplier = .3f;
         public Color Color = new Color(.85f,.9f,.91f);
         public Color ShadowColor = new Color(.36f,.44f,.46f);
         public Vector2 Wind = new Vector2(.18f,.07f);
@@ -69,6 +71,7 @@ namespace AssemblyZero.Unity.EP04
         private int current,initializeKernel,advectKernel,resolution;
         private float accumulator;
         private bool warned,wasPaused,wasRescuing;
+        private readonly Vector4[] factoryAreas=new Vector4[16];
         public GroundFogSettings Settings { get; private set; }
         public RenderTexture DensityTexture => density == null ? null : density[current];
         public bool IsReady => density != null && material != null;
@@ -257,6 +260,10 @@ namespace AssemblyZero.Unity.EP04
             material.SetVector("_FogArea",Area);material.SetFloat("_FogBottom",-.5f);material.SetFloat("_FogTop",Mathf.Max(.1f,Settings.Height));
             material.SetFloat("_FogExtinction",Mathf.Max(0,Settings.Density));material.SetFloat("_FogEdge",5);
             material.SetFloat("_FogClock",SimulationTime);
+            var count=Mathf.Min(factoryAreas.Length,game.World.State.Factories.Count);
+            for(var i=0;i<count;i++){var f=game.World.State.Factories[i];factoryAreas[i]=new Vector4((f.X-.75f)*1.2f,(f.Z-.75f)*1.2f,(f.X+GridRouting.Width+.75f)*1.2f,(f.Z+GridRouting.Depth+.75f)*1.2f);}
+            material.SetVectorArray("_FactoryAreas",factoryAreas);material.SetInt("_FactoryAreaCount",count);
+            material.SetFloat("_FactoryFogMultiplier",Mathf.Clamp01(Settings.FactoryDensityMultiplier));
             // The existing night lighting supplies a cooler, dimmer scattering palette.
             var night=game.View.Night;
             material.SetColor("_FogColor",night?Settings.Color*.42f:Settings.Color);

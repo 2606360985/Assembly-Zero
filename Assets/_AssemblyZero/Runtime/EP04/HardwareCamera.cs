@@ -59,6 +59,7 @@ namespace AssemblyZero.Unity.EP04
         }
         private void UpdateCamera(float deltaTime)
         {
+            if(Truck.Manual)cameraFocus=Vector3.Lerp(cameraFocus,new Vector3((float)Truck.DriveX*1.2f,0,(float)Truck.DriveZ*1.2f),1-Mathf.Exp(-8*deltaTime));
             if(CanNavigate&&orbitTime<OrbitDuration)
             {
                 orbitTime=Mathf.Min(OrbitDuration,orbitTime+deltaTime);

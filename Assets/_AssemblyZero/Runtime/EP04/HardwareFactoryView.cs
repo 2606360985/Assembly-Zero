@@ -106,7 +106,7 @@ namespace AssemblyZero.Unity.EP04
         {
             game=g;BuildEnvironment();BuildTruck();Rebuild();
         }
-        private Material Paint(Color c){if(!colors.TryGetValue(c,out var m)){m=new Material(game.Config.BaseMaterial);m.color=c;m.SetFloat("_Metallic",c==steel?.72f:.12f);m.SetFloat("_Smoothness",.42f);m.enableInstancing=true;colors.Add(c,m);}return m;}
+        private Material Paint(Color c){if(!colors.TryGetValue(c,out var m)){m=new Material(game.Config.BaseMaterial);m.color=c;m.SetFloat("_Metallic",c==steel?.85f:c==new Color(.72f,.36f,.16f)?.9f:.05f);m.SetFloat("_Smoothness",c==steel?.65f:c==dark?.24f:c==new Color(.72f,.36f,.16f)?.72f:.32f);m.enableInstancing=true;colors.Add(c,m);}return m;}
         private Transform Cube(string name,Vector3 position,Vector3 scale,Color color,Transform parent)
         {
             var o=GameObject.CreatePrimitive(PrimitiveType.Cube);o.name=name;o.transform.SetParent(parent,false);o.transform.localPosition=position;o.transform.localScale=scale;o.GetComponent<Renderer>().sharedMaterial=Paint(color);Destroy(o.GetComponent<Collider>());return o.transform;
@@ -126,7 +126,7 @@ namespace AssemblyZero.Unity.EP04
                 foreach(var r in game.World.State.Routes)if(r.Factory==game.Factory){key=key*31+r.Id;key=key*31+r.Material;key=key*31+r.Length;}}
             if(!worldChanged&&builtFactory==game.Factory&&geometryKey==key&&root!=null)return;
             builtFactory=game.Factory;geometryKey=key;ClearCargo();ClearRouteMeshes();
-            if(root!=null){root.gameObject.SetActive(false);Destroy(root.gameObject);}root=new GameObject("Factory machinery").transform;root.SetParent(transform);labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();inputPieces.Clear();actions.Clear();actionOrigins.Clear();utilizationBars.Clear();beds.Clear();chips.Clear();stations.Clear();lastOutput.Clear();
+            if(root!=null){root.gameObject.SetActive(false);Destroy(root.gameObject);}root=new GameObject("Factory machinery").transform;root.SetParent(transform);inspectedKeys.Clear();precisionTools.Clear();scanBeams.Clear();testRotors.Clear();labels.Clear();lamps.Clear();paths.Clear();workpieces.Clear();inputPieces.Clear();actions.Clear();actionOrigins.Clear();utilizationBars.Clear();beds.Clear();chips.Clear();stations.Clear();lastOutput.Clear();
             var f=game.World.Factory(game.Factory);
             foreach(var n in game.World.State.Nodes.Where(n=>n.Factory==game.Factory))
             {
@@ -139,7 +139,8 @@ namespace AssemblyZero.Unity.EP04
                 {
                     var recipe=game.World.Recipe(n.RecipeId);
                     workpieces[n.Id]=Product(recipe==null?HardwareCatalog.Board:HardwareVisualKey.Of(recipe.Output,game.World.Sku(recipe.SpecId)),station);workpieces[n.Id].localPosition=new Vector3(0,1.18f+.975f*(ModelHeight-1),-.7f);workpieces[n.Id].localScale=Vector3.one*1.25f;
-                    inputPieces[n.Id]=Product(recipe!=null&&recipe.Inputs.Length>0?recipe.Inputs[0].Material:HardwareCatalog.Board,station);inputPieces[n.Id].localPosition=workpieces[n.Id].localPosition;inputPieces[n.Id].localScale=Vector3.one*1.25f;
+                    inputPieces[n.Id]=n.Kind==BuildingKind.Tester?DisplayProduct(HardwareVisualKey.Of(HardwareCatalog.RawGPU,game.World.Sku(recipe?.SpecId)),station):Product(recipe!=null&&recipe.Inputs.Length>0?recipe.Inputs[0].Material:HardwareCatalog.Board,station);
+                    if(n.Kind==BuildingKind.Tester)testRotors[n.Id]=Rotors(inputPieces[n.Id]);inputPieces[n.Id].localPosition=workpieces[n.Id].localPosition;inputPieces[n.Id].localScale=Vector3.one*1.25f;
                     workpieces[n.Id].gameObject.SetActive(n.Output.Count>0);inputPieces[n.Id].gameObject.SetActive(n.Batch.Count>0&&n.Output.Count==0);
                 }
                 lamps[n.Id]=Cube("Status light",new Vector3(1.4f,2.5f*ModelHeight,1.3f),LampScale,StateColor(n.RunState),station);lamps[n.Id].GetComponent<Renderer>().sharedMaterial=Glow(StateColor(n.RunState));
@@ -176,6 +177,7 @@ namespace AssemblyZero.Unity.EP04
         // Station silhouettes keep their original footprints and ports.
         private void BuildBlocks(BusinessNode n,Transform station)
         {
+            if(BuildComputeModel(n,station))return;
             var ivory=new Color(.79f,.85f,.88f);var blue=new Color(.12f,.4f,.56f);var teal=new Color(.12f,.52f,.57f);
             var coral=new Color(.5f,.26f,.19f);var violet=new Color(.3f,.39f,.56f);
             var color=n.Kind==BuildingKind.Warehouse?teal:n.Kind==BuildingKind.Processor?coral:n.Kind==BuildingKind.Manufacturer?amber:n.Kind==BuildingKind.BoardAssembly?green:n.Kind==BuildingKind.GPUAssembly?blue:n.Kind==BuildingKind.Tester?violet:n.Kind==BuildingKind.Packaging?new Color(.94f,.75f,.2f):n.Kind==BuildingKind.Rework?coral:n.Kind==BuildingKind.Lab?new Color(.36f,.3f,.62f):green;
@@ -278,6 +280,7 @@ namespace AssemblyZero.Unity.EP04
         }
         public static Vector3 SampleTruck(WorldVehicle v,float interpolation)
         {
+            if(v.Manual)return new Vector3((float)v.DriveX*1.2f,.65f,(float)v.DriveZ*1.2f);
             var p=new Vector3(v.Position.X*1.2f,.65f,v.Position.Z*1.2f);
             if(v.RescueTicks==0&&v.Phase==VehiclePhase.Travelling&&v.PathIndex+1<v.Path.Count)
             {
@@ -289,6 +292,7 @@ namespace AssemblyZero.Unity.EP04
         public void Present(float interpolation)
         {
             var w=game.World;var v=game.Truck;truck.position=SampleTruck(v,interpolation);
+            if(v.Manual)truck.rotation=Quaternion.Euler(0,(float)(v.Heading*180/System.Math.PI),0);
             if(!game.Paused&&v.RescueTicks==0&&v.Phase==VehiclePhase.Travelling&&v.PathIndex+1<v.Path.Count)
             {
                 var next=v.Path[v.PathIndex+1];var direction=new Vector3(next.X-v.Position.X,0,next.Z-v.Position.Z);
@@ -320,15 +324,17 @@ namespace AssemblyZero.Unity.EP04
             removed.Clear();foreach(var id in cargo.Keys)if(!alive.Contains(id))removed.Add(id);
             foreach(var id in removed){ReleaseCargo(id,cargo[id]);cargo.Remove(id);cargoMaterials.Remove(id);previousCargo.Remove(id);}
             removed.Clear();foreach(var id in previousCargo.Keys)if(!alive.Contains(id))removed.Add(id);foreach(var id in removed)previousCargo.Remove(id);
-            var phase=(w.State.Tick+interpolation)/60f;
+            var phase=(w.State.Tick+(game.Paused?0:interpolation))/60f;
+            PresentPrecision(phase*60);
             foreach(var pair in actions)
             {
-                var n=w.Node(pair.Key);if(n==null)continue;var origin=actionOrigins[pair.Key];
+                var n=w.Node(pair.Key);if(n==null||n.Kind==BuildingKind.GPUAssembly)continue;var origin=actionOrigins[pair.Key];
                 var progress=n.WorkTotal>0?1-n.WorkRemaining/(float)n.WorkTotal:0;
                 pair.Value.localPosition=origin+(n.Batch.Count>0?(n.Kind==BuildingKind.BoardAssembly?Vector3.right*Mathf.Sin(progress*24)*.7f:Vector3.up*Mathf.Sin(progress*30)*.13f):Vector3.zero);
                 if(n.Kind==BuildingKind.Tester)pair.Value.localPosition=origin+(n.Batch.Count>0?Vector3.forward*Mathf.Sin(phase*2)*.55f:Vector3.zero);
             }
             labelTimer+=Time.unscaledDeltaTime;if(labelTimer<.2f)return;labelTimer=0;
+            PresentComputeModels();
             truckLoad.gameObject.SetActive(v.Cargo.Count>0);
             var resource=w.State.Resources[0];oreLabel.text="北岭铝矿 / 自动采集\n储量 "+resource.Stock+" / "+resource.Capacity;
             var visibleRocks=resource.Capacity>0?Mathf.CeilToInt(oreRocks.Count*resource.Stock/(float)resource.Capacity):0;

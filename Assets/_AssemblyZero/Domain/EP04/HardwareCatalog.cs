@@ -63,6 +63,7 @@ namespace AssemblyZero.Domain.EP04
     [Serializable] public sealed class GenerationLaunch { public int Gen; public long Tick; }
     [Serializable] public sealed class HardwareState
     {
+        public List<FactoryAutomation> Automation=new List<FactoryAutomation>();
         public string ContentId="az-gpu"; public int ContentVersion=HardwareCatalog.ContentVersion,LayoutVersion,NextOrder=4,NextPurchase=1,SpotRemaining=20;
         public List<HardwareOrder> Orders=new List<HardwareOrder>(); public List<SupplierStock> Stock=new List<SupplierStock>();
         public List<PurchaseDelivery> Deliveries=new List<PurchaseDelivery>(); public List<Settlement> Settlements=new List<Settlement>();

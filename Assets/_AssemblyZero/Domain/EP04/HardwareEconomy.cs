@@ -77,6 +77,7 @@ namespace AssemblyZero.Domain.EP04
                 if(State.Tick>order.HardDeadline)Expire(order);
             if(State.Tick%AllocationInterval==0)Allocate();
             TickOffers();
+            if(State.Tick%600==0)TickComputePark();
             foreach(var d in h.Deliveries.Where(d=>d.Method!=2&&State.Tick>=d.DueTick).ToArray())
             {
                 foreach(var g in d.Cargo.ToArray()){var store=State.Nodes.FirstOrDefault(n=>n.Factory==d.Factory&&n.Kind==BuildingKind.Warehouse&&CanReceive(n,g.Material));if(store==null)continue;store.Output.Add(g);d.Cargo.Remove(g);}

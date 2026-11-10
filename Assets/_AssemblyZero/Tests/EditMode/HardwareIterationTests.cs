@@ -8,6 +8,49 @@ namespace AssemblyZero.Tests
 {
     public sealed class HardwareIterationTests
     {
+        [Test] public void ComputePark_ConservesCardsLimitsCapacityAndRestoresAcrossSave()
+        {
+            var w=New();int rack1=0,rack2=0;
+            foreach(var x in new[]{12,20})
+            {
+                var built=Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.ComputeRack,X=x,Z=24});Assert.IsTrue(built.Success,built.Message);if(rack1==0)rack1=built.Entity;else rack2=built.Entity;
+            }
+            for(var i=0;i<8;i++){Put(w,HardwareCatalog.Standard,1,0,2,HardwareCatalog.StandardSpec);Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.InstallCompute,Node=i<4?rack1:rack2}).Success);}
+            Assert.AreEqual(8,w.InstalledCards(1));Assert.AreEqual(4,w.EffectiveCards(1));Run(w,10);Assert.AreEqual(1200,w.Automation(1).Income);Assert.AreEqual(200,w.Automation(1).Fees);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.PowerUnit,X=28,Z=28}).Success);Assert.AreEqual(4,w.EffectiveCards(1));
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.CoolingUnit,X=36,Z=28}).Success);Assert.AreEqual(8,w.EffectiveCards(1));
+            var loaded=new WorldSimulation(w.Settings,JsonUtility.FromJson<WorldState>(Save(w)));Run(w,20);Run(loaded,20);Assert.AreEqual(Save(w),Save(loaded));
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.UninstallCompute,Node=rack1}).Success);Assert.AreEqual(7,w.InstalledCards(1));
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Remove,Node=rack2}).Success);Assert.AreEqual(3,w.InstalledCards(1));Assert.AreEqual(5,w.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Standard));w.AssertConserved();
+        }
+        [Test] public void ComputePark_AndDealerCannotTakeOrderReservedCards()
+        {
+            var w=New();var card=Put(w,HardwareCatalog.Standard,1,0,2,HardwareCatalog.StandardSpec);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);Run(w,1);Assert.AreEqual(1,card.ReservedOrder);
+            var rack=Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.ComputeRack,X=12,Z=24});Assert.IsTrue(rack.Success,rack.Message);
+            Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.InstallCompute,Node=rack.Entity}).Success);
+            var p=w.Automation(1);p.Sell=true;p.KeepCards=0;Run(w,10);Assert.IsTrue(w.FinishedStock(1).Contains(card));Assert.AreEqual(0,w.InstalledCards(1));w.AssertConserved();
+        }
+        [Test] public void Automation_RespectsCashFloorTransitAndReservedCards()
+        {
+            var w=New();Chain(w);var p=w.Automation(1);p.Purchase=true;p.CashReserve=w.State.Money;Run(w,10);Assert.IsEmpty(w.State.Hardware.Deliveries);
+            p.CashReserve=0;Run(w,10);Assert.IsNotEmpty(w.State.Hardware.Deliveries);var ids=w.State.Hardware.Deliveries.SelectMany(d=>d.Cargo).Select(g=>g.Id).ToArray();Run(w,10);
+            Assert.IsTrue(w.State.Hardware.Deliveries.SelectMany(d=>d.Cargo).Select(g=>g.Id).Intersect(ids).Any());
+            p.Purchase=false;p.Sell=true;p.KeepCards=2;for(var i=0;i<4;i++)Put(w,HardwareCatalog.Standard,1,0,2,HardwareCatalog.StandardSpec);
+            Run(w,30);Assert.AreEqual(2,w.FinishedStock(1).Count(g=>g.Material==HardwareCatalog.Standard));w.AssertConserved();
+        }
+        [Test] public void ComputePark_NormalOpeningCanProduceAndMonetizeItsOwnCards()
+        {
+            var w=new WorldSimulation(HardwareCatalog.Create());Chain(w);Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);
+            var p=w.Automation(1);p.Purchase=true;p.Sell=true;p.KeepCards=4;
+            var rack=Do(w,new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.ComputeRack,X=12,Z=24});Assert.IsTrue(rack.Success,rack.Message);
+            for(var i=0;i<900*60;i++)
+            {
+                w.Tick();if(w.State.Tick%600==0&&w.Node(rack.Entity).Input.Count<4)Do(w,new WorldCommand{Kind=CommandKind.InstallCompute,Node=rack.Entity});
+            }
+            Assert.AreEqual(4,w.InstalledCards(1));Assert.Greater(p.Income-p.Fees,0);Assert.Greater(w.State.Hardware.Settlements.Count,0);w.AssertConserved();
+            Console.WriteLine("Compute normal opening at 15 simulated minutes: cards="+w.InstalledCards(1)+", service net="+(p.Income-p.Fees)/100m+", cash="+w.State.Money/100m);
+        }
         private static WorldSimulation New(){var w=new WorldSimulation(HardwareCatalog.Create());w.State.Money=10000000;return w;}
         private static CommandResult Do(WorldSimulation w,WorldCommand c){w.Enqueue(c);w.FlushCommands();return w.LastResult;}
         private static void Run(WorldSimulation w,int seconds){for(var i=0;i<seconds*60;i++)w.Tick();w.AssertConserved();}

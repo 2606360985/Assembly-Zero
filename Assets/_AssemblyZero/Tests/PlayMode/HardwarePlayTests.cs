@@ -13,6 +13,21 @@ namespace AssemblyZero.Tests
 {
     public sealed class HardwarePlayTests
     {
+        [UnityTest] public IEnumerator Hardware_ComputeParkBuildsModelsAndOperatesFromDrawer()
+        {
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            game.SetDrawer("算力");yield return null;
+            Assert.IsTrue(game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().Any(b=>b.name.StartsWith("搭建算力机柜")));
+            var b=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.ComputeRack,X=12,Z=24});Assert.IsTrue(b.Success,b.Message);
+            game.View.Rebuild();yield return null;
+            Assert.IsTrue(game.View.GetComponentsInChildren<Transform>().Any(t=>t.name=="Server face"));
+            game.SetDrawer("算力");yield return null;
+            game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(x=>x.name=="自动补料：关闭").onClick.Invoke();yield return null;
+            Assert.IsTrue(game.World.Automation(1).Purchase);
+            var tick=game.World.State.Tick;yield return null;Assert.AreEqual(tick,game.World.State.Tick,"Paused UI must not advance production or service payouts");
+            game.World.CaptureState();var json=JsonUtility.ToJson(game.World.State);var loaded=new WorldSimulation(game.Config.Economy,JsonUtility.FromJson<WorldState>(json));
+            Assert.IsTrue(loaded.Automation(1).Purchase);Assert.AreEqual(1,loaded.State.Nodes.Count(n=>n.Kind==BuildingKind.ComputeRack));loaded.AssertConserved();
+        }
         private InputSettings originalSettings, testSettings;private HideFlags originalFlags;
         private Keyboard fixtureKeyboard;
         [SetUp] public void RouteSyntheticInputToGame()
@@ -123,14 +138,24 @@ namespace AssemblyZero.Tests
             }
             finally{InputSystem.RemoveDevice(mouse);}
         }
-        [UnityTest] public IEnumerator Hardware_TransportPlanningPauseAndFrozenDrivingInput()
+        [UnityTest] public IEnumerator Hardware_TransportTakeoverInputPauseAndReturnToPlanning()
         {
             yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();var keyboard=InputSystem.AddDevice<Keyboard>();
             try
             {
-                game.Speed=2;game.ToggleDriving();Assert.IsFalse(game.Truck.Manual);Assert.AreEqual("运输",game.Drawer);Assert.AreEqual(2,game.Speed);var p=game.Truck.Position;
-                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W));yield return new WaitForSeconds(.35f);Assert.AreEqual(p,game.Truck.Position);
+                game.SendMessage("OnApplicationFocus",true);game.Speed=2;
+                game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接管小卡车 · Tab").onClick.Invoke();Assert.IsTrue(game.Truck.Manual);Assert.AreEqual("",game.Drawer);Assert.AreEqual(1,game.Speed);var p=game.Truck.Position;
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W));yield return new WaitForSeconds(.65f);Assert.AreNotEqual(p,game.Truck.Position);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W,Key.D));yield return new WaitForSeconds(.2f);var heading=game.Truck.Heading;Assert.Greater(heading,0);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.W,Key.A));yield return new WaitForSeconds(.2f);Assert.Less(game.Truck.Heading,heading);
+                InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.S));yield return new WaitForSeconds(.5f);Assert.Less(game.Truck.Speed,0);
+                Assert.AreEqual(HardwareFactoryView.SampleTruck(game.Truck,0),game.View.TruckVisual.position);
+                Assert.Greater(game.View.GetComponentsInChildren<Transform>().Count(t=>t.name=="Roadside tree"),40);
+                Assert.That(game.Fog.Settings.FactoryDensityMultiplier,Is.EqualTo(.3f).Within(.001f));
+                game.TogglePause();var manualTick=game.World.State.Tick;var manualZ=game.Truck.DriveZ;yield return new WaitForSeconds(.1f);Assert.AreEqual(manualTick,game.World.State.Tick);Assert.AreEqual(manualZ,game.Truck.DriveZ);game.TogglePause();
                 InputSystem.QueueStateEvent(keyboard,new KeyboardState());yield return null;
+                game.SendMessage("OnApplicationFocus",false);yield return null;Assert.AreEqual(0,game.Truck.Throttle);game.SendMessage("OnApplicationFocus",true);
+                game.ToggleDriving();Assert.IsFalse(game.Truck.Manual);Assert.AreEqual(2,game.Speed);game.SetDrawer("运输");yield return null;
                 game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="规划循环采集铝原料").onClick.Invoke();Assert.IsTrue(game.Truck.Loop);Assert.AreEqual(VehiclePhase.Travelling,game.Truck.Phase);
                 game.TogglePause();var tick=game.World.State.Tick;var position=game.Truck.Position;yield return new WaitForSeconds(.1f);Assert.AreEqual(tick,game.World.State.Tick);Assert.AreEqual(position,game.Truck.Position);
                 game.TogglePause();game.SetDrawer("订单");yield return null;Assert.AreEqual("订单",game.Drawer);game.SetDrawer("采购");yield return null;Assert.AreEqual("采购",game.Drawer);

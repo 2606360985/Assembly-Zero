@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="14" result="Passed" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.2172936">
+  <test-suite type="TestSuite" id="1000" name="Assembly Zero" fullname="Assembly Zero" runstate="Runnable" testcasecount="190" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.217294" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1231" name="AssemblyZero.Tests.dll" fullname="G:/UnityProjects2026/Assembly Zero/Library/ScriptAssemblies/AssemblyZero.Tests.dll" runstate="Runnable" testcasecount="190" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.207683" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="17776" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1232" name="AssemblyZero" fullname="AssemblyZero" runstate="Runnable" testcasecount="190" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.201546" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1233" name="Tests" fullname="AssemblyZero.Tests" runstate="Runnable" testcasecount="190" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.198669" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1167" name="HardwareIterationTests" fullname="AssemblyZero.Tests.HardwareIterationTests" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" testcasecount="14" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:06Z" duration="4.194821" total="14" passed="14" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1180" name="AnotherGeneration_DoesNotResetOldCardDepreciationAndReboundItsPrice" fullname="AssemblyZero.Tests.HardwareIterationTests.AnotherGeneration_DoesNotResetOldCardDepreciationAndReboundItsPrice" methodname="AnotherGeneration_DoesNotResetOldCardDepreciationAndReboundItsPrice" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="313401254" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:02Z" duration="0.051935" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1170" name="Automation_RespectsCashFloorTransitAndReservedCards" fullname="AssemblyZero.Tests.HardwareIterationTests.Automation_RespectsCashFloorTransitAndReservedCards" methodname="Automation_RespectsCashFloorTransitAndReservedCards" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="1936448160" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:02Z" duration="0.177680" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1169" name="ComputePark_AndDealerCannotTakeOrderReservedCards" fullname="AssemblyZero.Tests.HardwareIterationTests.ComputePark_AndDealerCannotTakeOrderReservedCards" methodname="ComputePark_AndDealerCannotTakeOrderReservedCards" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="1648949350" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:02Z" duration="0.012250" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1168" name="ComputePark_ConservesCardsLimitsCapacityAndRestoresAcrossSave" fullname="AssemblyZero.Tests.HardwareIterationTests.ComputePark_ConservesCardsLimitsCapacityAndRestoresAcrossSave" methodname="ComputePark_ConservesCardsLimitsCapacityAndRestoresAcrossSave" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="1442262585" result="Passed" start-time="2026-11-07 14:30:02Z" end-time="2026-11-07 14:30:03Z" duration="0.060379" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1171" name="ComputePark_NormalOpeningCanProduceAndMonetizeItsOwnCards" fullname="AssemblyZero.Tests.HardwareIterationTests.ComputePark_NormalOpeningCanProduceAndMonetizeItsOwnCards" methodname="ComputePark_NormalOpeningCanProduceAndMonetizeItsOwnCards" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="1541441806" result="Passed" start-time="2026-11-07 14:30:03Z" end-time="2026-11-07 14:30:05Z" duration="2.245860" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1173" name="CorePurchase_QuotesAndCarriesChosenGenerationAndBin" fullname="AssemblyZero.Tests.HardwareIterationTests.CorePurchase_QuotesAndCarriesChosenGenerationAndBin" methodname="CorePurchase_QuotesAndCarriesChosenGenerationAndBin" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="497893715" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:05Z" duration="0.001490" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1177" name="Demand_DoesNotInventImpossibleAiOffersOrUseRetiredSkus" fullname="AssemblyZero.Tests.HardwareIterationTests.Demand_DoesNotInventImpossibleAiOffersOrUseRetiredSkus" methodname="Demand_DoesNotInventImpossibleAiOffersOrUseRetiredSkus" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="37423764" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:05Z" duration="0.075189" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1176" name="GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration" fullname="AssemblyZero.Tests.HardwareIterationTests.GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration" methodname="GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="1010244667" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:05Z" duration="0.327687" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1172" name="IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice" fullname="AssemblyZero.Tests.HardwareIterationTests.IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice" methodname="IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="83300144" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:05Z" duration="0.013750" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1179" name="LateGenerations_StayPositiveAndBoundedWithoutAddingMaterialIds" fullname="AssemblyZero.Tests.HardwareIterationTests.LateGenerations_StayPositiveAndBoundedWithoutAddingMaterialIds" methodname="LateGenerations_StayPositiveAndBoundedWithoutAddingMaterialIds" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="234451419" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:05Z" duration="0.001351" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1175" name="NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers" fullname="AssemblyZero.Tests.HardwareIterationTests.NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers" methodname="NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="26314919" result="Passed" start-time="2026-11-07 14:30:05Z" end-time="2026-11-07 14:30:06Z" duration="1.008395" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1178" name="Procurement_DoesNotOffsetNewPremiumCoreDemandWithOldOrWrongBinStock" fullname="AssemblyZero.Tests.HardwareIterationTests.Procurement_DoesNotOffsetNewPremiumCoreDemandWithOldOrWrongBinStock" methodname="Procurement_DoesNotOffsetNewPremiumCoreDemandWithOldOrWrongBinStock" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="182601691" result="Passed" start-time="2026-11-07 14:30:06Z" end-time="2026-11-07 14:30:06Z" duration="0.010754" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1174" name="Retooling_WaitsForBatchStopsProductionAndResumesExactlyAcrossSave" fullname="AssemblyZero.Tests.HardwareIterationTests.Retooling_WaitsForBatchStopsProductionAndResumesExactlyAcrossSave" methodname="Retooling_WaitsForBatchStopsProductionAndResumesExactlyAcrossSave" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="327139163" result="Passed" start-time="2026-11-07 14:30:06Z" end-time="2026-11-07 14:30:06Z" duration="0.187697" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+            </test-case>
+            <test-case id="1181" name="Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership" fullname="AssemblyZero.Tests.HardwareIterationTests.Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership" methodname="Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership" classname="AssemblyZero.Tests.HardwareIterationTests" runstate="Runnable" seed="422550741" result="Passed" start-time="2026-11-07 14:30:06Z" end-time="2026-11-07 14:30:06Z" duration="0.005726" asserts="0">
+              <properties>
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Saving results to: C:/Users/Administrator/AppData/LocalLow/DefaultCompany/Assembly Zero\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

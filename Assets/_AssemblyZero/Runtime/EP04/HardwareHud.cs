@@ -25,7 +25,7 @@ namespace AssemblyZero.Unity.EP04
         private readonly Dictionary<int,(UnityEngine.UI.Image Fill,TMP_Text Text)> orderRings=new Dictionary<int,(UnityEngine.UI.Image Fill,TMP_Text Text)>();
         private readonly Dictionary<string,TMP_Text> kpis=new Dictionary<string,TMP_Text>();
         private (UnityEngine.UI.Image Fill,TMP_Text Text) deviceRing;
-        public static readonly string[] Pages={"工厂","订单","产品","研发","采购","市场","运输","报表"};
+        public static readonly string[] Pages={"工厂","订单","产品","研发","采购","市场","运输","算力","报表"};
         private Sprite PanelSprite()
         {
             if(roundedPanel!=null)return roundedPanel;
@@ -160,11 +160,18 @@ namespace AssemblyZero.Unity.EP04
             Button(header,"关闭",()=>{game.Drawer="";RebuildDrawer();},70);
             deviceRing=default;RevenueChart=null;priceChart=null;kpis.Clear();
             var w=game.World;var h=w.State.Hardware;
+            if(game.Drawer=="算力"){ComputeDrawer(w);return;}
             if(game.Drawer=="设备")
             {
                 var top=Row(Box("Device summary",content,false));top.GetComponent<UnityEngine.UI.LayoutElement>().preferredHeight=84;deviceRing=Ring(top,76,Good,18);
                 kpis["device-state"]=Tile(top,"bolt",Gold,"状态");kpis["device-speed"]=Tile(top,"clock",accent,"节拍");
                 DeviceActionBar();
+                var selectedNode=w.Node(game.SelectedNode);
+                if(selectedNode!=null&&(selectedNode.Kind==BuildingKind.ComputeRack||selectedNode.Kind==BuildingKind.PowerUnit||selectedNode.Kind==BuildingKind.CoolingUnit))
+                {
+                    Label(content,"园区设施 · "+selectedNode.Status,16,72);
+                    Button(content,"算力管理 · 装卡与自动经营",()=>game.SetDrawer("算力"));return;
+                }
                 Button(content,"工艺改造至最新世代 · 停机 30 秒",()=>game.Submit(new WorldCommand{Kind=CommandKind.Retool,Node=game.SelectedNode}),actionId:"device:retool");
             }
             if(game.Drawer=="报表")
@@ -226,6 +233,7 @@ namespace AssemblyZero.Unity.EP04
             }
             if(game.Drawer=="运输")
             {
+                Button(content,"接管小卡车 · Tab",game.ToggleDriving);
                 Button(content,"查看矿点与车库",game.FocusLogistics);
                 var cameras=Row(Box("Logistics cameras",content,false));Button(cameras,"矿区",game.FocusMine);Button(cameras,"采购站",game.FocusSupplier);Button(cameras,"皮卡",game.FocusTruck);Button(content,"返回工厂",game.FocusFactory);
                 Button(content,"规划循环采集铝原料",()=>game.Submit(new WorldCommand{Kind=CommandKind.Collect,Resource=1,TargetFactory=game.Factory}),actionId:"drawer:mining");
@@ -278,6 +286,7 @@ namespace AssemblyZero.Unity.EP04
         }
         public void Refresh()
         {
+            RefreshCompute();
             if(top==null||game.World==null||game.Showcasing)return;var w=game.World;var h=w.State.Hardware;
             RefreshProcurementOverview();
             RefreshEquipmentLibrary();
@@ -286,11 +295,14 @@ namespace AssemblyZero.Unity.EP04
             var badge=MarketBadge(w);eventText.text=badge==""?"<color=#7F8E99>行情未开放</color>":badge;
             timeText.text=(w.State.Tick/3600)+":"+(w.State.Tick/60%60).ToString("00");factoryText.text=game.Factory+"号厂";
             speedLabel.text=game.Paused?"已暂停":"速度 "+game.Speed+"×";
+            if(drivingTaskText!=null){drivingTaskText.text=game.ExplorationHint;drivingButtonText.text=game.Truck.Manual?"结束接管 · Tab":"接管小卡车 · Tab";drivingButton.interactable=!game.Paused&&game.Truck.RescueTicks==0;}
             var hint=HardwareGuide.Evaluate(w,game.Factory);
             tutorialHint=hint;
             goal.text="<color=#16B8D1>当前目标 / "+hint.Title+"</color>\n"+hint.Detail;guideAction.text=hint.Action;
             notice.text=string.Join("\n",game.Notices.Reverse());notices.gameObject.SetActive(game.Drawer==""&&game.Notices.Length>0&&!game.Truck.Manual);
-            build.gameObject.SetActive(true);goals.gameObject.SetActive(true);
+            build.gameObject.SetActive(!game.Truck.Manual);goals.gameObject.SetActive(!game.Truck.Manual);
+            if(drivingHelp!=null)drivingHelp.gameObject.SetActive(game.Truck.Manual);
+            if(game.Truck.Manual){goal.text="W/S 前进倒车 · A/D 转向\nE 装卸/采集 · F 回正 · Tab 结束接管";notice.text=goal.text;notices.gameObject.SetActive(false);}
             selection.text=game.Placing.HasValue?"放置 "+game.Config.Economy.Hardware.Buildings.First(b=>b.Kind==game.Placing).Name+" · R旋转设备 · Esc取消 · Q/E旋转视角":"常用设备 · 1–7 快捷放置 · 拖动交换位置 · 右键替换 · 全部设备查看分类与搜索";
             var v=game.Truck;
             if(game.Drawer=="订单"&&OrderSignature()!=orderSignature){RebuildDrawer();return;}

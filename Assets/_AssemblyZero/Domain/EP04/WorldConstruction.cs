@@ -8,6 +8,8 @@ namespace AssemblyZero.Domain.EP04
     {
         private CommandResult Execute(WorldCommand c)
         {
+            if(c.Kind==CommandKind.AutomationPolicy||c.Kind==CommandKind.InstallCompute||c.Kind==CommandKind.UninstallCompute)
+                return Settings.IsHardware?ComputeCommand(c):Fail("仅适用于显卡战役");
             switch(c.Kind){case CommandKind.AcceptOrder:case CommandKind.ReserveOrder:case CommandKind.ReleaseOrder:case CommandKind.DeliverOrder:case CommandKind.CancelOrder:case CommandKind.Purchase:case CommandKind.SpotSell:case CommandKind.TakeControl:case CommandKind.ReleaseControl:case CommandKind.Drive:case CommandKind.Interact:case CommandKind.RecoverVehicle:case CommandKind.RightVehicle:case CommandKind.StartResearch:case CommandKind.DesignSku:case CommandKind.RetireSku:case CommandKind.Retool:return Settings.IsHardware?HardwareCommand(c):Fail("该命令仅适用于显卡战役");}
             if(c.Kind==CommandKind.Build)return Build(c);
             if(c.Kind==CommandKind.BuyFactory)

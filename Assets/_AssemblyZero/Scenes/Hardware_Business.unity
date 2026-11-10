@@ -155,6 +155,7 @@ MonoBehaviour:
     Resolution: 768
     Height: 1.6
     Density: 0.55
+    FactoryDensityMultiplier: 0.3
     Color: {r: 0.85, g: 0.9, b: 0.91, a: 1}
     ShadowColor: {r: 0.36, g: 0.44, b: 0.46, a: 1}
     Wind: {x: 0.18, y: 0.07}
@@ -166,9 +167,12 @@ MonoBehaviour:
     VortexRadiusScale: 3
     WakeSwirl: 1
     WakePersistence: 1.8
-    ImpulseDuration: 1.2
-    TruckRadius: 0.5
+    ImpulseDuration: 0.8
+    TruckRadius: 0.8
     TruckStrength: 1.2
+    PlacementRadius: 2
+    PlacementStrength: 1.9
+    PlacementDuration: 0.75
   Interaction: 0
   SelectedNode: 0
   Factory: 1

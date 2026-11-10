@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="1" result="Passed" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.6219364">
+  <test-suite type="TestSuite" id="1066" name="Assembly Zero" fullname="Assembly Zero" runstate="Runnable" testcasecount="49" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.621936" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="PlayMode" />
+    </properties>
+    <test-suite type="Assembly" id="1060" name="AssemblyZero.PlayModeTests.dll" fullname="G:/UnityProjects2026/Assembly Zero/Library/ScriptAssemblies/AssemblyZero.PlayModeTests.dll" runstate="Runnable" testcasecount="49" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.606174" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="23956" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="PlayMode" />
+        <property name="EditorOnly" value="False" />
+      </properties>
+      <test-suite type="TestSuite" id="1061" name="AssemblyZero" fullname="AssemblyZero" runstate="Runnable" testcasecount="49" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.604735" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1062" name="Tests" fullname="AssemblyZero.Tests" runstate="Runnable" testcasecount="49" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.603562" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestFixture" id="1043" name="HardwarePlayTests" fullname="AssemblyZero.Tests.HardwarePlayTests" classname="AssemblyZero.Tests.HardwarePlayTests" runstate="Runnable" testcasecount="15" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.601485" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-case id="1044" name="Hardware_ComputeParkBuildsModelsAndOperatesFromDrawer" fullname="AssemblyZero.Tests.HardwarePlayTests.Hardware_ComputeParkBuildsModelsAndOperatesFromDrawer" methodname="Hardware_ComputeParkBuildsModelsAndOperatesFromDrawer" classname="AssemblyZero.Tests.HardwarePlayTests" runstate="Runnable" seed="955669719" result="Passed" start-time="2026-11-07 14:29:25Z" end-time="2026-11-07 14:29:27Z" duration="1.587393" asserts="0">
+              <properties>
+                <property name="_JOINTYPE" value="UnityCombinatorial" />
+                <property name="retryIteration" value="0" />
+                <property name="repeatIteration" value="0" />
+              </properties>
+              <output><![CDATA[Hardware Economy.asset is outdated; using HardwareCatalog defaults. Run Tools > Assembly Zero > Refresh Hardware Economy.
+Saving results to: C:/Users/Administrator/AppData/LocalLow/DefaultCompany/Assembly Zero\TestResults.xml
+]]></output>
+            </test-case>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>

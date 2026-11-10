@@ -17,6 +17,9 @@ namespace AssemblyZero.Unity.EP04
         private RectTransform highlighted;
         private bool completedNotified;
         private HardwareHint tutorialHint;
+        private TMP_Text drivingButtonText,drivingTaskText;
+        private UnityEngine.UI.Button drivingButton;
+        private RectTransform drivingHelp;
         public bool TutorialEnabled {get;private set;}
         public string CurrentGuideTarget {get;private set;}="";
         public bool TutorialComplete=>game.World.State.Hardware.ScriptedDone>=1;
@@ -31,13 +34,18 @@ namespace AssemblyZero.Unity.EP04
             menuTutorialToggle=Button(pause.GetComponentInChildren<VerticalLayoutGroup>().transform,"",ToggleTutorial).GetComponentInChildren<TMP_Text>();
             var mapPanel=Box("Minimap panel",canvas.transform);
             mapPanel.pivot=Vector2.zero;
-            Anchor(mapPanel,Vector2.zero,Vector2.zero,new Vector2(84,128),new Vector2(354,392));
+            Anchor(mapPanel,Vector2.zero,Vector2.zero,new Vector2(84,128),new Vector2(354,478));
             drawer.offsetMin=new Vector2(-356,128);
             var title=Label(mapPanel,"全局小地图 · 点击定位   ↑北",15,26);Anchor((RectTransform)title.transform,new Vector2(0,1),Vector2.one,new Vector2(8,-30),new Vector2(-8,-4));
             var mapObject=new GameObject("Minimap",typeof(RectTransform));mapObject.transform.SetParent(mapPanel,false);
-            var mapRect=(RectTransform)mapObject.transform;Stretch(mapRect);mapRect.offsetMin=new Vector2(8,42);mapRect.offsetMax=new Vector2(-8,-30);
+            var mapRect=(RectTransform)mapObject.transform;Stretch(mapRect);mapRect.offsetMin=new Vector2(8,130);mapRect.offsetMax=new Vector2(-8,-30);
             mapObject.AddComponent<RectMask2D>();mapObject.AddComponent<HardwareMinimap>().Initialize(game);
-            var legend=Label(mapPanel,"青：工厂  金：矿区  紫：采购站\n白：皮卡  青框：当前视野",12,34);Anchor((RectTransform)legend.transform,Vector2.zero,new Vector2(1,0),new Vector2(8,4),new Vector2(-8,38));
+            var legend=Label(mapPanel,"白：皮卡  绿：探索点  金线：目标路线",12,20);Anchor((RectTransform)legend.transform,Vector2.zero,new Vector2(1,0),new Vector2(8,108),new Vector2(-8,128));
+            drivingTaskText=Label(mapPanel,"",13,48);Anchor((RectTransform)drivingTaskText.transform,Vector2.zero,new Vector2(1,0),new Vector2(8,58),new Vector2(-8,106));
+            drivingButton=Button(mapPanel,"接管小卡车 · Tab",game.ToggleDriving,0,40);
+            Anchor((RectTransform)drivingButton.transform,Vector2.zero,new Vector2(1,0),new Vector2(8,8),new Vector2(-8,50));drivingButtonText=drivingButton.GetComponentInChildren<TMP_Text>();
+            drivingHelp=Box("Driving controls",canvas.transform);Anchor(drivingHelp,new Vector2(.5f,0),new Vector2(.5f,0),new Vector2(-310,16),new Vector2(310,100));
+            var help=Label(drivingHelp,"<color=#16B8D1>手动探索 / WASD</color>  W/S 前进倒车 · A/D 转向\nE 装卸 / 采集 · F 原地回正 · Tab 结束接管 · 空格暂停",17,72);Stretch((RectTransform)help.transform,8);help.alignment=TextAlignmentOptions.Center;drivingHelp.gameObject.SetActive(false);
             guideTargets["next"]=(RectTransform)guideAction.transform.parent;
             guideTargets["progress"]=(RectTransform)goal.transform;
             guideBorder=Box("Tutorial highlight",canvas.transform,false);

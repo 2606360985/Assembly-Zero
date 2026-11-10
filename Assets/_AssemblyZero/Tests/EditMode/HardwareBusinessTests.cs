@@ -251,12 +251,46 @@ namespace AssemblyZero.Tests
             var w=New();Buy(w,HardwareCatalog.Carton,80,2);var cash=w.State.Money;Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Purchase,Material=HardwareCatalog.Carton,Quantity=1}).Success);Assert.AreEqual(cash,w.State.Money);
             Run(w,w.Settings.Hardware.RestockSeconds);Assert.AreEqual(80,w.State.Hardware.Stock.First(s=>s.Material==HardwareCatalog.Carton).Quantity);
         }
-        [Test] public void Hardware_ManualDrivingIsFrozenAndRescueUnloadsAutomatically()
+        [Test] public void Hardware_ManualDrivingMovesAndRescueUnloadsAutomatically()
         {
-            var w=New();Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.TakeControl}).Success);
+            var w=New();var truck=w.State.Vehicles[0];var start=truck.Position;
             Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.TakeControl}).Success);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1}).Success);Run(w,2);Assert.Greater(truck.DriveZ,start.Z+5);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.ReleaseControl}).Success);
             Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);Run(w,20);var v=w.State.Vehicles[0];Assert.IsNotEmpty(v.Cargo);var ids=v.Cargo.Select(g=>g.Id).ToArray();
             Do(w,new WorldCommand{Kind=CommandKind.RecoverVehicle});Assert.Greater(v.RescueTicks,0);Assert.IsFalse(Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1}).Success);Run(w,61);Assert.AreEqual(w.Factory(1).Dock,v.Position);Assert.IsEmpty(v.Cargo);Assert.IsTrue(ids.All(id=>w.FinishedStock(1).Any(g=>g.Id==id)));w.AssertConserved();
+        }
+        [Test] public void Hardware_TakeoverPreservesCargoAndClearsAutomaticTask()
+        {
+            var w=New();Do(w,new WorldCommand{Kind=CommandKind.Collect,Resource=1});Run(w,20);var v=w.State.Vehicles[0];var goods=v.Cargo.Select(g=>g.Id).ToArray();Assert.IsNotEmpty(goods);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.TakeControl}).Success);Assert.IsTrue(v.Manual);Assert.IsFalse(v.Loop||v.PickupTask||v.TransferTask);Assert.IsEmpty(v.Path);CollectionAssert.AreEqual(goods,v.Cargo.Select(g=>g.Id));
+            Do(w,new WorldCommand{Kind=CommandKind.ReleaseControl});Assert.AreEqual(0,v.Throttle);Assert.AreEqual(0,v.Speed);
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Return}).Success);Run(w,40);Assert.IsEmpty(v.Cargo);Assert.IsTrue(goods.All(id=>w.FinishedStock(1).Any(g=>g.Id==id)));w.AssertConserved();
+        }
+        [Test] public void Hardware_ManualPickupAndUnloadPreservePurchasedGoods()
+        {
+            var w=New();Buy(w,HardwareCatalog.Core,2,2);var goods=w.State.Hardware.Deliveries.Single().Cargo.Select(g=>g.Id).ToArray();
+            Do(w,new WorldCommand{Kind=CommandKind.TakeControl});var v=w.State.Vehicles[0];v.Position=new GridPoint(w.Settings.Hardware.SupplierX,w.Settings.Hardware.SupplierZ);v.DriveX=v.Position.X;v.DriveZ=v.Position.Z;
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Interact}).Success);CollectionAssert.AreEquivalent(goods,v.Cargo.Select(g=>g.Id));Assert.IsEmpty(w.State.Hardware.Deliveries);
+            v.Position=w.Factory(1).Dock;v.DriveX=v.Position.X;v.DriveZ=v.Position.Z;
+            Assert.IsTrue(Do(w,new WorldCommand{Kind=CommandKind.Interact}).Success);Assert.IsEmpty(v.Cargo);Assert.IsTrue(goods.All(id=>w.FinishedStock(1).Any(g=>g.Id==id)));w.AssertConserved();
+        }
+        [Test] public void Hardware_ExpandedRoadsConnectStopsAndKeepFactoryFootprints()
+        {
+            var w=New();var roads=HardwareWorldMap.Roads(w.Settings,w.State.Factories);Assert.Greater(GridRouting.WorldWidth,116);Assert.Greater(GridRouting.WorldDepth,88);
+            Assert.AreEqual(4,w.Factory(1).X);Assert.AreEqual(4,w.Factory(1).Z);
+            Assert.IsTrue(roads.All(p=>!GridRouting.HardwareBlocked(p,w.State.Factories)));
+            var visited=new System.Collections.Generic.HashSet<GridPoint>();var queue=new System.Collections.Generic.Queue<GridPoint>();queue.Enqueue(w.Factory(1).Dock);visited.Add(w.Factory(1).Dock);
+            while(queue.Count>0){var p=queue.Dequeue();foreach(var d in new[]{new GridPoint(1,0),new GridPoint(-1,0),new GridPoint(0,1),new GridPoint(0,-1)}){var next=new GridPoint(p.X+d.X,p.Z+d.Z);if(roads.Contains(next)&&visited.Add(next))queue.Enqueue(next);}}
+            foreach(var p in HardwareWorldMap.Landmarks)Assert.IsTrue(visited.Contains(p),"Exploration stop must join the existing road network");
+            var trees=HardwareWorldMap.Trees(roads,w.State.Factories);Assert.Greater(trees.Count,40);Assert.IsTrue(trees.All(p=>!roads.Contains(p)&&!GridRouting.HardwareBlocked(p,w.State.Factories)));
+        }
+        [Test] public void Hardware_DrivingRespectsFactoryWallsAndWorldBoundsAndDiscovers()
+        {
+            var w=New();var v=w.State.Vehicles[0];Do(w,new WorldCommand{Kind=CommandKind.TakeControl});v.Heading=System.Math.PI/2;Do(w,new WorldCommand{Kind=CommandKind.Drive,Throttle=1});Run(w,5);
+            Assert.Less(v.DriveX,w.Factory(1).X-1);Assert.IsFalse(GridRouting.HardwareBlocked(v.Position,w.State.Factories));
+            v.Position=new GridPoint(150,110);v.DriveX=150;v.DriveZ=110;v.Heading=0;Run(w,8);Assert.Less(v.DriveZ,GridRouting.WorldDepth);Assert.IsTrue(w.State.Explored.Contains(new GridPoint(150/8,110/8)));w.AssertConserved();
         }
         [Test] public void Hardware_PickupRepeatsMiningWaitsAtFullWarehouseAndStopsSafely()
         {

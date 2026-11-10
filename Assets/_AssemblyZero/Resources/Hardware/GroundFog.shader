@@ -17,6 +17,9 @@ Shader "AssemblyZero/Hardware/GroundFog"
             TEXTURE2D(_GroundFogDensity); SAMPLER(sampler_GroundFogDensity);
             float4 _FogArea, _FogColor, _FogShadow;
             float _FogBottom, _FogTop, _FogExtinction, _FogClock, _FogEdge;
+            float4 _FactoryAreas[16];
+            int _FactoryAreaCount;
+            float _FactoryFogMultiplier;
             float Hash3(float3 p) { return frac(sin(dot(p,float3(127.1,311.7,74.7))) * 43758.5453); }
             float Noise3(float3 p)
             {
@@ -55,6 +58,14 @@ Shader "AssemblyZero/Hardware/GroundFog"
                     float3 p=origin+direction*(start+(n+.5)*stride);
                     float2 fieldUv=(p.xz-_FogArea.xy)/_FogArea.zw;
                     float d=SAMPLE_TEXTURE2D_LOD(_GroundFogDensity,sampler_GroundFogDensity,fieldUv,0).r;
+                    float factoryWeight=0;
+                    [loop] for(int site=0;site<_FactoryAreaCount;site++)
+                    {
+                        float4 area=_FactoryAreas[site];
+                        float2 outside=max(area.xy-p.xz,p.xz-area.zw);
+                        factoryWeight=max(factoryWeight,1-smoothstep(0,2,max(outside.x,outside.y)));
+                    }
+                    d *= lerp(1,_FactoryFogMultiplier,factoryWeight);
                     float h=saturate((p.y-_FogBottom)/(_FogTop-_FogBottom));
                     float2 edge=min(p.xz-_FogArea.xy,_FogArea.xy+_FogArea.zw-p.xz);
                     d *= (1-smoothstep(.12,1,h))*smoothstep(0,_FogEdge,min(edge.x,edge.y));

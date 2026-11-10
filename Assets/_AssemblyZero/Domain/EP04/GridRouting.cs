@@ -6,7 +6,7 @@ namespace AssemblyZero.Domain.EP04
 {
     public static class GridRouting
     {
-        public const int Width=40, Depth=32, WorldWidth=116, WorldDepth=88;
+        public const int Width=40, Depth=32, WorldWidth=168, WorldDepth=128;
         private static readonly GridPoint[] Directions={new GridPoint(1,0),new GridPoint(0,1),new GridPoint(-1,0),new GridPoint(0,-1),new GridPoint(0,0,1),new GridPoint(0,0,-1)};
         private readonly struct SearchKey : IEquatable<SearchKey>
         {
@@ -33,6 +33,15 @@ namespace AssemblyZero.Domain.EP04
         }
         public static List<GridPoint> HardwarePath(GridPoint start,GridPoint end,IEnumerable<FactorySite> factories)
             =>Search(start,end,p=>HardwareBlocked(p,factories),false);
+        public static List<GridPoint> RoadPath(GridPoint start,GridPoint end,HashSet<GridPoint> roads,IEnumerable<FactorySite> factories)
+        {
+            var nearest=start;var distance=int.MaxValue;
+            foreach(var p in roads){var d=GridPoint.Distance(start,p);if(d<distance){distance=d;nearest=p;}}
+            var approach=HardwarePath(start,nearest,factories);
+            var route=Search(nearest,end,p=>!roads.Contains(p),false);
+            if(approach==null||route==null)return HardwarePath(start,end,factories);
+            approach.AddRange(route.Skip(1));return approach;
+        }
         public static List<GridPoint> FactoryPath(BusinessNode from,BusinessNode to,IEnumerable<BusinessNode> nodes,IEnumerable<BusinessRoute> routes)
         {
             var start=from.Port(true);var end=to.Port(false);

@@ -21,6 +21,7 @@ namespace AssemblyZero.Domain.EP04
         public WorldSimulation(EconomySettings settings,WorldState restored=null,int seed=0)
         {
             Settings=settings??throw new ArgumentNullException(nameof(settings));
+            if(Settings.IsHardware)EnsureComputeCatalog();
             State=restored??NewState();
             var legacyProductClock=restored!=null&&State.Hardware?.ContentVersion<3;
             if(restored!=null&&Settings.IsHardware)MigrateHardwareProducts();
@@ -129,6 +130,7 @@ namespace AssemblyZero.Domain.EP04
                 return;
             }
             if(n.Kind==BuildingKind.Warehouse){n.RunState=NodeState.Idle;n.Status="仓储 "+n.Output.Count+"/"+Capacity(n);return;}
+            if(Settings.IsHardware&&(n.Kind==BuildingKind.ComputeRack||n.Kind==BuildingKind.PowerUnit||n.Kind==BuildingKind.CoolingUnit))return;
             if(n.Kind==BuildingKind.Lab){if(Settings.IsHardware)ProcessLab(n);return;}
             if(Settings.IsHardware&&TickRetooling(n))return;
             var recipe=Recipe(n.RecipeId);if(recipe==null){n.RunState=NodeState.Idle;n.Status="请选择配方";return;}

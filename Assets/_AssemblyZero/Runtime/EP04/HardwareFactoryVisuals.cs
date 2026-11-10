@@ -52,7 +52,7 @@ namespace AssemblyZero.Unity.EP04
             if(environment!=null){environment.gameObject.SetActive(false);Destroy(environment.gameObject);}
             environment=new GameObject("Hardware environment").transform;environment.SetParent(transform,false);
             oreRocks.Clear();
-            Cube("Landscape",new Vector3(68,-.65f,52),new Vector3(170,.5f,130),new Color(.32f,.41f,.4f),environment);
+            Cube("Landscape",new Vector3((GridRouting.WorldWidth-1)*.6f,-.65f,(GridRouting.WorldDepth-1)*.6f),new Vector3(GridRouting.WorldWidth*1.2f+200,.5f,GridRouting.WorldDepth*1.2f+200),new Color(.32f,.41f,.4f),environment);
             for(var z=8;z<68;z+=6)if(z<32||z>39)Shape("Eastern rock ridge",new Vector3(51*1.2f,.5f,z*1.2f),new Vector3(4,2.5f,6),new Color(.34f,.43f,.45f),environment,PrimitiveType.Sphere);
             for(var x=6;x<43;x+=5)if(x<22||x>28)Shape("Northern rock ridge",new Vector3(x*1.2f,.4f,44.5f*1.2f),new Vector3(5,2.2f,3),new Color(.34f,.43f,.45f),environment,PrimitiveType.Sphere);
             foreach(var f in game.World.State.Factories)
@@ -78,18 +78,7 @@ namespace AssemblyZero.Unity.EP04
             }
             var h=game.Config.Economy.Hardware;var supplier=new GridPoint(h.SupplierX,h.SupplierZ);var ore=new GridPoint(h.OreX,h.OreZ);
             // Draw the same deterministic paths used by the vehicles, including ridge openings.
-            var roadCells=new HashSet<GridPoint>();
-            foreach(var f in game.World.State.Factories)foreach(var destination in new[]{supplier,ore})
-            {
-                var path=GridRouting.HardwarePath(f.Dock,destination,game.World.State.Factories);if(path==null)continue;
-                foreach(var p in path)roadCells.Add(p);
-            }
-            foreach(var p in roadCells)
-            {
-                var point=new Vector3(p.X*1.2f,-.02f,p.Z*1.2f);
-                Cube("Exterior road",point,new Vector3(2.7f,.14f,2.7f),new Color(.17f,.23f,.27f),environment);
-                if((p.X+p.Z)%4==0)Cube("Road stud",point+Vector3.up*.09f,new Vector3(.18f,.025f,.18f),amber,environment);
-            }
+            BuildExplorationRoads(HardwareWorldMap.Roads(game.Config.Economy,game.World.State.Factories));
             var sp=new Vector3(supplier.X*1.2f,0,supplier.Z*1.2f);
             Cube("Supplier yard",sp+Vector3.right*4,new Vector3(12,.12f,11),steel,environment);
             Case("Supplier warehouse",sp+new Vector3(5,1.6f,2),new Vector3(6,3.2f,5),ivory,environment);
@@ -138,6 +127,7 @@ namespace AssemblyZero.Unity.EP04
             Cube("Service cable tray",new Vector3(-1.48f,.55f,0),new Vector3(.09f,.08f,2.5f),steel,station);
             for(var i=0;i<4;i++)Cube("Vent slot",new Vector3(-.8f+i*.3f,.25f,-1.61f),new Vector3(.17f,.22f,.025f),steel,station);
             foreach(var x in new[]{-1.3f,1.3f})foreach(var z in new[]{-1.3f,1.3f})Shape("Deck bolt",new Vector3(x,.69f,z),new Vector3(.1f,.035f,.1f),steel,station,PrimitiveType.Cylinder);
+            DetailPrecisionStation(n,station);
             var actionName=n.Kind==BuildingKind.BoardAssembly?"Pick head":n.Kind==BuildingKind.GPUAssembly?"Robot tool":n.Kind==BuildingKind.Tester?"Scan strip":n.Kind==BuildingKind.Packaging?"Sealing bar":n.Kind==BuildingKind.Manufacturer?"Press die":n.Kind==BuildingKind.Rework?"Solder iron":n.Kind==BuildingKind.Lab?"Lab beacon":"";
             foreach(Transform child in station)if(child.name==actionName){actions[n.Id]=child;actionOrigins[n.Id]=child.localPosition;break;}
         }
@@ -227,9 +217,11 @@ namespace AssemblyZero.Unity.EP04
         private void Fan(Vector3 p,float diameter,Transform t)
         {
             Shape("Fan well",p,new Vector3(diameter,.018f,diameter),dark,t,PrimitiveType.Cylinder);
-            for(var k=0;k<5;k++){var blade=Cube("Fan blade",p+Vector3.up*.023f,new Vector3(diameter*.7f,.018f,diameter*.12f),steel,t);blade.localRotation=Quaternion.Euler(0,k*72,0);}
-            Shape("Fan hub",p+Vector3.up*.04f,new Vector3(diameter*.23f,.024f,diameter*.23f),cyan,t,PrimitiveType.Cylinder).GetComponent<Renderer>().sharedMaterial=Glow(cyan);
-            Shape("Fan rim",p+Vector3.up*.02f,new Vector3(diameter*1.08f,.012f,diameter*1.08f),steel,t,PrimitiveType.Cylinder);
+            var rim=MeshPart("Fan rim",RingMesh(),t,steel);rim.localPosition=p+Vector3.up*.02f;rim.localScale=Vector3.one*diameter;
+            var rotor=new GameObject("Fan rotor").transform;rotor.SetParent(t,false);rotor.localPosition=p+Vector3.up*.028f;
+            for(var k=0;k<9;k++){var blade=MeshPart("Swept blade",BladeMesh(),rotor,new Color(.16f,.19f,.22f));blade.localScale=Vector3.one*diameter;blade.localRotation=Quaternion.Euler(0,k*40,0);}
+            Shape("Fan hub",Vector3.up*.025f,new Vector3(diameter*.24f,.025f,diameter*.24f),steel,rotor,PrimitiveType.Cylinder);
+
         }
         private void CombineProduct(Transform product)
         {

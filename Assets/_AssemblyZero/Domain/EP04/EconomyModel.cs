@@ -23,12 +23,12 @@ namespace AssemblyZero.Domain.EP04
         public override int GetHashCode() => (X*397 ^ Z)*31 ^ H;
         public static int Distance(GridPoint a, GridPoint b) => Math.Abs(a.X-b.X)+Math.Abs(a.Z-b.Z)+Math.Abs(a.H-b.H);
     }
-    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging, Rework, Lab }
+    public enum BuildingKind { Warehouse, Processor, Manufacturer, Sales, BoardAssembly, GPUAssembly, Tester, Packaging, Rework, Lab, ComputeRack, PowerUnit, CoolingUnit }
     public enum NodeState { Idle, Working, Starved, Blocked, NoFunds, Disconnected }
     public enum VehicleRole { Pickup, Collector, Hauler }
     public enum VehiclePhase { Idle, Travelling, Gathering, Unloading, WaitingFunds, WaitingStock }
     public enum CommandKind { Build, Move, Remove, Upgrade, Recipe, Policy, CancelChange, Explore, Collect, Return, Transfer, HireCollector, HireHauler, Station, BuyFactory, Boost,
-        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle, PickupPurchase, StartResearch, DesignSku, RetireSku, Retool }
+        AcceptOrder, ReserveOrder, ReleaseOrder, DeliverOrder, CancelOrder, Purchase, SpotSell, TakeControl, ReleaseControl, Drive, Interact, RecoverVehicle, RightVehicle, PickupPurchase, StartResearch, DesignSku, RetireSku, Retool, AutomationPolicy, InstallCompute, UninstallCompute }
     [Serializable] public sealed class Goods
     {
         public int Id, Origin, Material;
