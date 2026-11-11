@@ -102,6 +102,7 @@ namespace AssemblyZero.Domain.EP04
         }
         private void Reserve(HardwareOrder order)
         {
+            if(order.Template==1&&!NarrativeQualityReady(order.Factory))return;
             var count=ReservedCount(order.Id);
             // Use the lowest acceptable grade first so A cards stay free for orders that demand them.
             foreach(var g in FinishedStock(order.Factory).Where(g=>g.ReservedOrder==0&&Matches(g,order)).OrderByDescending(g=>g.Grade).ThenBy(g=>g.Id).Take(Math.Max(0,order.Quantity-count)))g.ReservedOrder=order.Id;
@@ -112,12 +113,14 @@ namespace AssemblyZero.Domain.EP04
         {
             if(!State.Nodes.Any(n=>n.Factory==order.Factory&&n.Kind==BuildingKind.Sales))return Fail("需要交付站");
             var goods=FinishedStock(order.Factory).Where(g=>g.ReservedOrder==order.Id&&Matches(g,order)).ToArray();if(goods.Length!=order.Quantity)return Fail("合格成品尚未配齐");
+            if(order.Template==1&&!NarrativeQualityReady(order.Factory))return Fail("首批验收条件尚未达到：补齐检测工位并连续三张检测合格");
             var grade=GradeAt(order,State.Tick);var percent=grade==DeliveryGrade.Early?EarlyPercent:grade==DeliveryGrade.OnTime?100:LatePercent;
             var income=OrderValue(order)*percent/100;var delta=grade==DeliveryGrade.Early?EarlyReputation:grade==DeliveryGrade.OnTime?OnTimeReputation:LateReputation;
             if(income>int.MaxValue-State.Money)return Fail("资金超过当前账户上限");
             var settlement=new Settlement{Order=order.Id,Name=order.Name,Quantity=goods.Length,Tick=State.Tick,Income=income,Adjustment=income-OrderValue(order),Grade=grade,ReputationDelta=delta,MaterialCost=goods.Sum(g=>g.MaterialCost),ProcessingCost=goods.Sum(g=>g.ProcessingCost),FreightCost=goods.Sum(g=>g.FreightCost)};
             foreach(var n in State.Nodes.Where(n=>n.Factory==order.Factory&&n.Kind==BuildingKind.Warehouse))n.Output.RemoveAll(g=>g.ReservedOrder==order.Id);
             State.Sold+=goods.Length;State.Transactions++;Earn((int)income,"订单收入");State.Hardware.Settlements.Add(settlement);order.Phase=HardwareOrderPhase.Delivered;AdjustReputation(delta);
+            if(order.Template==1)Narrative.LastDelivery=grade==DeliveryGrade.Early?"我们提前完成了交付。客户拿到了额外的调试时间，奖金与口碑已按实际结算入账。":grade==DeliveryGrade.OnTime?"按承诺完成交付。对方的工作安排没有被打乱，正式收入和口碑已入账。":"这次迟交影响了客户安排。折扣与口碑损失已经入账，我们需要用下一次交付修复信任。";
             if(order.Template>State.Hardware.ScriptedDone)State.Hardware.ScriptedDone=order.Template;
             if(order.Template==1){State.Unlocked=4;Factory(2).Discovered=true;State.Hardware.Orders.Add(NewOrder(Settings.Hardware.Orders[1],State.Hardware.NextOrder++));Log("订单板已开放；第二厂购买资格已解锁");}
             PruneOrders();
@@ -153,6 +156,7 @@ namespace AssemblyZero.Domain.EP04
                 if(Factory(c.Factory)?.Owned!=true)return Fail("厂址未购买");
                 var ticks=(long)order.Seconds*60;
                 order.Factory=c.Factory;order.Deadline=State.Tick+ticks;order.BonusDeadline=State.Tick+ticks*60/100;order.HardDeadline=State.Tick+ticks*3/2;order.Phase=HardwareOrderPhase.Active;
+                if(order.Template==1&&Narrative.QualityMode>0&&Narrative.Factory!=c.Factory){Narrative.Factory=c.Factory;Narrative.QualityStreak=0;}
                 return Ok("已接单；合格成品入库后自动分配并交付",order.Id);
             }
             if(order.Phase!=HardwareOrderPhase.Active&&order.Phase!=HardwareOrderPhase.Ready)return Fail("订单不处于可操作状态");

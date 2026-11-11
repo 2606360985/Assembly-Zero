@@ -61,6 +61,7 @@ namespace AssemblyZero.Domain.EP04
                 if(active>0&&State.Money<=int.MaxValue-income&&State.Money>=fee)
                 {
                     Pay(fee);Earn(income,"算力渲染服务");p.Income+=income;p.Fees+=fee;
+                    ObserveNarrativeCompute(factory.Id,active);
                     p.Status=active<count?"算力受限：补建供电 / 冷却；最多承接 16 卡业务":"渲染服务运行中 · 每有效卡净收益 ¥15 / 分钟";
                 }
                 else p.Status=count==0?"先建机柜，装入自产零售显卡":active==0?"配套容量不足":"运营资金不足或账户已满";

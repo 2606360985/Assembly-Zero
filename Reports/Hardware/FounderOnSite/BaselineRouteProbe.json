@@ -1,0 +1,8 @@
+{
+  "baseline": "7ecc6aca47c08cd6feee3e18b0cd2ce9111b1159",
+  "method": "Compile unmodified HEAD domain sources in Temp; reproduce original test construction commands",
+  "routes": 6,
+  "expected_by_existing_test": ">10",
+  "exitCode": 0,
+  "stderr": ""
+}

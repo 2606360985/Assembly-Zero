@@ -1,0 +1,771 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_tests",
+    "parameters": {
+      "mode": "editor",
+      "filter": "Hardware",
+      "timeout": "300"
+    },
+    "result": {
+      "Summary": {
+        "Total": 105,
+        "Passed": 104,
+        "Failed": 1,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Results": [
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.CatalogGrowthAndReorderingNeverReorderSavedSlots",
+          "Status": "Passed",
+          "Duration": 0.0151118,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.DefaultsHaveSevenDistinctFrequentlyUsedDevices",
+          "Status": "Passed",
+          "Duration": 0.0023122,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.InvalidAndDuplicateSavedEntriesAreRepairedInPlace",
+          "Status": "Passed",
+          "Duration": 0.0014991,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.RemovingACatalogItemOnlyRepairsItsOwnSlot",
+          "Status": "Passed",
+          "Duration": 0.0014496,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.ReplacingAndSwappingKeepsEveryOtherSlotStable",
+          "Status": "Passed",
+          "Duration": 0.0010041,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBuildShortcutTests.SmallCatalogLeavesReachableEmptySlotsAndRejectsInvalidAssignments",
+          "Status": "Passed",
+          "Duration": 0.0031309,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AllocationServesEarliestDeadlineFirst",
+          "Status": "Passed",
+          "Duration": 0.7286499,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticPickupLoadsMultipleTripsAndFinishes",
+          "Status": "Passed",
+          "Duration": 0.1719824,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(False)",
+          "Status": "Passed",
+          "Duration": 0.2674856,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_AutomaticTasksContinueExactlyAfterSave(True)",
+          "Status": "Passed",
+          "Duration": 0.2587857,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_BottleneckIsTheSaturatedMachineFeedingStarvedOnes",
+          "Status": "Passed",
+          "Duration": 0.1383077,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_CancelChargesPenaltyButNeverOverdrawsCash",
+          "Status": "Passed",
+          "Duration": 0.0049773,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_DrivingRespectsFactoryWallsAndWorldBoundsAndDiscovers",
+          "Status": "Passed",
+          "Duration": 0.1816264,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_DuplicatedMachinesConnectAllInputsFromTheHubWarehouse",
+          "Status": "Passed",
+          "Duration": 0.1986919,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExhaustedSupplierRestocks",
+          "Status": "Passed",
+          "Duration": 0.0746731,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExpandedRoadsConnectStopsAndKeepFactoryFootprints",
+          "Status": "Passed",
+          "Duration": 0.078134,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExpiryChargesPenaltyAndRequotesScriptedContract",
+          "Status": "Passed",
+          "Duration": 0.6098912,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ExteriorDestinationsAreReachableWithoutCrossingFactoryFootprints",
+          "Status": "Passed",
+          "Duration": 0.023038,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_FirstCardWithinOneMinuteAndFirstIncomeWithinThree",
+          "Status": "Passed",
+          "Duration": 0.2938223,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_GuideWalksOpeningThenSecondContractShortage",
+          "Status": "Passed",
+          "Duration": 0.4785772,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_LateDeliveryPaysLessAndCostsReputation",
+          "Status": "Passed",
+          "Duration": 0.6238569,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ManualDrivingMovesAndRescueUnloadsAutomatically",
+          "Status": "Passed",
+          "Duration": 0.1825452,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ManualPickupAndUnloadPreservePurchasedGoods",
+          "Status": "Passed",
+          "Duration": 0.1489614,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_MarketForecastsThenChangesPricesWithoutRepricingHistory",
+          "Status": "Passed",
+          "Duration": 2.3555999,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OfferBoardOpensWithRepairFallbackAndRotates",
+          "Status": "Passed",
+          "Duration": 1.9334621,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OldManualSaveResumesWithAutomaticCargoRecovery",
+          "Status": "Passed",
+          "Duration": 0.0714843,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OnTimeDeliveryPaysBasePrice",
+          "Status": "Passed",
+          "Duration": 0.665217,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_OpeningIsAnIncompleteLineWithOneContract",
+          "Status": "Passed",
+          "Duration": 0.1821662,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PartiallyConnectedMachineDoesNotHoardInputs",
+          "Status": "Passed",
+          "Duration": 0.0221871,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PickupRepeatsMiningWaitsAtFullWarehouseAndStopsSafely",
+          "Status": "Passed",
+          "Duration": 0.326701,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_PurchaseFailureIsAtomicAndFreightIsExact",
+          "Status": "Passed",
+          "Duration": 0.0025565,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_RejectsAppearOnlyAfterFirstContractAndAreDeterministic",
+          "Status": "Passed",
+          "Duration": 3.0263829,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ReputationAndActiveLimitGateAcceptance",
+          "Status": "Passed",
+          "Duration": 0.4630032,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ReworkKeepsSpecificationAndBudgetPackagingUsesRejects",
+          "Status": "Passed",
+          "Duration": 2.0419191,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SaveV4ContinuesExactlyAndOlderSavesAreRejected",
+          "Status": "Passed",
+          "Duration": 2.7632735,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SecondBoardAssemblyRaisesThroughput",
+          "Status": "Passed",
+          "Duration": 2.2521288,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SeedChangesTheMarketButNotTheOpening",
+          "Status": "Passed",
+          "Duration": 0.0030598,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SettlementMatchesAuditableCost",
+          "Status": "Passed",
+          "Duration": 0.5279407,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_SkuRecipesAreDerivedAndListedForFinalAssembly",
+          "Status": "Passed",
+          "Duration": 0.003972,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_StatsRecordMinuteBucketsCappedAndSaved",
+          "Status": "Passed",
+          "Duration": 37.324569,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_TakeoverPreservesCargoAndClearsAutomaticTask",
+          "Status": "Passed",
+          "Duration": 0.1486634,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_TwoSkusShareOneLineWithoutMixingSpecifications",
+          "Status": "Passed",
+          "Duration": 0.8417652,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_WarehouseCapacityLeavesArrivalInTransit",
+          "Status": "Passed",
+          "Duration": 0.1741159,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareBusinessTests.Hardware_ZeroCashRecoversThroughOreAndRepairJobs",
+          "Status": "Passed",
+          "Duration": 0.6679807,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(0)",
+          "Status": "Passed",
+          "Duration": 0.0206191,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(1)",
+          "Status": "Passed",
+          "Duration": 0.0003526,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(2)",
+          "Status": "Passed",
+          "Duration": 0.0002678,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ContinuousSectionsNeverCollapseOnArcsTightPortsRampsOrLifts(3)",
+          "Status": "Passed",
+          "Duration": 0.0005556,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.EveryExpandedHardwareRouteUsesRoundedGeometryWithoutChangingSimulation",
+          "Status": "Failed",
+          "Duration": 0.0107605,
+          "Message": "  Expected: greater than 10\r\n  But was:  6\r\n",
+          "StackTrace": "at AssemblyZero.Tests.HardwareConveyorTests.EveryExpandedHardwareRouteUsesRoundedGeometryWithoutChangingSimulation () [0x000b3] in E:\\HP_E\\GITHUB_SKY\\Assembly-Zero\\Assets\\_AssemblyZero\\Tests\\EditMode\\HardwareConveyorTests.cs:71\r\n"
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ExtractedSweepMatchesEveryAcceptedEp03BeltMesh(\"Full\",\"EP03_Demo\")",
+          "Status": "Passed",
+          "Duration": 0.3423194,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.ExtractedSweepMatchesEveryAcceptedEp03BeltMesh(\"Minimal\",\"EP03_Minimal\")",
+          "Status": "Passed",
+          "Duration": 0.13883,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.RoundedCargoFollowsTheSameArcAsTheBeltWithContinuousHeading(1)",
+          "Status": "Passed",
+          "Duration": 0.0249045,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareConveyorTests.RoundedCargoFollowsTheSameArcAsTheBeltWithContinuousHeading(-1)",
+          "Status": "Passed",
+          "Duration": 0.0181117,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.AnotherGeneration_DoesNotResetOldCardDepreciationAndReboundItsPrice",
+          "Status": "Passed",
+          "Duration": 0.0137282,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.Automation_RespectsCashFloorTransitAndReservedCards",
+          "Status": "Passed",
+          "Duration": 0.3135778,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.ComputePark_AndDealerCannotTakeOrderReservedCards",
+          "Status": "Passed",
+          "Duration": 0.0187203,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.ComputePark_ConservesCardsLimitsCapacityAndRestoresAcrossSave",
+          "Status": "Passed",
+          "Duration": 0.0716922,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.ComputePark_NormalOpeningCanProduceAndMonetizeItsOwnCards",
+          "Status": "Passed",
+          "Duration": 5.087597,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.CorePurchase_QuotesAndCarriesChosenGenerationAndBin",
+          "Status": "Passed",
+          "Duration": 0.0033412,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.Demand_DoesNotInventImpossibleAiOffersOrUseRetiredSkus",
+          "Status": "Passed",
+          "Duration": 0.1524523,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.GradeC_PackagingDivertsOnlyCAndPreservesCostsAndGeneration",
+          "Status": "Passed",
+          "Duration": 0.6927849,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.IndustryClock_DepreciatesExistingCardsWithoutPlayerResearchAndKeepsContractPrice",
+          "Status": "Passed",
+          "Duration": 0.0295164,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.LateGenerations_StayPositiveAndBoundedWithoutAddingMaterialIds",
+          "Status": "Passed",
+          "Duration": 0.0038666,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.NewSku_RequiresMatchingBoardsAndRetooledAssemblyThenDelivers",
+          "Status": "Passed",
+          "Duration": 1.9241141,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.Procurement_DoesNotOffsetNewPremiumCoreDemandWithOldOrWrongBinStock",
+          "Status": "Passed",
+          "Duration": 0.0240709,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.Retooling_WaitsForBatchStopsProductionAndResumesExactlyAcrossSave",
+          "Status": "Passed",
+          "Duration": 0.5764131,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareIterationTests.Save_UpgradesPreviousP1P2ContentAndLegacyQuietGoodsWithoutLosingOwnership",
+          "Status": "Passed",
+          "Duration": 0.0059056,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FirstBatch_UsesRealInspectionStreakAndChosenEquipmentRequirement(1)",
+          "Status": "Passed",
+          "Duration": 0.361742,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FirstBatch_UsesRealInspectionStreakAndChosenEquipmentRequirement(2)",
+          "Status": "Passed",
+          "Duration": 0.4893844,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderIdentity_IsSanitizedFixedAndHasNoEconomicBonus(0,\"林序\")",
+          "Status": "Passed",
+          "Duration": 0.0013501,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderIdentity_IsSanitizedFixedAndHasNoEconomicBonus(1,\"沈知微\")",
+          "Status": "Passed",
+          "Duration": 0.0012213,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.LegacyCampaign_ResumesWithoutReplayingHistoricalMilestones",
+          "Status": "Passed",
+          "Duration": 0.0025173,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Narrative_QueuesOnceAndRestoresDialogueAndChoicesWithNativeJson",
+          "Status": "Passed",
+          "Duration": 0.0025904,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Scenes_AllHaveUniqueKeysAndShortReadableLines",
+          "Status": "Passed",
+          "Duration": 0.0003704,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Validation_CountsOnlySuccessfulFourCardSettlementsAndDoesNotDoublePay",
+          "Status": "Passed",
+          "Duration": 0.0582796,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Validation_NoFundsOrWrongFactoryCannotCompleteObjective",
+          "Status": "Passed",
+          "Duration": 0.1587084,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_AllocatesSharedBoardToEarliestDeadlineThenOrderId",
+          "Status": "Passed",
+          "Duration": 0.0062814,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_CountsLocalCachesBeltsDeliveriesAndVehiclesInSeparateColumns",
+          "Status": "Passed",
+          "Duration": 0.0040352,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_DoesNotUseWrongSpecificationsVersionsOrAnotherOrdersReservations",
+          "Status": "Passed",
+          "Duration": 0.0029308,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_ExcludesOtherFactoriesAndClosedOrUnacceptedOrders",
+          "Status": "Passed",
+          "Duration": 0.0039431,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_ExistingCoolersBeforeSelfProductionAndExistingOreOnly",
+          "Status": "Passed",
+          "Duration": 0.0037643,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_ExistingRejectedBatchOnlyCoversBudgetDemand",
+          "Status": "Passed",
+          "Duration": 0.0029647,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_IsReadOnlyAndListsConfiguredPurchasesWithoutOrders",
+          "Status": "Passed",
+          "Duration": 0.0041976,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_ProjectsBatchesWithoutAlsoCountingTheirCommittedInputs",
+          "Status": "Passed",
+          "Duration": 0.0031371,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_PurchaseAndPartialUnloadingNeverDoubleCount(0)",
+          "Status": "Passed",
+          "Duration": 0.0031499,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_PurchaseAndPartialUnloadingNeverDoubleCount(1)",
+          "Status": "Passed",
+          "Duration": 0.0020297,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_PurchaseAndPartialUnloadingNeverDoubleCount(2)",
+          "Status": "Passed",
+          "Duration": 0.0018664,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_PurchaseLimitsAndInsufficientFundsLeaveDemandUnchanged",
+          "Status": "Passed",
+          "Duration": 0.0020931,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_ReportsUnpurchasableDefectsAndDoesNotInventThemFromProduction",
+          "Status": "Passed",
+          "Duration": 0.0023057,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_SharedMaterialsAreConsumedOnceAcrossStandardAndQuietOrders",
+          "Status": "Passed",
+          "Duration": 0.0020386,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareProcurementTests.Overview_UsesCompatibleFinishedAndIntermediateGoodsBeforeExpandingRecipes",
+          "Status": "Passed",
+          "Duration": 0.002268,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Campaign_ReachesSecondGenerationFromTheRealOpening",
+          "Status": "Passed",
+          "Duration": 5.7073614,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Design_ClientsChooseSkusMatchingTheirNeedsAndReviews",
+          "Status": "Passed",
+          "Duration": 0.0643904,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Design_CommandsValidateLaunchAndRetireSkus",
+          "Status": "Passed",
+          "Duration": 0.0059912,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Design_SlotsDerivePerformanceNoiseCostAndReview",
+          "Status": "Passed",
+          "Duration": 0.0019712,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Generations_AreEndlessAndScaleCostsPricesAndCoreSupply",
+          "Status": "Passed",
+          "Duration": 10.2580157,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Generations_CardsInheritTheCoreGenerationAndOrdersDemandIt",
+          "Status": "Passed",
+          "Duration": 1.3814939,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Lab_ChargesRunningCostsAndAccumulatesPointsWithoutBelts",
+          "Status": "Passed",
+          "Duration": 0.4736833,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Research_PrerequisitesAndUnlocksGateRecipesAndDesigns",
+          "Status": "Passed",
+          "Duration": 0.8715174,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareResearchTests.Research_StateSurvivesSaveAndContinuesExactly",
+          "Status": "Passed",
+          "Duration": 0.4185919,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareSkuTests.Binning_EveryInspectedCardHasAGradeAndOddsImproveWithTesterLevel",
+          "Status": "Passed",
+          "Duration": 1.1892865,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareSkuTests.Binning_GradedOffersCarryRequirementPremiumAndSurviveSave",
+          "Status": "Passed",
+          "Duration": 0.0197683,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareSkuTests.Binning_GradeRequirementsFilterAllocationAndKeepACardsForDemandingOrders",
+          "Status": "Passed",
+          "Duration": 0.0044369,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareSkuTests.Binning_NewGenerationRampsUpBeforeYieldingAsMuchA",
+          "Status": "Passed",
+          "Duration": 0.7860319,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareSkuTests.Binning_ReworkReturnsAnUngradedCardThatIsInspectedAgain",
+          "Status": "Passed",
+          "Duration": 0.1638074,
+          "Message": null,
+          "StackTrace": null
+        }
+      ],
+      "Duration": 92.78,
+      "StatusPath": null,
+      "Mode": "EditMode",
+      "FilterApplied": "testname: Hardware",
+      "success": true,
+      "result": null
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

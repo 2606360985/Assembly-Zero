@@ -51,7 +51,7 @@ namespace AssemblyZero.Tests
 #else
             yield return SceneManager.LoadSceneAsync("Hardware_Business");
 #endif
-            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.SendMessage("OnApplicationFocus",true);game.Hud.SetTutorialEnabled(true);
+            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Founder.SetPresentationEnabled(false);game.SendMessage("OnApplicationFocus",true);game.Hud.SetTutorialEnabled(true);
         }
         private Button Action(string id)=>game.Hud.GetComponentsInChildren<Button>().First(b=>b.name==id);
         [UnityTest] public IEnumerator Procurement_SelectsPurchasesAndSharesStateWithOriginalDrawer()
@@ -230,7 +230,7 @@ namespace AssemblyZero.Tests
 #else
             yield return SceneManager.LoadSceneAsync("Hardware_Business");
 #endif
-            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.SendMessage("OnApplicationFocus",true);
+            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Founder.SetPresentationEnabled(false);game.SendMessage("OnApplicationFocus",true);
         }
         [UnityTest] public IEnumerator UiScalingKeepsMapAndGuidanceInsideCanvas()
         {

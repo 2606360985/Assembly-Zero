@@ -15,7 +15,7 @@ namespace AssemblyZero.Tests
     {
         [UnityTest] public IEnumerator Hardware_ComputeParkBuildsModelsAndOperatesFromDrawer()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;
             game.SetDrawer("算力");yield return null;
             Assert.IsTrue(game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().Any(b=>b.name.StartsWith("搭建算力机柜")));
             var b=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.ComputeRack,X=12,Z=24});Assert.IsTrue(b.Success,b.Message);
@@ -47,7 +47,7 @@ namespace AssemblyZero.Tests
         [TearDown] public void RestoreInputSettings(){if(fixtureKeyboard!=null){InputSystem.RemoveDevice(fixtureKeyboard);fixtureKeyboard=null;}if(originalSettings!=null){InputSystem.settings=originalSettings;originalSettings.hideFlags=originalFlags;}if(testSettings!=null)Object.DestroyImmediate(testSettings);}
         [UnityTest] public IEnumerator Hardware_PauseModalBlocksUnderlyingOrderButtons()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.SetDrawer("订单");yield return null;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.SetDrawer("订单");yield return null;
             var button=game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单");
             var point=RectTransformUtility.WorldToScreenPoint(null,button.transform.position);game.TogglePause();yield return null;
             var results=new System.Collections.Generic.List<UnityEngine.EventSystems.RaycastResult>();
@@ -57,7 +57,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_QuietShortageOpensCorrectPurchasableMaterial()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;
             var built=game.Submit(new WorldCommand{Kind=CommandKind.Build,Building=BuildingKind.GPUAssembly,X=20,Z=8});Assert.IsTrue(built.Success,built.Message);game.SelectedNode=built.Entity;
             Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.Recipe,Node=built.Entity,Recipe=HardwareSku.RecipeId(HardwareCatalog.QuietSpec)}).Success);
             game.SetDrawer("设备");yield return null;
@@ -67,7 +67,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_DesignerLaunchesSkuAndResearchPageStartsProjects()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;
             game.SetDrawer("产品");yield return null;
             var preview=game.Hud.GetComponentsInChildren<UnityEngine.UI.RawImage>().First(r=>r.name=="SKU preview image");Assert.IsNotNull(preview.texture,"The designer renders a live card preview");
             var before=game.World.State.Hardware.Skus.Count;
@@ -98,7 +98,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_EnvironmentResetsAndProductStagesAreExplicit()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;
             Assert.AreEqual(HardwareProductForm.Card,HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Form);
             Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Quiet);Assert.IsFalse(HardwareVisualCatalog.Get(HardwareCatalog.RawGPU,true).Qualified);
             Assert.IsTrue(HardwareVisualCatalog.Get(HardwareCatalog.Tested,true).Qualified);
@@ -119,11 +119,11 @@ namespace AssemblyZero.Tests
 #else
             yield return SceneManager.LoadSceneAsync("Hardware_Business");
 #endif
-            yield return null;yield return null;
+            yield return null;yield return null;Object.FindFirstObjectByType<HardwareGame>().AutosaveEnabled=false;Object.FindFirstObjectByType<HardwareGame>().Founder.SetPresentationEnabled(false);
         }
         [UnityTest] public IEnumerator Hardware_BuildPointerAndUiBlocking()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();Assert.IsNotNull(game);var mouse=InputSystem.AddDevice<Mouse>();
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;Assert.IsNotNull(game);var mouse=InputSystem.AddDevice<Mouse>();
             try
             {
                 game.BeginBuild(BuildingKind.Processor);var f=game.World.Factory(1);var point=game.ViewCamera.WorldToScreenPoint(new Vector3((f.X+12)*1.2f,0,(f.Z+24)*1.2f));
@@ -140,7 +140,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_TransportTakeoverInputPauseAndReturnToPlanning()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();var keyboard=InputSystem.AddDevice<Keyboard>();
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;var keyboard=InputSystem.AddDevice<Keyboard>();
             try
             {
                 game.SendMessage("OnApplicationFocus",true);game.Speed=2;
@@ -164,7 +164,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_GuideAcceptsFirstOrderThenAsksForTheMissingMachines()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;game.Hud.FollowGuide();Assert.AreEqual("订单",game.Drawer);Assert.AreEqual(1,game.SelectedOrder);
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;game.Hud.FollowGuide();Assert.AreEqual("订单",game.Drawer);Assert.AreEqual(1,game.SelectedOrder);
             game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="接单").onClick.Invoke();yield return null;Assert.AreEqual(HardwareOrderPhase.Active,game.World.State.Hardware.Orders[0].Phase);
             Assert.IsTrue(game.View.GetComponentsInChildren<Transform>().Any(t=>t.name=="Suggested slot GPUAssembly"),"The empty assembly slot must be marked on the floor");
             game.Hud.FollowGuide();yield return null;Assert.AreEqual(BuildingKind.GPUAssembly,game.Placing);
@@ -172,7 +172,7 @@ namespace AssemblyZero.Tests
         }
         [UnityTest] public IEnumerator Hardware_SpeedCycleOrderBoardMarketAndSettlementToast()
         {
-            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.Paused=true;
+            yield return Open();var game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Paused=true;
             var speed=game.Hud.GetComponentsInChildren<UnityEngine.UI.Button>().First(b=>b.name=="速度 1×");
             foreach(var expected in new[]{2,4,8,1}){speed.onClick.Invoke();Assert.AreEqual(expected,game.Speed);}
             Assert.IsTrue(game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=1}).Success);HardwareWalkthrough.BuildChain(game.World);

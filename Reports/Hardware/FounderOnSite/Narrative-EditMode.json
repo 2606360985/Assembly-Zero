@@ -1,0 +1,113 @@
+{
+  "success": true,
+  "command": "command",
+  "data": {
+    "command": "run_tests",
+    "parameters": {
+      "mode": "editor",
+      "filter": "HardwareNarrativeTests",
+      "timeout": "120"
+    },
+    "result": {
+      "Summary": {
+        "Total": 11,
+        "Passed": 11,
+        "Failed": 0,
+        "Skipped": 0,
+        "Inconclusive": 0
+      },
+      "Results": [
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FirstBatch_UsesRealInspectionStreakAndChosenEquipmentRequirement(1)",
+          "Status": "Passed",
+          "Duration": 0.5186996,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FirstBatch_UsesRealInspectionStreakAndChosenEquipmentRequirement(2)",
+          "Status": "Passed",
+          "Duration": 0.531686,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderCampaign_CompletesTwoChaptersWithRealStartingCapitalAndGoods(0,1)",
+          "Status": "Passed",
+          "Duration": 1.2446537,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderCampaign_CompletesTwoChaptersWithRealStartingCapitalAndGoods(1,2)",
+          "Status": "Passed",
+          "Duration": 1.4754234,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderIdentity_IsSanitizedFixedAndHasNoEconomicBonus(0,\"林序\")",
+          "Status": "Passed",
+          "Duration": 0.0054773,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.FounderIdentity_IsSanitizedFixedAndHasNoEconomicBonus(1,\"沈知微\")",
+          "Status": "Passed",
+          "Duration": 0.0019453,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.LegacyCampaign_ResumesWithoutReplayingHistoricalMilestones",
+          "Status": "Passed",
+          "Duration": 0.0149914,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Narrative_QueuesOnceAndRestoresDialogueAndChoicesWithNativeJson",
+          "Status": "Passed",
+          "Duration": 0.0044734,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Scenes_AllHaveUniqueKeysAndShortReadableLines",
+          "Status": "Passed",
+          "Duration": 0.0014249,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Validation_CountsOnlySuccessfulFourCardSettlementsAndDoesNotDoublePay",
+          "Status": "Passed",
+          "Duration": 0.0636809,
+          "Message": null,
+          "StackTrace": null
+        },
+        {
+          "FullName": "AssemblyZero.Tests.HardwareNarrativeTests.Validation_NoFundsOrWrongFactoryCannotCompleteObjective",
+          "Status": "Passed",
+          "Duration": 0.1263844,
+          "Message": null,
+          "StackTrace": null
+        }
+      ],
+      "Duration": 8.32,
+      "StatusPath": null,
+      "Mode": "EditMode",
+      "FilterApplied": "testname: HardwareNarrativeTests",
+      "success": true,
+      "result": null
+    },
+    "target": {
+      "host": "127.0.0.1",
+      "port": 7800,
+      "projectPath": "E:\\HP_E\\GITHUB_SKY\\Assembly-Zero"
+    }
+  },
+  "errors": [],
+  "warnings": []
+}

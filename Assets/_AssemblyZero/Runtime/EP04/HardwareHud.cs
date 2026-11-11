@@ -62,6 +62,7 @@ namespace AssemblyZero.Unity.EP04
             eventText=Chip(row,"bolt",new Color(.95f,.85f,.45f),260,out eventChip);eventChip.GetComponent<UnityEngine.UI.LayoutElement>().flexibleWidth=1;
             timeText=Chip(row,"clock",ink,96,out _);factoryText=Chip(row,"factory",ink,84,out _);
             Button(row,"工厂",()=>{game.ChangeFactory();},70);speedLabel=Button(row,"速度 1×",game.CycleSpeed,105,40,"speed").GetComponentInChildren<TMP_Text>();Button(row,"菜单",game.TogglePause,70);
+            Button(row,"创始人现场",()=>game.Founder?.OpenArchive(),130);
             var nav=Box("Navigation",canvas.transform);Anchor(nav,new Vector2(0,1),new Vector2(0,1),new Vector2(8,-72-Pages.Length*64-16),new Vector2(68,-72));var list=Column(nav);
             foreach(var label in Pages)
             {
@@ -261,7 +262,7 @@ namespace AssemblyZero.Unity.EP04
                 var fill=Box("Allocated product fill",track);Stretch(fill);image=fill.GetComponent<UnityEngine.UI.Image>();image.color=accent;image.type=UnityEngine.UI.Image.Type.Filled;image.fillMethod=UnityEngine.UI.Image.FillMethod.Horizontal;image.fillOrigin=0;image.raycastTarget=false;
                 Button(card,"取消订单（违约金 "+HardwareGame.Money(game.World.OrderValue(o)*WorldSimulation.CancelPenaltyPercent/100)+"）",()=>{game.Submit(new WorldCommand{Kind=CommandKind.CancelOrder,Order=id,Factory=game.Factory});RebuildDrawer();},0,32);
             }
-            else acceptButtons[id]=Button(card,"接单",()=>{game.SelectedOrder=id;game.Submit(new WorldCommand{Kind=CommandKind.AcceptOrder,Order=id,Factory=game.Factory});RebuildDrawer();},0,40,"drawer:accept:"+id);
+            else acceptButtons[id]=Button(card,"接单",()=>{game.SelectedOrder=id;game.Founder.RequestContract(id);},0,40,"drawer:accept:"+id);
             orderCards[id]=(status,image);
         }
         private string OrderSignature()=>string.Join(",",game.World.State.Hardware.Orders.Where(o=>o.Phase<=HardwareOrderPhase.Ready).Select(o=>o.Id+":"+(int)o.Phase));

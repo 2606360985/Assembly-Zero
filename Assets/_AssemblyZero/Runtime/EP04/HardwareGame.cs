@@ -23,6 +23,9 @@ namespace AssemblyZero.Unity.EP04
         private double accumulator; private float uiTime,saveTime; private Vector3 cameraFocus; private bool pan; private Vector2 lastMouse; private int savedRevision=-1;private long seenFirstProduct;
         private int seenSettlements,seenEvent=-1,seenPenalties;
         public HardwareAudio Audio {get;private set;}
+        public HardwareFounder Founder {get;private set;}
+        public bool SimulationSuspended=>Paused||Founder!=null&&Founder.IsBlocking;
+        public bool AutosaveEnabled {get;set;}=true;
         public static readonly int[] Speeds={1,2,4,8};
         public string SavePath=>Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v4.json");
         private bool verifying;
@@ -46,6 +49,7 @@ namespace AssemblyZero.Unity.EP04
             Hud=gameObject.AddComponent<HardwareHud>();Hud.Initialize(this);View=gameObject.AddComponent<HardwareFactoryView>();View.Initialize(this);FocusFactory();
             InitializeLens();
             Fog=gameObject.AddComponent<HardwareGroundFog>();Fog.Initialize(this,GroundFog);
+            Founder=gameObject.AddComponent<HardwareFounder>();Founder.Initialize(this);
             if(verifying)StartCoroutine(VerifyPlayer());
             else if(Environment.GetCommandLineArgs().Contains("--hardware-capsule"))StartCoroutine(CapsuleCommandLine());
         }
@@ -64,6 +68,7 @@ namespace AssemblyZero.Unity.EP04
         }
         public CommandResult Submit(WorldCommand command)
         {
+            if(Founder!=null&&!Founder.AllowsCommands)return new CommandResult(false,"请先完成创始人现场中的决定");
             command.Factory=command.Factory==0?Factory:command.Factory;World.Enqueue(command);World.FlushCommands();var r=World.LastResult;
             LastActionFailed=!r.Success;
             if(r.Success&&(command.Kind==CommandKind.Build||command.Kind==CommandKind.Move))
@@ -82,15 +87,15 @@ namespace AssemblyZero.Unity.EP04
         private void Update()
         {
             if(World==null)return;if(!verifying)HandleInput();
-            if(!Paused){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<64){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
+            if(!SimulationSuspended){accumulator+=Time.unscaledDeltaTime*Speed;var steps=0;while(accumulator>=1d/60&&steps++<64){View.BeforeTick();World.Tick();accumulator-=1d/60;}accumulator=Math.Min(accumulator,.5);}
             PollBusinessEvents();
             var production=World.State.Nodes.Where(n=>n.Factory==Factory&&World.Recipe(n.RecipeId)!=null).ToArray();
-            Audio.SetActivity(production.Length==0?0:production.Count(n=>n.RunState==NodeState.Working)/(float)production.Length,Speed,Paused);
+            Audio.SetActivity(production.Length==0?0:production.Count(n=>n.RunState==NodeState.Working)/(float)production.Length,Speed,SimulationSuspended);
             UpdateCamera(Time.unscaledDeltaTime);
             View.Present((float)(accumulator*60));
             uiTime+=Time.unscaledDeltaTime;saveTime+=Time.unscaledDeltaTime;
             if(uiTime>.25f){uiTime=0;Hud.Refresh();}
-            if(saveTime>=60&&!verifying&&!Showcasing){saveTime=0;Save();}
+            if(saveTime>=60&&AutosaveEnabled&&!verifying&&!Showcasing){saveTime=0;Save();}
             if(savedRevision!=World.Revision){savedRevision=World.Revision;View.Rebuild();}
         }
         // Frames the built line plus the suggested empty slots so the opening layout fills the view.
@@ -134,6 +139,7 @@ namespace AssemblyZero.Unity.EP04
         public int NodeAt(int x,int z)=>World.State.Nodes.FirstOrDefault(n=>n.Factory==Factory&&Math.Abs(n.X-x)<2&&Math.Abs(n.Z-z)<2)?.Id??0;
         private void HandleInput()
         {
+            if(Founder!=null&&Founder.IsBlocking){pan=false;return;}
             GuardFogPointer();
             if(Truck.Manual){HandleDrivingInput();return;}
             var k=Keyboard.current;var m=Mouse.current;if(k==null||!cameraFocused){pan=false;return;}
@@ -202,11 +208,12 @@ namespace AssemblyZero.Unity.EP04
         }
         public bool Load()
         {
+            Founder?.ResetPresentation();
             ExitShowcase();
             foreach(var path in new[]{SavePath,SavePath+".bak",Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v3.json")})if(File.Exists(path))try{var candidate=new WorldSimulation(Config.Economy,JsonUtility.FromJson<WorldState>(File.ReadAllText(path)));World=candidate;SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message=path.EndsWith(".bak")?"已恢复备份":"已继续显卡战役";return true;}catch(Exception e){Message="存档无法读取："+e.Message;}
             if(File.Exists(Path.Combine(Application.persistentDataPath,"AssemblyZero-Hardware-v2.json")))Message="旧版 v2 存档与新规则不兼容，已保留原文件；请开始新战役。";
             return false;
         }
-        public void NewGame(){ExitShowcase();World=new WorldSimulation(Config.Economy,null,verifying?0:NewSeed());SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标打通第一条产线";}
+        public void NewGame(){Founder?.ResetPresentation();ExitShowcase();World=new WorldSimulation(Config.Economy,null,verifying?0:NewSeed());SyncNotifications();Notices=Array.Empty<string>();accumulator=0;saveTime=0;Speed=1;ResetPlacement();SelectedNode=0;Factory=1;Drawer="";FocusFactory();View.Rebuild();Hud.RebuildDrawer();Message="新战役开始；跟随左上角目标打通第一条产线";}
     }
 }

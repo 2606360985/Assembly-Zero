@@ -50,6 +50,8 @@ namespace AssemblyZero.Domain.EP04
                 return new HardwareHint{Key="build",Title=(first?"2 / 6 · ":"")+"放置"+name,Detail="产线缺少"+name+"。在地面青色推荐位放下即可，输送线会自动连接。板卡装配 → 显卡总装 → 检测 → 包装 → 入库。",Action="放置"+name,Building=kind,Order=order.Id};
             }
             var budget=order.Material==HardwareCatalog.Budget;var sku=budget?null:w.Sku(order.Spec);
+            if(order.Template==1&&w.Narrative.IdentityChosen&&w.Narrative.QualityMode==2&&nodes.Count(n=>n.Kind==BuildingKind.Tester&&!n.PendingRemove)<2)
+                return new HardwareHint{Key="build",Title="首批验收 · 增加并行检测工位",Detail="你选择了双工位验收方案。再放置一台检测机，连续三张检测合格后自动放行首批订单。",Action="增加检测工位",Building=BuildingKind.Tester,Order=order.Id};
             var retool=nodes.FirstOrDefault(n=>w.NeedsRetooling(n)&&sku!=null&&sku.Gen>n.ProcessGen);
             if(retool!=null)return new HardwareHint{Key="retool",Title="改造装配工艺至 G"+sku.Gen,Detail="新核心需要设备工艺改造。每台停机 "+w.Settings.Hardware.RetoolSeconds+" 秒，保留输送接口。",Action="查看设备改造",Node=retool.Id,Order=order.Id};
             if(!budget)foreach(var kind in new[]{BuildingKind.GPUAssembly,BuildingKind.Tester,BuildingKind.Packaging})

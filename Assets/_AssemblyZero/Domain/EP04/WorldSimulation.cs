@@ -31,6 +31,7 @@ namespace AssemblyZero.Domain.EP04
             foreach(var route in State.Routes)route.Initialize();
             RefreshSkus();Index();
             if(restored==null&&Settings.IsHardware)InitializeHardware();
+            if(Settings.IsHardware)InitializeNarrative(restored!=null);
             if(restored!=null&&Settings.IsHardware)
             {
                 MigrateHardwareLayout();
@@ -112,6 +113,7 @@ namespace AssemblyZero.Domain.EP04
             foreach(var v in State.Vehicles)TickVehicle(v);
             if(logisticsDirty){logisticsDirty=false;CommitNetwork(State.Nodes,new List<BusinessRoute>(),null,true);Revision++;}
             if(State.Tick%600==0)AssertConserved();
+            if(Settings.IsHardware)ObserveNarrative();
         }
         private void Process(BusinessNode n)
         {
@@ -185,6 +187,7 @@ namespace AssemblyZero.Domain.EP04
                 // Packaging keeps the bin; a passing inspection assigns a fresh one; rework returns an ungraded card.
                 product.Grade=recipe.Machine==BuildingKind.Rework?0:n.Batch.FirstOrDefault(g=>HardwareCatalog.IsCard(g.Material))?.Grade??0;
                 if(recipe.Machine==BuildingKind.Tester&&output==recipe.Output)product.Grade=RollGrade(n,product.Gen);
+                if(recipe.Machine==BuildingKind.Tester)ObserveNarrativeTest(n,output==recipe.Output&&!flawed);
             }
             State.Consumed+=n.Batch.Count;n.Batch.Clear();n.BatchFee=0;
             if(Settings.IsHardware&&output==HardwareCatalog.Defect)Log("检测发现次品：可返修、做成丐版，或在市场页卖给翻新商");

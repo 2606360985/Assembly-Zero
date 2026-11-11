@@ -1,0 +1,121 @@
+[
+  {
+    "id": "lin",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-334b33cc-506a-4da7-b38d-9a187b344987.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/lin.png",
+    "kind": "3x2 expression atlas / alpha",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "shen",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-a8c6de1e-5139-4785-8108-03a8caa4fdc8.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/shen.png",
+    "kind": "3x2 expression atlas / alpha",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "client_studio",
+    "source": "C:/Users/ESI186/.codex/generated_images/01a1c8ba-9ebf-7561-a3a6-4a1df73ca358/exec-91396cc1-61a1-4b6e-9634-4bdd0a0a7c90.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/client_studio.png",
+    "kind": "3x2 expression atlas / alpha",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "client_gaming",
+    "source": "C:/Users/ESI186/.codex/generated_images/01a1c8ba-9ebf-7561-a3a6-4a1df73ca358/exec-b8f7e7bf-543d-41c9-a409-4cd222ea987b.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/client_gaming.png",
+    "kind": "3x2 expression atlas / alpha",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "client_research",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-df55c09d-809a-4628-a6c9-bbe43a5224ea.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/client_research.png",
+    "kind": "3x2 expression atlas / alpha",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "workshop",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-75fdaefe-b63c-49f4-b456-b24fd55b7880.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/workshop.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "acceptance",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-867bb4f8-ff57-4a24-bc66-de82802f416b.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/acceptance.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "first_product",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-0662fc6d-a08d-4a75-bc78-7488511cbbde.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/first_product.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "studio",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-f299bdb6-c3f8-47fb-a96e-58489e6ee0dd.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/studio.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "gaming",
+    "source": "C:/Users/ESI186/.codex/generated_images/01a1c8ba-9ebf-7561-a3a6-4a1df73ca358/exec-b40b13a6-9ff3-41c7-8f9e-2cf039a0325d.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/gaming.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "ai_lab",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-ae52d9c7-49df-4d4a-85d2-0a35d3267b45.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/ai_lab.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "compute",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-70e2df50-78b0-4d02-ae05-70f9aa8bfcb1.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/compute.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "design",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-aa838272-4572-44b9-b092-8a04dc6762a2.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/design.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "energy",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-3adddf04-4570-4977-b589-9c657c172579.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/energy.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "energy_control",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-02771dbe-0ef1-410b-9af1-4c6d8e59a2c3.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/energy_control.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "orbital",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-8349adb0-c40e-4d3e-8a06-25171d3e0df5.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/orbital.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  },
+  {
+    "id": "deep_space",
+    "source": "C:\\Users\\ESI186\\.codex\\generated_images\\01a1c8ba-9ebf-7561-a3a6-4a1df73ca358\\exec-0f2efcd0-c5ec-4817-bcc2-702cf31c7009.png",
+    "asset": "Assets/_AssemblyZero/Resources/Founder/Art/deep_space.png",
+    "kind": "environment / 16:9",
+    "generator": "built-in image_gen"
+  }
+]

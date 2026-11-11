@@ -76,6 +76,7 @@ namespace AssemblyZero.Unity.EP04
         }
         private void RefreshDesigner(WorldSimulation w)
         {
+            if(game.Founder!=null&&game.Founder.ScenePlaying&&game.Founder.CurrentScene=="product")return;
             if(designStats==null)return;
             var c=DesignCommand(w);var draft=w.Draft(c);var suggested=HardwareSku.SuggestedPrice(draft);
             designStats.text="<b>"+draft.Name+"</b> · G"+draft.Gen+" · "+HardwareSku.CoreName(draft.CoreBin)+" · "+HardwareSku.MarketName(draft.Market)+"\n"+HardwareFactoryView.ShellNames[draft.Shell]+" · "+(draft.Fans==0?"自动":draft.Fans.ToString())+" 风扇 · "+new[]{"标准卡长","加长","超长"}[draft.Length]+" · 背板"+(draft.Backplate?"有":"无")+"（外观不影响属性）\n性能 <b>"+HardwareSku.Perf(draft,draft.Gen)+"</b> · 噪音 "+HardwareSku.Noise(draft.Cooler)+"dB · 理论成本 "+HardwareGame.Money(w.SkuReplacementCost(draft))

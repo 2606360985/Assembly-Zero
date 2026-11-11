@@ -1,0 +1,138 @@
+[
+  {
+    "Asset": "acceptance.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2045003,
+    "SHA256": "09BC15788B8D448618432F7E5CCCA41AFC15DE8E3FC8F52F02D3537FA31CD9DD"
+  },
+  {
+    "Asset": "ai_lab.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2143483,
+    "SHA256": "2683B5685033CA652B5039D3A1F3BBD260FB1C7058D053C5636AD650CF458E05"
+  },
+  {
+    "Asset": "client_gaming.png",
+    "Width": 1536,
+    "Height": 1024,
+    "CornerAlpha": 0,
+    "Bytes": 2325449,
+    "SHA256": "657DC9D26D0AD75001A331C731569BEF1BD1C43A8C041E2BCBE77E29BD207AE6"
+  },
+  {
+    "Asset": "client_research.png",
+    "Width": 1536,
+    "Height": 1024,
+    "CornerAlpha": 0,
+    "Bytes": 2298176,
+    "SHA256": "261C9F9999E20FFDCBE1610E121D9019AD028D56A5CE581CC93E18D9935540EA"
+  },
+  {
+    "Asset": "client_studio.png",
+    "Width": 1536,
+    "Height": 1024,
+    "CornerAlpha": 0,
+    "Bytes": 2253156,
+    "SHA256": "582ACA691F821A3579079808A48D6C210287CD399F8405BEE0BABD28183A0368"
+  },
+  {
+    "Asset": "compute.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2183724,
+    "SHA256": "A3439E5CC21E01FC8FE52A11513D50334501F9B3B6B3B2D7F6BBC20B13EEE9BF"
+  },
+  {
+    "Asset": "deep_space.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2272721,
+    "SHA256": "AEE525010386A072EFA6C46FC4E06FD932CAFB8795F02D1EC1555BB912F3311E"
+  },
+  {
+    "Asset": "design.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2104915,
+    "SHA256": "F9C88BC4FCE44F89C24A6F922562314710D8F8E3B97FAFA62A1858BCE18EF165"
+  },
+  {
+    "Asset": "energy_control.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2247917,
+    "SHA256": "8E09E8D3505102B406E7285ADB1F6AE30081FC72A9EF22EEB5196860E2735D72"
+  },
+  {
+    "Asset": "energy.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2164544,
+    "SHA256": "2056100F3F533EA05CA1BFE58BB47B0F46F56DD2F64B453760AD683AF1EC9608"
+  },
+  {
+    "Asset": "first_product.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2167844,
+    "SHA256": "4787EAE57E27A342B527037EB05130DA1F861BA312E27426BA78F281C7F715B9"
+  },
+  {
+    "Asset": "gaming.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2315854,
+    "SHA256": "369E6B22B419B606331090DC51343F7B4878E50A2E26964ED657F20085D7FC21"
+  },
+  {
+    "Asset": "lin.png",
+    "Width": 1536,
+    "Height": 1024,
+    "CornerAlpha": 0,
+    "Bytes": 2114448,
+    "SHA256": "E1D03FE9FF61C81187DA4EE0C4EB42DF9BFEC4435809E574D43A6AD0EECA00BE"
+  },
+  {
+    "Asset": "orbital.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2370803,
+    "SHA256": "9FB03D852E798E378D8773DC65603C6996008F4357D2966CF30A8BEFFA231DC3"
+  },
+  {
+    "Asset": "shen.png",
+    "Width": 1536,
+    "Height": 1024,
+    "CornerAlpha": 0,
+    "Bytes": 2124465,
+    "SHA256": "4AC4A1F580378FE956436C028A48951521CD9F85EB5F46A283D6E0843BD982A9"
+  },
+  {
+    "Asset": "studio.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 2104378,
+    "SHA256": "3808818F9200179B71A71644A7B7F299EB387BDF29D90EDCC1352182CFB21D34"
+  },
+  {
+    "Asset": "workshop.png",
+    "Width": 1672,
+    "Height": 941,
+    "CornerAlpha": 255,
+    "Bytes": 1979311,
+    "SHA256": "62EAE20709EE36FA2ADF14132D06DAEA35A7C3204B85E99B5CE966F3408A4164"
+  }
+]

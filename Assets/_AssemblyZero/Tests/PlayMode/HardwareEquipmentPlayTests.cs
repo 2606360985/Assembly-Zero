@@ -56,7 +56,7 @@ namespace AssemblyZero.Tests
 #else
             yield return SceneManager.LoadSceneAsync("Hardware_Business");
 #endif
-            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.SendMessage("OnApplicationFocus",true);
+            yield return null;yield return null;game=Object.FindFirstObjectByType<HardwareGame>();game.AutosaveEnabled=false;game.Founder.SetPresentationEnabled(false);game.SendMessage("OnApplicationFocus",true);
         }
         private Button Action(string name)=>game.Hud.GetComponentsInChildren<Button>().First(b=>b.name==name);
         private Button Slot(int index)=>Action("Build shortcut "+(index+1));

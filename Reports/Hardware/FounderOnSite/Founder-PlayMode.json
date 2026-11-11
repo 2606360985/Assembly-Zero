@@ -1,0 +1,41 @@
+{
+  "status": "completed",
+  "duration": 8.79,
+  "summary": {
+    "total": 4,
+    "passed": 4,
+    "failed": 0,
+    "skipped": 0,
+    "inconclusive": 0
+  },
+  "results": [
+    {
+      "FullName": "AssemblyZero.Tests.HardwareFounderPlayTests.Founder_ArtExpressionsAndDialogueFitSupportedScales",
+      "Status": "Passed",
+      "Duration": 4.2031366,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.HardwareFounderPlayTests.Founder_ContractSkipPreservesExplicitDecisionAndRealQualityTask",
+      "Status": "Passed",
+      "Duration": 1.4892379,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.HardwareFounderPlayTests.Founder_IdentityDialogueAndReplayFreezeBusinessButFramesAdvance",
+      "Status": "Passed",
+      "Duration": 1.5276664,
+      "Message": null,
+      "StackTrace": null
+    },
+    {
+      "FullName": "AssemblyZero.Tests.HardwareFounderPlayTests.Founder_ProductStoryUsesTheActualDesignedSkuPreview",
+      "Status": "Passed",
+      "Duration": 1.5004261,
+      "Message": null,
+      "StackTrace": null
+    }
+  ]
+}
